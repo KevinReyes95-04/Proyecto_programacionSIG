@@ -1,0 +1,31 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Kedro: Info",
+			"type": "shell",
+			"command": "./.venv/Scripts/python.exe",
+			"args": [
+				"-W",
+				"default:Kedro is not yet fully compatible",
+				"-m",
+				"kedro",
+				"info"
+			],
+			"isBackground": false
+		},
+		{
+			"label": "Kedro: Run",
+			"type": "shell",
+			"command": "./.venv/Scripts/python.exe",
+			"args": [
+				"-W",
+				"default:Kedro is not yet fully compatible",
+				"-m",
+				"kedro",
+				"run"
+			],
+			"isBackground": false
+		}
+	]
+}

@@ -1,0 +1,17 @@
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+.ipynb_checkpoints/
+.kedro/
+.env
+
+# Data outputs
+/data/06_models/*
+/data/07_model_output/*
+/data/08_reporting/*
+
+# Keep directory structure
+!/data/06_models/.gitkeep
+!/data/07_model_output/.gitkeep
+!/data/08_reporting/.gitkeep

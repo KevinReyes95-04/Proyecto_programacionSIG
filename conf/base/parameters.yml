@@ -1,0 +1,55 @@
+raw_data:
+  sentinel_samples_path: data/03_primary/sentinel_samples.csv
+  planetscope_samples_path: data/03_primary/planetscope_samples.csv
+
+binary_rf:
+  target: mining_label
+  feature_columns:
+    - blue
+    - green
+    - red
+    - nir
+    - swir
+    - ndvi
+    - nbr
+  n_estimators: 300
+  max_depth: null
+  random_state: 42
+  class_weight: balanced
+
+multiclass_rf:
+  target: landcover_label
+  feature_columns:
+    - blue
+    - green
+    - red
+    - nir
+    - swir
+    - ndvi
+    - nbr
+  n_estimators: 400
+  max_depth: null
+  random_state: 42
+  class_weight: balanced_subsample
+
+evaluation:
+  binary_target: mining_label
+  multiclass_target: landcover_label
+  feature_columns:
+    - blue
+    - green
+    - red
+    - nir
+    - swir
+    - ndvi
+    - nbr
+
+prediction:
+  feature_columns:
+    - blue
+    - green
+    - red
+    - nir
+    - swir
+    - ndvi
+    - nbr

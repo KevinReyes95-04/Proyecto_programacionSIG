@@ -1,0 +1,21 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Debug Kedro Run",
+      "type": "python",
+      "request": "launch",
+      "python": "${workspaceFolder}/.venv/Scripts/python.exe",
+      "module": "kedro",
+      "args": [
+        "run"
+      ],
+      "env": {
+        "PYTHONWARNINGS": "default:Kedro is not yet fully compatible"
+      },
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "justMyCode": true
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sat-mining-kedro"
+version = "0.1.0"
+description = "Satellite classification with Kedro and Random Forest"
+readme = "README.md"
+requires-python = ">=3.12,<3.13"
+dependencies = []
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.kedro]
+package_name = "sat_mining_kedro"
+project_name = "sat-mining-kedro"
+kedro_init_version = "0.19.11"
+source_dir = "src"
+
+[tool.kedro_telemetry]
+project_id = "c70d5bec446b4e85be5eca733eff25bf"

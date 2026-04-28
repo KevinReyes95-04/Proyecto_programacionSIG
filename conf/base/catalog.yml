@@ -1,0 +1,17 @@
+harmonized_samples:
+  type: MemoryDataset
+
+feature_table:
+  type: MemoryDataset
+
+binary_model:
+  type: MemoryDataset
+
+multiclass_model:
+  type: MemoryDataset
+
+evaluation_report:
+  type: MemoryDataset
+
+prediction_table:
+  type: MemoryDataset
