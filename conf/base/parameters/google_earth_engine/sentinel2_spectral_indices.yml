@@ -1,0 +1,150 @@
+sentinel2_spectral_indices:
+  collection: COPERNICUS/S2_SR_HARMONIZED
+  roi:
+    name: roi_planet_quick_search_polygon
+    source: inline_geojson
+    bbox: null
+    inline_geojson:
+      type: Polygon
+      coordinates:
+        - - [-74.96723392, 7.79418315]
+          - [-74.96709889, 8.12991298]
+          - [-74.62519767, 8.1297761]
+          - [-74.62532856, 7.79405091]
+          - [-74.96723392, 7.79418315]
+    geojson_path: null
+  start_date: "2024-01-01"
+  end_date: "2024-12-31"
+  cloud_cover_max: 10
+  cloud_cover_property: CLOUDY_PIXEL_PERCENTAGE
+  cloud_mask: false
+  composite_method: median
+  sort_by: system:time_start
+  sort_ascending: true
+  bands:
+    - B2
+    - B3
+    - B4
+    - B8
+    - B11
+    - B12
+  scale: 20
+  crs: null
+  apply_reflectance_scale: true
+  reflectance_scale_factor: 0.0001
+  include_original_bands: true
+  output_band_order:
+    - B2
+    - B3
+    - B4
+    - B8
+    - B11
+    - B12
+    - NDVI
+    - MSAVI
+    - NDWI
+    - BSI
+    - MBSI
+    - NDSI
+    - MSWI
+    - NDBI
+  indices:
+    NDVI:
+      enabled: true
+      name: Indice de vegetacion de diferencia normalizada
+      formula: normalized_difference
+      bands:
+        first: B8
+        second: B4
+      expression_label: "(B8 - B4) / (B8 + B4)"
+      rationale: Deteccion de perdida o reduccion de cobertura vegetal presente en zonas mineras.
+
+    MSAVI:
+      enabled: true
+      name: Indice de Vegetacion Ajustado al Suelo Modificado
+      formula: expression
+      expression: "(2 * nir + 1 - sqrt(pow((2 * nir + 1), 2) - 8 * (nir - red))) / 2"
+      bands:
+        nir: B8
+        red: B4
+      expression_label: "(2 * B8 + 1 - sqrt((2 * B8 + 1)^2 - 8 * (B8 - B4))) / 2"
+      rationale: Aumentar el contraste entre la vegetacion y las areas mineras a cielo abierto.
+
+    NDWI:
+      enabled: true
+      name: Indice de agua de diferencia normalizada
+      formula: normalized_difference
+      bands:
+        first: B3
+        second: B8
+      expression_label: "(B3 - B8) / (B3 + B8)"
+      rationale: Mapeo de humedad del suelo y cuerpos de agua presentes en zonas mineras.
+
+    BSI:
+      enabled: true
+      name: Indice de suelo desnudo
+      formula: expression
+      expression: "((swir1 + red) - (nir + blue)) / ((swir1 + red) + (nir + blue))"
+      bands:
+        swir1: B11
+        red: B4
+        nir: B8
+        blue: B2
+      expression_label: "((B11 + B4) - (B8 + B2)) / ((B11 + B4) + (B8 + B2))"
+      rationale: Identificacion de zonas de suelo desnudo como proceso previo a la aparicion de zonas mineras.
+
+    MBSI:
+      enabled: true
+      name: Indice de Suelo Desnudo Modificado
+      formula: normalized_difference
+      bands:
+        first: B11
+        second: B4
+      expression_label: "(B11 - B4) / (B11 + B4)"
+      rationale: Identificacion de suelo desnudo asociado a zonas mineras.
+
+    NDSI:
+      enabled: true
+      name: Indice de Suelo de Diferencia Normalizada
+      formula: normalized_difference
+      bands:
+        first: B11
+        second: B3
+      expression_label: "(B11 - B3) / (B11 + B3)"
+      rationale: Aumentar el contraste entre la vegetacion y las areas con mineria.
+
+    MSWI:
+      enabled: true
+      name: Indice de Residuos Solidos Mineros
+      formula: normalized_difference
+      bands:
+        first: B12
+        second: B4
+      expression_label: "(B12 - B4) / (B12 + B4)"
+      rationale: Resalta residuos solidos generados por actividades mineras. Ajusta second si tu metodologia usa otra banda.
+
+    NDBI:
+      enabled: true
+      name: Indice de estructura construida
+      formula: normalized_difference
+      bands:
+        first: B11
+        second: B8
+      expression_label: "(B11 - B8) / (B11 + B8)"
+      rationale: Distinguir zonas urbanas, suelo desnudo y mineria.
+      
+  drive_export:
+    folder: centromonitoreo_mineria
+    file_name_prefix: sentinel2_spectral_indices_roi_planet_quick_search_polygon
+    description: sentinel2_spectral_indices_roi_planet_quick_search_polygon
+    file_format: GeoTIFF
+    max_pixels: 10000000000
+    shard_size: 256
+    file_dimensions: null
+    skip_empty_tiles: true
+    cloud_optimized: true
+    no_data: null
+    priority: 100
+    wait_for_completion: true
+    poll_interval_seconds: 30
+    timeout_seconds: 7200
