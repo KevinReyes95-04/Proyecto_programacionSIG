@@ -1,0 +1,64 @@
+sentinel2_download:
+  collection: COPERNICUS/S2_SR_HARMONIZED
+  roi:
+    # Options: bbox, inline_geojson, geojson_path.
+    # Use bbox for simple rectangular areas fully defined in parameters.
+    name: roi_planet_quick_search_polygon
+    source: inline_geojson
+    bbox: null
+    # Use inline_geojson for polygons fully defined in parameters.
+    inline_geojson:
+      type: Polygon
+      coordinates:
+        - - [-74.96723392, 7.79418315]
+          - [-74.96709889, 8.12991298]
+          - [-74.62519767, 8.12977610]
+          - [-74.62532856, 7.79405091]
+          - [-74.96723392, 7.79418315]
+    # Use geojson_path when the ROI lives in an external .geojson/.json file.
+    geojson_path: null
+  start_date: "2024-01-01"
+  end_date: "2024-12-31"
+  cloud_cover_max: 10
+  cloud_cover_property: CLOUDY_PIXEL_PERCENTAGE
+  cloud_mask: false
+  composite_method: median
+  sort_by: system:time_start
+  sort_ascending: true
+  bands:
+    - B2
+    - B3
+    - B4
+    - B5
+    - B6
+    - B7
+    - B8
+    - B8A
+    - B9
+    - B11
+    - B12
+  scale: 20
+  crs: null
+  drive_export:
+    folder: centromonitoreo_mineria
+    file_name_prefix: sentinel2_composite_roi_planet_quick_search_polygon
+    description: sentinel2_composite_roi_planet_quick_search_polygon
+    file_format: GeoTIFF
+    max_pixels: 10000000000
+    shard_size: 256
+    file_dimensions: null
+    skip_empty_tiles: true
+    cloud_optimized: true
+    no_data: null
+    priority: 100
+    wait_for_completion: true
+    poll_interval_seconds: 30
+    timeout_seconds: 7200
+  apply_reflectance_scale: true
+  reflectance_scale_factor: 0.0001
+  scene_metadata_limit: 50
+  scene_metadata_properties:
+    - system:index
+    - system:time_start
+    - MGRS_TILE
+    - CLOUDY_PIXEL_PERCENTAGE

@@ -1,0 +1,15 @@
+gee:
+  # Set this to your Google Cloud project id with Earth Engine enabled.
+  project: programacionsig
+  # Options: oauth, service_account, adc.
+  # oauth: local development with `earthengine authenticate`.
+  # service_account: reproducible unattended execution with a private key JSON.
+  # adc: Application Default Credentials from Google Cloud or gcloud.
+  auth_method: oauth
+  authenticate: false
+  auth_mode: localhost:0
+  service_account_email: null
+  service_account_key_path: null
+  adc_scopes:
+    - https://www.googleapis.com/auth/earthengine
+    - https://www.googleapis.com/auth/cloud-platform

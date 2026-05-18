@@ -1,0 +1,21 @@
+google_earth_engine_config:
+  type: MemoryDataset
+
+sentinel2_gee_context:
+  type: MemoryDataset
+
+sentinel2_roi_geometry:
+  type: MemoryDataset
+
+sentinel2_image_collection:
+  type: MemoryDataset
+
+sentinel2_composite_image:
+  type: MemoryDataset
+
+sentinel2_drive_export_metadata:
+  type: MemoryDataset
+
+sentinel2_download_metadata:
+  type: json.JSONDataset
+  filepath: data/08_reporting/sentinel2_download_metadata.json

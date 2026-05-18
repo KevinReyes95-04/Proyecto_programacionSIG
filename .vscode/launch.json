@@ -5,7 +5,7 @@
       "name": "Debug Kedro Run",
       "type": "python",
       "request": "launch",
-      "python": "${workspaceFolder}/.venv/Scripts/python.exe",
+      "python": "${workspaceFolder}/.env/Scripts/python.exe",
       "module": "kedro",
       "args": [
         "run"

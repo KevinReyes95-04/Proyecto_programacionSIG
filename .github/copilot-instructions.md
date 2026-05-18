@@ -10,7 +10,7 @@
 
 Summary:
 - Project scaffolded manually in current folder with Kedro-compatible structure.
-- Base dependencies installed in `.venv`.
+- Base dependencies installed in `.env`.
 - VS Code task and debug launch configuration created.
 - Sample input data added for first end-to-end run.
 - `kedro run` executed successfully with in-memory catalog.

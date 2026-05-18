@@ -1,1 +1,1 @@
-{"harmonized_samples": {"rows": 8, "columns": 8, "file_size": null}, "feature_table": {"rows": 8, "columns": 10, "file_size": null}, "prediction_table": {"rows": 8, "columns": 12, "file_size": null}}
+{"labeled_points": {"rows": 600, "columns": 5, "file_size": null}, "validated_labeled_points": {"rows": 600, "columns": 5, "file_size": null}, "training_labeled_points": {"rows": 480, "columns": 7, "file_size": 53852}, "testing_labeled_points": {"rows": 120, "columns": 7, "file_size": 13514}}

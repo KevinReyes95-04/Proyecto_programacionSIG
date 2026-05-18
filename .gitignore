@@ -1,17 +1,23 @@
 __pycache__/
 *.py[cod]
 *.egg-info/
-.venv/
+.env/
 .ipynb_checkpoints/
 .kedro/
-.env
+
+# Local secrets and user-specific configuration
+conf/local/
+*.service-account.json
+*service-account*.json
 
 # Data outputs
+/data/01_raw/sentinel2/*
 /data/06_models/*
 /data/07_model_output/*
 /data/08_reporting/*
 
 # Keep directory structure
+!/data/01_raw/sentinel2/.gitkeep
 !/data/06_models/.gitkeep
 !/data/07_model_output/.gitkeep
 !/data/08_reporting/.gitkeep

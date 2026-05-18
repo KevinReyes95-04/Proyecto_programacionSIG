@@ -4,7 +4,7 @@
 		{
 			"label": "Kedro: Info",
 			"type": "shell",
-			"command": "./.venv/Scripts/python.exe",
+			"command": "./.env/Scripts/python.exe",
 			"args": [
 				"-W",
 				"default:Kedro is not yet fully compatible",
@@ -17,7 +17,7 @@
 		{
 			"label": "Kedro: Run",
 			"type": "shell",
-			"command": "./.venv/Scripts/python.exe",
+			"command": "./.env/Scripts/python.exe",
 			"args": [
 				"-W",
 				"default:Kedro is not yet fully compatible",

@@ -3,7 +3,7 @@ requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "sat-mining-kedro"
+name = "centromonitoreo-mineria"
 version = "0.1.0"
 description = "Satellite classification with Kedro and Random Forest"
 readme = "README.md"
@@ -17,10 +17,15 @@ package-dir = {"" = "src"}
 where = ["src"]
 
 [tool.kedro]
-package_name = "sat_mining_kedro"
-project_name = "sat-mining-kedro"
+package_name = "centromonitoreo_mineria"
+project_name = "centromonitoreo-mineria"
 kedro_init_version = "0.19.11"
 source_dir = "src"
 
 [tool.kedro_telemetry]
 project_id = "c70d5bec446b4e85be5eca733eff25bf"
+
+[tool.pytest.ini_options]
+addopts = "-p no:cacheprovider"
+pythonpath = ["src"]
+testpaths = ["tests"]

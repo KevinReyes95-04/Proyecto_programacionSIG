@@ -1,0 +1,51 @@
+training_data:
+  labeled_points_path: data/01_raw/labeled_points/Datos_Entrenamiento.shp
+  label_column: Cobertura
+  target_crs: EPSG:9377
+  test_size: 0.2
+  random_state: 42
+  stratify: true
+  
+  spatial_plot:
+    output_path: data/08_reporting/labeled_points_distribution.png
+    title: Distribucion espacial de puntos etiquetados
+    figure_size: [8, 8]
+    dpi: 160
+    point_size: 12
+    alpha: 0.8
+    use_basemap: true
+    basemap_source: Esri.WorldImagery
+    basemap_zoom: auto
+    basemap_strict: false
+
+  split_spatial_plot:
+    training_output_path: data/08_reporting/training_labeled_points_distribution.png
+    testing_output_path: data/08_reporting/testing_labeled_points_distribution.png
+    training_title: Distribucion espacial - entrenamiento
+    testing_title: Distribucion espacial - prueba
+    figure_size: [8, 8]
+    dpi: 160
+    point_size: 12
+    alpha: 0.8
+    use_basemap: true
+    basemap_source: Esri.WorldImagery
+    basemap_zoom: auto
+    basemap_strict: false
+
+  class_distribution_plot:
+    output_path: data/08_reporting/labeled_points_class_distribution.png
+    title: Conjunto de datos
+    x_label: Cobertura
+    y_label: Numero de muestras
+    figure_size: [10, 6]
+    dpi: 160
+    value_font_size: 9
+    label_wrap_width: 16
+    class_order: null
+    colors:
+      - "#8DD34F"
+      - "#0CB354"
+      - "#1379B9"
+      - "#FFC107"
+      - "#F5F500"
+      - "#18A8D8"
