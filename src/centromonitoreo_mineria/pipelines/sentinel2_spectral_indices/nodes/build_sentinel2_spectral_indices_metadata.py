@@ -5,6 +5,7 @@ from centromonitoreo_mineria.pipelines.helper.google_earth_engine.sentinel2_spec
 def build_sentinel2_spectral_indices_metadata(
     sentinel2_image_collection: Any,
     sentinel2_spectral_indices_drive_export_metadata: dict,
+    sentinel2_spectral_indices_maps_metadata: dict,
     sentinel2_spectral_indices_config: dict,
 ) -> dict:
     """Construye metadatos reproducibles del calculo de indices Sentinel-2."""
@@ -22,6 +23,7 @@ def build_sentinel2_spectral_indices_metadata(
         "source_bands": params["bands"],
         "output_bands": output_bands(params),
         "indices": enabled_indices,
+        "maps": sentinel2_spectral_indices_maps_metadata,
         "drive_export": sentinel2_spectral_indices_drive_export_metadata,
         "reflectance_scaled": params.get("apply_reflectance_scale", True),
         "reflectance_scale_factor": params.get("reflectance_scale_factor", 0.0001),

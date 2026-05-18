@@ -19,6 +19,9 @@ from centromonitoreo_mineria.pipelines.sentinel2_spectral_indices.nodes.initiali
 from centromonitoreo_mineria.pipelines.sentinel2_spectral_indices.nodes.load_roi_geometry import (
     load_roi_geometry,
 )
+from centromonitoreo_mineria.pipelines.sentinel2_spectral_indices.nodes.plot_sentinel2_spectral_indices import (
+    plot_sentinel2_spectral_indices,
+)
 from centromonitoreo_mineria.pipelines.sentinel2_spectral_indices.nodes.validate_sentinel2_spectral_indices_config import (
     validate_sentinel2_spectral_indices_config,
 )
@@ -30,6 +33,7 @@ __all__ = [
     "build_sentinel2_collection",
     "build_sentinel2_composite",
     "calculate_sentinel2_spectral_indices",
+    "plot_sentinel2_spectral_indices",
     "export_sentinel2_spectral_indices_to_drive",
     "build_sentinel2_spectral_indices_metadata",
 ]

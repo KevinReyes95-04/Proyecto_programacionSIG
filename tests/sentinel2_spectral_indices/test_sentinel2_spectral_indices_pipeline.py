@@ -31,7 +31,9 @@ def _spectral_indices_params(**overrides):
         "start_date": "2024-01-01",
         "end_date": "2024-12-31",
         "cloud_cover_max": 10,
-        "cloud_mask": False,
+        "cloud_mask": True,
+        "cloud_mask_method": "scl",
+        "cloud_mask_scl_classes": [3, 8, 9, 10],
         "composite_method": "median",
         "bands": ["B2", "B3", "B4", "B8", "B11", "B12"],
         "scale": 20,
@@ -50,6 +52,14 @@ def _spectral_indices_params(**overrides):
                 "bands": {"swir1": "B11", "red": "B4", "nir": "B8", "blue": "B2"},
             },
         },
+        "visualization": {
+            "enabled": True,
+            "default_style": {
+                "min": -1,
+                "max": 1,
+                "palette": ["#000000", "#ffffff"],
+            },
+        },
         "drive_export": {
             "folder": "centromonitoreo_mineria",
             "file_name_prefix": "sentinel2_spectral_indices_test",
@@ -62,7 +72,7 @@ def _spectral_indices_params(**overrides):
 
 
 def test_sentinel2_spectral_indices_pipeline_has_expected_node_count():
-    assert len(create_pipeline().nodes) == 8
+    assert len(create_pipeline().nodes) == 9
 
 
 def test_sentinel2_spectral_indices_config_is_validated_and_grouped():

@@ -38,7 +38,9 @@ def _sentinel2_params(**overrides):
         "start_date": "2024-01-01",
         "end_date": "2024-12-31",
         "cloud_cover_max": 10,
-        "cloud_mask": False,
+        "cloud_mask": True,
+        "cloud_mask_method": "scl",
+        "cloud_mask_scl_classes": [3, 8, 9, 10],
         "composite_method": "median",
         "bands": [
             "B2",
@@ -78,7 +80,8 @@ def test_google_earth_engine_config_is_validated_and_grouped():
     assert config["gee"]["project"] == "programacionsig"
     assert config["gee"]["auth_method"] == "oauth"
     assert config["sentinel2_download"]["roi"]["source"] == "bbox"
-    assert config["sentinel2_download"]["cloud_mask"] is False
+    assert config["sentinel2_download"]["cloud_mask"] is True
+    assert config["sentinel2_download"]["cloud_mask_method"] == "scl"
     assert config["sentinel2_download"]["bands"] == [
         "B2",
         "B3",

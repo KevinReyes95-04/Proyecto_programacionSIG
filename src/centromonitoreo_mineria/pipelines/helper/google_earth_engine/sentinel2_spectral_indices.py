@@ -21,6 +21,7 @@ def validate_sentinel2_spectral_indices_params(params: dict[str, Any]) -> None:
     for name, config in params["indices"].items():
         _validate_index_config(name=name, config=config, source_bands=source_bands)
     _validate_output_band_order(params, enabled_indices)
+    _validate_visualization_params(params.get("visualization", {}), enabled_indices)
 
 
 def build_sentinel2_indices_image(sentinel2_composite_image: Any, params: dict[str, Any]) -> Any:
@@ -86,6 +87,33 @@ def _validate_output_band_order(params: dict[str, Any], enabled_indices: list[st
     unknown_bands = set(output_band_order) - allowed_bands
     if unknown_bands:
         raise ValueError(f"output_band_order incluye bandas desconocidas: {sorted(unknown_bands)}.")
+
+
+def _validate_visualization_params(params: dict[str, Any], enabled_indices: list[str]) -> None:
+    if not isinstance(params, dict):
+        raise ValueError("sentinel2_spectral_indices.visualization debe ser un diccionario.")
+    if not isinstance(params.get("enabled", True), bool):
+        raise ValueError("sentinel2_spectral_indices.visualization.enabled debe ser true o false.")
+    if not params.get("enabled", True):
+        return
+    default_style = params.get("default_style", {})
+    _validate_map_style("default_style", default_style)
+    for index_name, style in params.get("indices", {}).items():
+        if index_name not in enabled_indices:
+            raise ValueError(f"visualization.indices incluye indice no activo: {index_name}.")
+        _validate_map_style(index_name, default_style | style)
+
+
+def _validate_map_style(name: str, style: dict[str, Any]) -> None:
+    if not isinstance(style, dict):
+        raise ValueError(f"visualization.{name} debe ser un diccionario.")
+    if not isinstance(style.get("palette"), list) or not style["palette"]:
+        raise ValueError(f"visualization.{name}.palette debe ser una lista no vacia.")
+    for key in ("min", "max"):
+        if not isinstance(style.get(key), int | float) or isinstance(style.get(key), bool):
+            raise ValueError(f"visualization.{name}.{key} debe ser numerico.")
+    if style["min"] >= style["max"]:
+        raise ValueError(f"visualization.{name}.min debe ser menor que max.")
 
 
 def _calculate_index(image: Any, name: str, config: dict[str, Any]) -> Any:

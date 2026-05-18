@@ -21,7 +21,13 @@ sentinel2_download:
   end_date: "2024-12-31"
   cloud_cover_max: 10
   cloud_cover_property: CLOUDY_PIXEL_PERCENTAGE
-  cloud_mask: false
+  cloud_mask: true
+  cloud_mask_method: scl
+  cloud_mask_scl_classes:
+    - 3   # cloud shadows
+    - 8   # cloud medium probability
+    - 9   # cloud high probability
+    - 10  # thin cirrus
   composite_method: median
   sort_by: system:time_start
   sort_ascending: true

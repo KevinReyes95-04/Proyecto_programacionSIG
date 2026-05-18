@@ -17,7 +17,13 @@ sentinel2_spectral_indices:
   end_date: "2024-12-31"
   cloud_cover_max: 10
   cloud_cover_property: CLOUDY_PIXEL_PERCENTAGE
-  cloud_mask: false
+  cloud_mask: true
+  cloud_mask_method: scl
+  cloud_mask_scl_classes:
+    - 3   # cloud shadows
+    - 8   # cloud medium probability
+    - 9   # cloud high probability
+    - 10  # thin cirrus
   composite_method: median
   sort_by: system:time_start
   sort_ascending: true
@@ -132,7 +138,94 @@ sentinel2_spectral_indices:
         second: B8
       expression_label: "(B11 - B8) / (B11 + B8)"
       rationale: Distinguir zonas urbanas, suelo desnudo y mineria.
-      
+
+  visualization:
+    enabled: true
+    strict: false
+    output_dir: data/08_reporting/sentinel2_spectral_indices_maps
+    dimensions: 1200
+    format: png
+    timeout_seconds: 120
+    figure_size: [8, 8]
+    dpi: 160
+    colorbar_orientation: vertical
+    default_style:
+      min: -1
+      max: 1
+      palette:
+        - "#8c510a"
+        - "#d8b365"
+        - "#f6e8c3"
+        - "#c7eae5"
+        - "#5ab4ac"
+        - "#01665e"
+    indices:
+      NDVI:
+        min: -1
+        max: 1
+        palette:
+          - "#8c510a"
+          - "#d8b365"
+          - "#ffffbf"
+          - "#a6d96a"
+          - "#1a9850"
+      MSAVI:
+        min: -1
+        max: 1
+        palette:
+          - "#8c510a"
+          - "#d9f0a3"
+          - "#78c679"
+          - "#006837"
+      NDWI:
+        min: -1
+        max: 1
+        palette:
+          - "#8c510a"
+          - "#f6e8c3"
+          - "#67a9cf"
+          - "#2166ac"
+      BSI:
+        min: -1
+        max: 1
+        palette:
+          - "#1a9850"
+          - "#ffffbf"
+          - "#fdae61"
+          - "#d73027"
+      MBSI:
+        min: -1
+        max: 1
+        palette:
+          - "#1a9850"
+          - "#ffffbf"
+          - "#fdae61"
+          - "#d73027"
+      NDSI:
+        min: -1
+        max: 1
+        palette:
+          - "#1a9850"
+          - "#ffffbf"
+          - "#fdae61"
+          - "#d73027"
+      MSWI:
+        min: -1
+        max: 1
+        palette:
+          - "#2c7bb6"
+          - "#ffffbf"
+          - "#fdae61"
+          - "#d7191c"
+      NDBI:
+        min: -1
+        max: 1
+        palette:
+          - "#1a9850"
+          - "#ffffbf"
+          - "#fdae61"
+          - "#d73027"
+
   drive_export:
     folder: centromonitoreo_mineria
     file_name_prefix: sentinel2_spectral_indices_roi_planet_quick_search_polygon

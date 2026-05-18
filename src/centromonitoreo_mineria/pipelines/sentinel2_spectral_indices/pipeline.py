@@ -7,6 +7,7 @@ from centromonitoreo_mineria.pipelines.sentinel2_spectral_indices.nodes import (
     export_sentinel2_spectral_indices_to_drive,
     initialize_earth_engine,
     load_roi_geometry,
+    plot_sentinel2_spectral_indices,
     validate_sentinel2_spectral_indices_config,
 )
 
@@ -65,6 +66,16 @@ def create_pipeline(**kwargs) -> Pipeline:
                 name="calculate_sentinel2_spectral_indices_node",
             ),
             node(
+                func=plot_sentinel2_spectral_indices,
+                inputs=[
+                    "sentinel2_spectral_indices_image",
+                    "sentinel2_spectral_indices_roi_geometry",
+                    "sentinel2_spectral_indices_config",
+                ],
+                outputs="sentinel2_spectral_indices_maps_metadata",
+                name="plot_sentinel2_spectral_indices_node",
+            ),
+            node(
                 func=export_sentinel2_spectral_indices_to_drive,
                 inputs=[
                     "sentinel2_spectral_indices_image",
@@ -79,6 +90,7 @@ def create_pipeline(**kwargs) -> Pipeline:
                 inputs=[
                     "sentinel2_spectral_indices_image_collection",
                     "sentinel2_spectral_indices_drive_export_metadata",
+                    "sentinel2_spectral_indices_maps_metadata",
                     "sentinel2_spectral_indices_config",
                 ],
                 outputs="sentinel2_spectral_indices_metadata",

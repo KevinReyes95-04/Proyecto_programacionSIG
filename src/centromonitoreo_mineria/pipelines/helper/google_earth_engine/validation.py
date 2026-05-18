@@ -46,6 +46,9 @@ def validate_sentinel2_download_params(params: dict) -> None:
 
     if not isinstance(params.get("cloud_mask", False), bool):
         raise ValueError("sentinel2_download.cloud_mask debe ser true o false.")
+    if params.get("cloud_mask_method", "qa60") not in {"qa60", "scl", "qa60_and_scl"}:
+        raise ValueError("sentinel2_download.cloud_mask_method debe ser qa60, scl o qa60_and_scl.")
+    _validate_scl_classes(params.get("cloud_mask_scl_classes", [3, 8, 9, 10]))
 
     _require_text_list(params.get("bands"), "sentinel2_download.bands")
     if not params.get("bands"):
@@ -171,6 +174,13 @@ def _validate_drive_export_params(params: dict) -> None:
         raise ValueError("sentinel2_download.drive_export.priority debe estar entre 0 y 9999.")
     _require_positive_integer(params.get("poll_interval_seconds", 30), "sentinel2_download.drive_export.poll_interval_seconds")
     _require_positive_integer(params.get("timeout_seconds", 7200), "sentinel2_download.drive_export.timeout_seconds")
+
+
+def _validate_scl_classes(value: Any) -> None:
+    if not isinstance(value, list) or not value:
+        raise ValueError("sentinel2_download.cloud_mask_scl_classes debe ser una lista no vacia.")
+    if not all(isinstance(item, int) and not isinstance(item, bool) and 0 <= item <= 11 for item in value):
+        raise ValueError("sentinel2_download.cloud_mask_scl_classes debe contener enteros entre 0 y 11.")
 
 
 def _parse_date(value: Any, name: str) -> date:
