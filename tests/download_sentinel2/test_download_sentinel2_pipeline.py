@@ -10,7 +10,6 @@ from centromonitoreo_mineria.pipelines.download_sentinel2.pipeline import (
 )
 from centromonitoreo_mineria.pipelines.helper.google_earth_engine.drive_export import (
     build_drive_export_params,
-    params_for_band_export,
 )
 
 
@@ -63,9 +62,6 @@ def _sentinel2_params(**overrides):
             "file_name_prefix": "Sentinel2",
             "description": "Sentinel2",
             "file_format": "GeoTIFF",
-            "file_per_band": True,
-            "band_file_name_template": "{file_name_prefix}_{band}_Masked",
-            "band_description_template": "{description}_{band}_Masked",
             "align_to_reference_band": True,
             "reference_band": "B2",
             "max_pixels": 10_000_000_000,
@@ -146,14 +142,7 @@ def test_drive_export_params_are_built_from_configuration():
         params={
             "scale": 20,
             "crs": "EPSG:32618",
-            "drive_export": _sentinel2_params()["drive_export"]
-            | {
-                "shard_size": 256,
-                "file_dimensions": [4096, 4096],
-                "skip_empty_tiles": True,
-                "cloud_optimized": True,
-                "priority": 100,
-            },
+            "drive_export": _sentinel2_params()["drive_export"],
         },
     )
 
@@ -163,16 +152,5 @@ def test_drive_export_params_are_built_from_configuration():
         "fileNamePrefix": "Sentinel2",
         "description": "Sentinel2",
         "fileFormat": "GeoTIFF",
-        "fileDimensions": (4096, 4096),
-        "formatOptions": {"cloudOptimized": True},
     }
     assert {key: params[key] for key in expected} == expected
-
-
-def test_band_export_params_are_built_from_configuration():
-    params = _sentinel2_params()
-    band_params = params_for_band_export(params=params, band="B4")
-
-    assert band_params["bands"] == ["B4"]
-    assert band_params["drive_export"]["file_name_prefix"] == "Sentinel2_B4_Masked"
-    assert band_params["drive_export"]["description"] == "Sentinel2_B4_Masked"

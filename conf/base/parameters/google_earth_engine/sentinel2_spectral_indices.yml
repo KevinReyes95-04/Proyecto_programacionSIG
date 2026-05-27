@@ -248,12 +248,6 @@ sentinel2_spectral_indices:
     align_to_reference_band: true
     reference_band: B2
     max_pixels: 10000000000
-    shard_size: 256
-    file_dimensions: null
-    skip_empty_tiles: true
-    cloud_optimized: true
-    no_data: null
-    priority: 100
     wait_for_completion: true
     poll_interval_seconds: 30
     timeout_seconds: 7200

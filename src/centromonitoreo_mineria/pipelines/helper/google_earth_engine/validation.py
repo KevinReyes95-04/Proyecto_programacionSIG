@@ -135,45 +135,19 @@ def _validate_drive_export_params(params: dict) -> None:
         value = params.get(key)
         if value is not None:
             _require_text(value, f"sentinel2_download.drive_export.{key}")
-    if params.get("file_format", "GeoTIFF") not in {"GeoTIFF", "TFRecord"}:
-        raise ValueError("sentinel2_download.drive_export.file_format debe ser GeoTIFF o TFRecord.")
+    if params.get("file_format", "GeoTIFF") != "GeoTIFF":
+        raise ValueError("sentinel2_download.drive_export.file_format debe ser GeoTIFF.")
     _require_positive_integer(params.get("max_pixels", 100000000), "sentinel2_download.drive_export.max_pixels")
-
-    shard_size = params.get("shard_size")
-    if shard_size is not None:
-        _require_positive_integer(shard_size, "sentinel2_download.drive_export.shard_size")
-    file_dimensions = params.get("file_dimensions")
-    if file_dimensions is not None and not (
-        (isinstance(file_dimensions, int) and not isinstance(file_dimensions, bool) and file_dimensions > 0)
-        or (
-            isinstance(file_dimensions, list | tuple)
-            and len(file_dimensions) == 2
-            and all(isinstance(item, int) and not isinstance(item, bool) and item > 0 for item in file_dimensions)
-        )
-    ):
-        raise ValueError(
-            "sentinel2_download.drive_export.file_dimensions debe ser un entero, "
-            "una lista de dos enteros positivos o null."
-        )
     for key in (
-        "skip_empty_tiles",
-        "cloud_optimized",
         "wait_for_completion",
-        "file_per_band",
         "align_to_reference_band",
     ):
         if not isinstance(params.get(key, False), bool):
             raise ValueError(f"sentinel2_download.drive_export.{key} debe ser true o false.")
-    for key in ("band_file_name_template", "band_description_template", "reference_band"):
+    for key in ("reference_band",):
         value = params.get(key)
         if value is not None:
             _require_text(value, f"sentinel2_download.drive_export.{key}")
-    no_data = params.get("no_data")
-    if no_data is not None and not _is_number(no_data):
-        raise ValueError("sentinel2_download.drive_export.no_data debe ser un numero o null.")
-    priority = params.get("priority", 100)
-    if not isinstance(priority, int) or isinstance(priority, bool) or not 0 <= priority <= 9999:
-        raise ValueError("sentinel2_download.drive_export.priority debe estar entre 0 y 9999.")
     _require_positive_integer(params.get("poll_interval_seconds", 30), "sentinel2_download.drive_export.poll_interval_seconds")
     _require_positive_integer(params.get("timeout_seconds", 7200), "sentinel2_download.drive_export.timeout_seconds")
 
@@ -190,8 +164,6 @@ def _validate_local_download_params(params: dict) -> None:
             params.get("file_name_template"),
             "sentinel2_download.local_download.file_name_template",
         )
-    if params.get("format", "GEO_TIFF") not in {"GEO_TIFF", "ZIPPED_GEO_TIFF"}:
-        raise ValueError("sentinel2_download.local_download.format debe ser GEO_TIFF o ZIPPED_GEO_TIFF.")
     _require_positive_integer(
         params.get("timeout_seconds", 300),
         "sentinel2_download.local_download.timeout_seconds",

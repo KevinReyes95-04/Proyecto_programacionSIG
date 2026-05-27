@@ -53,18 +53,9 @@ sentinel2_download:
     file_name_prefix: Sentinel2
     description: Sentinel2
     file_format: GeoTIFF
-    file_per_band: true
-    band_file_name_template: "{file_name_prefix}_{band}_Masked"
-    band_description_template: "{description}_{band}_Masked"
     align_to_reference_band: true
     reference_band: B2
     max_pixels: 10000000000
-    shard_size: 256
-    file_dimensions: null
-    skip_empty_tiles: true
-    cloud_optimized: true
-    no_data: null
-    priority: 100
     wait_for_completion: true
     poll_interval_seconds: 30
     timeout_seconds: 7200
@@ -72,7 +63,6 @@ sentinel2_download:
     enabled: true
     output_dir: data/04_feature/sentinel2_bands
     file_name_template: "{file_name_prefix}_{band}_Masked.tif"
-    format: GEO_TIFF
     timeout_seconds: 300
   apply_reflectance_scale: false
   reflectance_scale_factor: 0.0001
