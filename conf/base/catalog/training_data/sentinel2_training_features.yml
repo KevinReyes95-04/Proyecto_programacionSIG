@@ -1,0 +1,33 @@
+sentinel2_training_features_config:
+  type: MemoryDataset
+
+sentinel2_training_features_gee_context:
+  type: MemoryDataset
+
+sentinel2_training_features_roi_geometry:
+  type: MemoryDataset
+
+sentinel2_training_features_image_collection:
+  type: MemoryDataset
+
+sentinel2_training_features_composite_image:
+  type: MemoryDataset
+
+sentinel2_training_features_image:
+  type: MemoryDataset
+
+training_sentinel2_features:
+  type: pandas.CSVDataset
+  filepath: data/05_model_input/training_sentinel2_features.csv
+  save_args:
+    index: false
+
+testing_sentinel2_features:
+  type: pandas.CSVDataset
+  filepath: data/05_model_input/testing_sentinel2_features.csv
+  save_args:
+    index: false
+
+sentinel2_training_features_metadata:
+  type: json.JSONDataset
+  filepath: data/08_reporting/sentinel2_training_features_metadata.json

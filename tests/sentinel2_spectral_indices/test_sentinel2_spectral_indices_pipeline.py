@@ -28,15 +28,15 @@ def _spectral_indices_params(**overrides):
     params = {
         "collection": "COPERNICUS/S2_SR_HARMONIZED",
         "roi": {"source": "bbox", "bbox": [-74.2, 4.5, -74.0, 4.8]},
-        "start_date": "2024-01-01",
-        "end_date": "2024-12-31",
+        "start_date": "2023-02-02",
+        "end_date": "2023-02-03",
         "cloud_cover_max": 10,
         "cloud_mask": True,
-        "cloud_mask_method": "scl",
+        "cloud_mask_method": "qa60",
         "cloud_mask_scl_classes": [3, 8, 9, 10],
         "composite_method": "median",
         "bands": ["B2", "B3", "B4", "B8", "B11", "B12"],
-        "scale": 20,
+        "scale": 10,
         "include_original_bands": True,
         "output_band_order": ["B2", "B3", "B4", "B8", "B11", "B12", "NDVI", "BSI"],
         "indices": {
@@ -65,6 +65,8 @@ def _spectral_indices_params(**overrides):
             "file_name_prefix": "sentinel2_spectral_indices_test",
             "description": "sentinel2_spectral_indices_test",
             "file_format": "GeoTIFF",
+            "align_to_reference_band": True,
+            "reference_band": "B2",
             "max_pixels": 10_000_000_000,
         },
     }

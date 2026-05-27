@@ -1,1 +1,1 @@
-{}
+{"training_sentinel2_features": {"rows": 480, "columns": 28, "file_size": 249969}, "testing_sentinel2_features": {"rows": 120, "columns": 28, "file_size": 62419}, "postprocessed_mining_point_validation": {"rows": 600, "columns": 33, "file_size": 326939}, "postprocessed_mining_class_summary": {"rows": 12, "columns": 5, "file_size": 474}}

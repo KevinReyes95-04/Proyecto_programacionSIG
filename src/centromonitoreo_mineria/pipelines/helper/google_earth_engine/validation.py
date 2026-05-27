@@ -74,15 +74,6 @@ def validate_sentinel2_download_params(params: dict) -> None:
         "sentinel2_download.reflectance_scale_factor",
     )
 
-    scene_limit = params.get("scene_metadata_limit", 50)
-    if scene_limit is not None and (
-        not isinstance(scene_limit, int) or isinstance(scene_limit, bool) or scene_limit < 0
-    ):
-        raise ValueError("sentinel2_download.scene_metadata_limit debe ser >= 0 o null.")
-    _require_text_list(
-        params.get("scene_metadata_properties", []),
-        "sentinel2_download.scene_metadata_properties",
-    )
     _validate_drive_export_params(params.get("drive_export", {}))
 
 
@@ -163,9 +154,19 @@ def _validate_drive_export_params(params: dict) -> None:
             "sentinel2_download.drive_export.file_dimensions debe ser un entero, "
             "una lista de dos enteros positivos o null."
         )
-    for key in ("skip_empty_tiles", "cloud_optimized", "wait_for_completion"):
+    for key in (
+        "skip_empty_tiles",
+        "cloud_optimized",
+        "wait_for_completion",
+        "file_per_band",
+        "align_to_reference_band",
+    ):
         if not isinstance(params.get(key, False), bool):
             raise ValueError(f"sentinel2_download.drive_export.{key} debe ser true o false.")
+    for key in ("band_file_name_template", "band_description_template", "reference_band"):
+        value = params.get(key)
+        if value is not None:
+            _require_text(value, f"sentinel2_download.drive_export.{key}")
     no_data = params.get("no_data")
     if no_data is not None and not _is_number(no_data):
         raise ValueError("sentinel2_download.drive_export.no_data debe ser un numero o null.")

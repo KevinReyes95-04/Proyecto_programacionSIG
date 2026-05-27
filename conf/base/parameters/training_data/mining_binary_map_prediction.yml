@@ -1,0 +1,68 @@
+mining_binary_map_prediction:
+  raster_dir: data/04_feature/sentinel2_bands
+  band_file_template: Sentinel2_{band}_Masked.tif
+  reference_band: B2
+  bands:
+    - B1
+    - B2
+    - B3
+    - B4
+    - B5
+    - B6
+    - B7
+    - B8
+    - B8A
+    - B9
+    - B11
+    - B12
+  feature_columns:
+    - B1
+    - B2
+    - B3
+    - B4
+    - B5
+    - B6
+    - B7
+    - B8
+    - B8A
+    - B9
+    - B11
+    - B12
+    - NDVI
+    - MSAVI
+    - NDWI
+    - BSI
+    - MBSI
+    - NDSI
+    - MSWI
+    - NDBI
+  positive_label: Mineria
+  negative_label: No Mineria
+  class_values:
+    No Mineria: 0
+    Mineria: 1
+  class_nodata: 255
+  probability_nodata: -9999.0
+  classification_threshold: 0.4
+  apply_reflectance_scale: true
+  reflectance_scale_factor: 0.0001
+  window_size: 512
+  outputs:
+    classification_map: data/07_model_output/mining_binary_classification_map.tif
+    probability_map: data/07_model_output/mining_binary_probability_map.tif
+  visualization:
+    output_path: data/08_reporting/mining_binary_classification_map.png
+    title: Mapa binario de mineria
+    figure_size: [8, 8]
+    dpi: 160
+    mining_color: "#E31A1C"
+    mining_alpha: 0.55
+    background:
+      enabled: true
+  categorical_visualization:
+    output_path: data/08_reporting/mining_binary_classification_categorical_map.png
+    title: Mapa categorico - Mineria vs No Mineria
+    figure_size: [8, 8]
+    dpi: 160
+    negative_color: "#1A9850"
+    positive_color: "#E31A1C"

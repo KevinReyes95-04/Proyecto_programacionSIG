@@ -1,0 +1,67 @@
+postprocessed_mining_map_validation:
+  label_column: Cobertura
+  positive_label: Mineria
+  negative_label: No Mineria
+  class_nodata: 255
+  coordinate_columns:
+    longitude: x
+    latitude: y
+    source_crs: EPSG:4326
+  outputs:
+    point_validation: data/07_model_output/postprocessed_mining_point_validation.csv
+    class_summary: data/07_model_output/postprocessed_mining_class_summary.csv
+  map:
+    output_path: data/08_reporting/postprocessed_mining_map_validation.png
+    title: Validacion cartografica del mapa postprocesado
+    figure_size: [9, 9]
+    dpi: 180
+    mining_color: "#E31A1C"
+    no_mining_color: "#1A9850"
+    title_font_size: 15
+    note_font_size: 8
+    x_label: Este (m)
+    y_label: Norte (m)
+    legend_font_size: 8
+    class_legend_location: upper left
+    points_legend_location: lower left
+    grid_color: "#303030"
+    grid_alpha: 0.35
+    grid_linewidth: 0.6
+    north_arrow:
+      x: 0.93
+      y: 0.88
+      font_size: 13
+    scale_bar:
+      fraction: 0.2
+      x_fraction: 0.08
+      y_fraction: 0.07
+      font_size: 10
+    status_styles:
+      TP:
+        color: "#00FFFF"
+        edgecolor: "#111111"
+        marker: o
+        size: 45
+        linewidth: 0.6
+        alpha: 0.95
+      TN:
+        color: "#FFFFFF"
+        edgecolor: "#111111"
+        marker: .
+        size: 16
+        linewidth: 0.25
+        alpha: 0.7
+      FP:
+        color: "#FFD700"
+        edgecolor: "#111111"
+        marker: X
+        size: 110
+        linewidth: 1.0
+        alpha: 0.95
+      FN:
+        color: "#FF00FF"
+        edgecolor: "#111111"
+        marker: X
+        size: 110
+        linewidth: 1.0
+        alpha: 0.95

@@ -1,0 +1,14 @@
+mining_binary_map_prediction_config:
+  type: MemoryDataset
+
+mining_binary_map_prediction_metadata:
+  type: json.JSONDataset
+  filepath: data/08_reporting/mining_binary_map_prediction_metadata.json
+
+mining_binary_map_plot_metadata:
+  type: json.JSONDataset
+  filepath: data/08_reporting/mining_binary_map_plot_metadata.json
+
+mining_binary_map_metadata:
+  type: json.JSONDataset
+  filepath: data/08_reporting/mining_binary_map_metadata.json

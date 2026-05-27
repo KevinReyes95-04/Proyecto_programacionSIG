@@ -5,6 +5,10 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
+from centromonitoreo_mineria.pipelines.prepare_training_data.helpers.spatial_background import (
+    add_sentinel2_background,
+)
+
 
 def plot_labeled_points_distribution(
     labeled_points: gpd.GeoDataFrame, params: dict[str, Any]
@@ -20,9 +24,16 @@ def plot_labeled_points_distribution(
     )
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
-    use_basemap = plot_params.get("use_basemap", True)
+    use_sentinel2_background = plot_params.get("sentinel2_background", {}).get("enabled", False)
+    use_basemap = plot_params.get("use_basemap", True) and not use_sentinel2_background
     plot_points = labeled_points.to_crs(epsg=3857) if use_basemap else labeled_points
     figure, axis = plt.subplots(figsize=tuple(plot_params.get("figure_size", [8, 8])))
+    sentinel2_background_metadata = add_sentinel2_background(
+        axis=axis,
+        plot_params=plot_params,
+        target_crs=plot_points.crs,
+        points_bounds=plot_points.total_bounds,
+    )
     plot_points.plot(
         ax=axis,
         column=label_column,
@@ -30,6 +41,8 @@ def plot_labeled_points_distribution(
         legend=True,
         markersize=plot_params.get("point_size", 12),
         alpha=plot_params.get("alpha", 0.8),
+        edgecolor=plot_params.get("point_edgecolor", "black"),
+        linewidth=plot_params.get("point_linewidth", 0.4),
     )
 
     basemap_added = False
@@ -71,4 +84,5 @@ def plot_labeled_points_distribution(
         "basemap_added": basemap_added,
         "basemap_source": plot_params.get("basemap_source", "CartoDB.Positron"),
         "basemap_error": basemap_error,
+        **sentinel2_background_metadata,
     }

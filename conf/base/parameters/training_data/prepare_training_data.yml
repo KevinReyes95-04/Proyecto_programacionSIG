@@ -13,10 +13,22 @@ training_data:
     dpi: 160
     point_size: 12
     alpha: 0.8
-    use_basemap: true
+    point_edgecolor: black
+    point_linewidth: 0.4
+    use_basemap: false
     basemap_source: Esri.WorldImagery
     basemap_zoom: auto
     basemap_strict: false
+    sentinel2_background:
+      enabled: false
+      image_path: data/08_reporting/sentinel2_download_visualizations/sentinel2_true_color_background.png
+      extent_crs: EPSG:4326
+      extent: [-74.96723392, 7.79405091, -74.62519767, 8.12991298]
+      origin: upper
+      aspect: auto
+      alpha: 1.0
+      margin: 0.03
+      strict: false
 
   split_spatial_plot:
     training_output_path: data/08_reporting/training_labeled_points_distribution.png

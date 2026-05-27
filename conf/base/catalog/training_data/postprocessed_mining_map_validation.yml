@@ -1,0 +1,22 @@
+postprocessed_mining_map_validation_config:
+  type: MemoryDataset
+
+postprocessed_mining_point_validation:
+  type: pandas.CSVDataset
+  filepath: data/07_model_output/postprocessed_mining_point_validation.csv
+  save_args:
+    index: false
+
+postprocessed_mining_class_summary:
+  type: pandas.CSVDataset
+  filepath: data/07_model_output/postprocessed_mining_class_summary.csv
+  save_args:
+    index: false
+
+postprocessed_mining_validation_plot_metadata:
+  type: json.JSONDataset
+  filepath: data/08_reporting/postprocessed_mining_validation_plot_metadata.json
+
+postprocessed_mining_map_validation_metadata:
+  type: json.JSONDataset
+  filepath: data/08_reporting/postprocessed_mining_map_validation_metadata.json

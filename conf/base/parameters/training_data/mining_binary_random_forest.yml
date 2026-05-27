@@ -1,0 +1,62 @@
+mining_binary_random_forest:
+  label_column: Cobertura
+  positive_label: Mineria
+  negative_label: No Mineria
+  negative_source_labels:
+    - Bosque Natural
+    - Cuerpos de Agua
+    - Nubes
+    - Suelo Desnudo
+    - Vegetacion
+  target_column: target
+  prediction_column: predicted_target
+  probability_column: probability_mineria
+  classification_threshold: 0.4
+  feature_columns:
+    - B1
+    - B2
+    - B3
+    - B4
+    - B5
+    - B6
+    - B7
+    - B8
+    - B8A
+    - B9
+    - B11
+    - B12
+    - NDVI
+    - MSAVI
+    - NDWI
+    - BSI
+    - MBSI
+    - NDSI
+    - MSWI
+    - NDBI
+  random_forest:
+    n_estimators: 500
+    criterion: gini
+    max_depth: null
+    min_samples_split: 2
+    min_samples_leaf: 1
+    max_features: sqrt
+    bootstrap: true
+    class_weight: balanced
+    random_state: 42
+    n_jobs: 1
+  confusion_matrix_plot:
+    output_path: data/08_reporting/mining_binary_confusion_matrix.png
+    title: Matriz de confusion - Mineria vs No Mineria
+    x_label: Prediccion
+    y_label: Observado
+    figure_size: [6, 5]
+    dpi: 160
+    cmap: Blues
+  feature_importance_plot:
+    output_path: data/08_reporting/mining_binary_feature_importance.png
+    title: Importancia de variables - Random Forest binario
+    x_label: Importancia
+    figure_size: [8, 7]
+    dpi: 160
+    top_n: 20
+    color: "#1379B9"

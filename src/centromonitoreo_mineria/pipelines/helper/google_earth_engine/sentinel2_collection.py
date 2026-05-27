@@ -15,6 +15,8 @@ def _apply_cloud_mask(image: Any, params: dict) -> Any:
 
 
 def _qa60_cloud_mask(image: Any) -> Any:
+    ee = load_ee()
+    image = ee.Image(image)
     qa60 = image.select("QA60")
     cloud_bit_mask = 1 << 10
     cirrus_bit_mask = 1 << 11
@@ -25,6 +27,8 @@ def _qa60_cloud_mask(image: Any) -> Any:
 
 
 def _scl_cloud_mask(image: Any, params: dict) -> Any:
+    ee = load_ee()
+    image = ee.Image(image)
     scl = image.select("SCL")
     masked_classes = params.get("cloud_mask_scl_classes", [3, 8, 9, 10])
     mask = scl.neq(masked_classes[0])

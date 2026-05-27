@@ -1,0 +1,66 @@
+mining_binary_map_validation:
+  label_column: Cobertura
+  target_column: target
+  prediction_column: predicted_target
+  positive_label: Mineria
+  negative_label: No Mineria
+  band_file_template: Sentinel2_{band}_Masked.tif
+  class_values:
+    No Mineria: 0
+    Mineria: 1
+  coordinate_columns:
+    longitude: x
+    latitude: y
+    source_crs: EPSG:4326
+  class_colors:
+    Bosque Natural: "#0CB354"
+    Cuerpos de Agua: "#1379B9"
+    Mineria: "#E31A1C"
+    Nubes: "#18A8D8"
+    Suelo Desnudo: "#FFC107"
+    Vegetacion: "#8DD34F"
+  visualization:
+    max_size: 1600
+  classification_points_plot:
+    output_path: data/08_reporting/mining_binary_classification_points_overlay.png
+    title: Clasificacion binaria con puntos etiquetados
+    figure_size: [9, 9]
+    dpi: 160
+    mining_color: "#E31A1C"
+    mining_alpha: 0.45
+    training_point_size: 10
+    testing_point_size: 24
+    legend_font_size: 7
+    legend_location: lower left
+  probability_points_plot:
+    output_path: data/08_reporting/mining_binary_probability_points_overlay.png
+    title: Probabilidad de mineria con puntos de prueba
+    figure_size: [9, 9]
+    dpi: 160
+    cmap: viridis
+    colorbar_label: Probabilidad Mineria
+    point_size: 24
+    legend_font_size: 7
+    legend_location: lower left
+  errors_plot:
+    output_path: data/08_reporting/mining_binary_testing_errors_overlay.png
+    title: Errores de prueba sobre mapa clasificado
+    figure_size: [9, 9]
+    dpi: 160
+    mining_color: "#E31A1C"
+    mining_alpha: 0.45
+    context_point_size: 12
+    legend_font_size: 8
+    legend_location: lower left
+    false_negative:
+      color: "#00FFFF"
+      edgecolor: "#000000"
+      marker: X
+      point_size: 110
+      linewidth: 1.0
+    false_positive:
+      color: "#FFD700"
+      edgecolor: "#000000"
+      marker: X
+      point_size: 110
+      linewidth: 1.0

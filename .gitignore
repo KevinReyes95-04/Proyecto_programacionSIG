@@ -11,7 +11,11 @@ conf/local/
 *service-account*.json
 
 # Data outputs
+/data/02_intermediate/test_predict_mining_binary_map/
+/data/02_intermediate/test_postprocess_mining_binary_map/
+/data/02_intermediate/test_validate_postprocessed_mining_map/
 /data/01_raw/sentinel2/*
+/data/04_feature/sentinel2_bands/
 /data/06_models/*
 /data/07_model_output/*
 /data/08_reporting/*

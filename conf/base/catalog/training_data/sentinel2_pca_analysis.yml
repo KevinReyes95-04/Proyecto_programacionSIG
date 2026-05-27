@@ -1,0 +1,48 @@
+sentinel2_pca_config:
+  type: MemoryDataset
+
+sentinel2_pca_training_dataset:
+  type: MemoryDataset
+
+sentinel2_pca_testing_dataset:
+  type: MemoryDataset
+
+sentinel2_pca_model:
+  type: pickle.PickleDataset
+  filepath: data/06_models/sentinel2_pca_model.pkl
+
+sentinel2_pca_training_scores:
+  type: pandas.CSVDataset
+  filepath: data/07_model_output/sentinel2_pca_training_scores.csv
+  save_args:
+    index: false
+
+sentinel2_pca_testing_scores:
+  type: pandas.CSVDataset
+  filepath: data/07_model_output/sentinel2_pca_testing_scores.csv
+  save_args:
+    index: false
+
+sentinel2_pca_explained_variance:
+  type: pandas.CSVDataset
+  filepath: data/07_model_output/sentinel2_pca_explained_variance.csv
+  save_args:
+    index: false
+
+sentinel2_pca_loadings:
+  type: pandas.CSVDataset
+  filepath: data/07_model_output/sentinel2_pca_loadings.csv
+  save_args:
+    index: false
+
+sentinel2_pca_scatter_plot_metadata:
+  type: json.JSONDataset
+  filepath: data/08_reporting/sentinel2_pca_scatter_plot_metadata.json
+
+sentinel2_pca_scree_plot_metadata:
+  type: json.JSONDataset
+  filepath: data/08_reporting/sentinel2_pca_scree_plot_metadata.json
+
+sentinel2_pca_metadata:
+  type: json.JSONDataset
+  filepath: data/08_reporting/sentinel2_pca_metadata.json

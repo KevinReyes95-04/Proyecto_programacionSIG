@@ -1,0 +1,40 @@
+mining_binary_random_forest_config:
+  type: MemoryDataset
+
+mining_binary_training_dataset:
+  type: MemoryDataset
+
+mining_binary_testing_dataset:
+  type: MemoryDataset
+
+mining_binary_random_forest_model:
+  type: pickle.PickleDataset
+  filepath: data/06_models/mining_binary_random_forest.pkl
+
+mining_binary_predictions:
+  type: pandas.CSVDataset
+  filepath: data/07_model_output/mining_binary_predictions.csv
+  save_args:
+    index: false
+
+mining_binary_metrics:
+  type: json.JSONDataset
+  filepath: data/08_reporting/mining_binary_metrics.json
+
+mining_binary_feature_importance:
+  type: pandas.CSVDataset
+  filepath: data/07_model_output/mining_binary_feature_importance.csv
+  save_args:
+    index: false
+
+mining_binary_confusion_matrix_plot_metadata:
+  type: json.JSONDataset
+  filepath: data/08_reporting/mining_binary_confusion_matrix_plot_metadata.json
+
+mining_binary_feature_importance_plot_metadata:
+  type: json.JSONDataset
+  filepath: data/08_reporting/mining_binary_feature_importance_plot_metadata.json
+
+mining_binary_random_forest_metadata:
+  type: json.JSONDataset
+  filepath: data/08_reporting/mining_binary_random_forest_metadata.json

@@ -13,12 +13,14 @@ sentinel2_spectral_indices:
           - [-74.62532856, 7.79405091]
           - [-74.96723392, 7.79418315]
     geojson_path: null
-  start_date: "2024-01-01"
-  end_date: "2024-12-31"
+  # Keep this aligned with sentinel2_download so indices are calculated from
+  # the same clean Sentinel-2 scene.
+  start_date: "2023-02-02"
+  end_date: "2023-02-03"
   cloud_cover_max: 10
   cloud_cover_property: CLOUDY_PIXEL_PERCENTAGE
   cloud_mask: true
-  cloud_mask_method: scl
+  cloud_mask_method: qa60_and_scl
   cloud_mask_scl_classes:
     - 3   # cloud shadows
     - 8   # cloud medium probability
@@ -28,22 +30,34 @@ sentinel2_spectral_indices:
   sort_by: system:time_start
   sort_ascending: true
   bands:
+    - B1
     - B2
     - B3
     - B4
+    - B5
+    - B6
+    - B7
     - B8
+    - B8A
+    - B9
     - B11
     - B12
-  scale: 20
+  scale: 10
   crs: null
   apply_reflectance_scale: true
   reflectance_scale_factor: 0.0001
   include_original_bands: true
   output_band_order:
+    - B1
     - B2
     - B3
     - B4
+    - B5
+    - B6
+    - B7
     - B8
+    - B8A
+    - B9
     - B11
     - B12
     - NDVI
@@ -161,8 +175,8 @@ sentinel2_spectral_indices:
         - "#01665e"
     indices:
       NDVI:
-        min: -1
-        max: 1
+        min: -0.2
+        max: 0.9
         palette:
           - "#8c510a"
           - "#d8b365"
@@ -228,9 +242,11 @@ sentinel2_spectral_indices:
 
   drive_export:
     folder: centromonitoreo_mineria
-    file_name_prefix: sentinel2_spectral_indices_roi_planet_quick_search_polygon
-    description: sentinel2_spectral_indices_roi_planet_quick_search_polygon
+    file_name_prefix: Sentinel2_SpectralIndices_Masked
+    description: Sentinel2_SpectralIndices_Masked
     file_format: GeoTIFF
+    align_to_reference_band: true
+    reference_band: B2
     max_pixels: 10000000000
     shard_size: 256
     file_dimensions: null

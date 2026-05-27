@@ -1,0 +1,44 @@
+sentinel2_training_features:
+  # Para entrenar la clase "Nubes" necesitamos conservar su respuesta espectral.
+  # Por eso este pipeline no aplica mascara de nubes aunque los mapas si puedan usarla.
+  sentinel2_overrides:
+    cloud_mask: false
+  label_column: Cobertura
+  coordinate_columns:
+    longitude: x
+    latitude: y
+    crs: EPSG:4326
+  properties_to_keep:
+    - Codigo
+    - Cobertura
+    - x
+    - y
+    - longitude
+    - latitude
+    - geometry_wkt
+  feature_columns:
+    - B1
+    - B2
+    - B3
+    - B4
+    - B5
+    - B6
+    - B7
+    - B8
+    - B8A
+    - B9
+    - B11
+    - B12
+    - NDVI
+    - MSAVI
+    - NDWI
+    - BSI
+    - MBSI
+    - NDSI
+    - MSWI
+    - NDBI
+  sample_scale: 10
+  tile_scale: 4
+  geometries: false
+  drop_missing_features: true
+  unmask_value: null
