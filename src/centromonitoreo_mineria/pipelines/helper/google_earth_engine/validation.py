@@ -75,6 +75,7 @@ def validate_sentinel2_download_params(params: dict) -> None:
     )
 
     _validate_drive_export_params(params.get("drive_export", {}))
+    _validate_local_download_params(params.get("local_download", {}))
 
 
 def _validate_roi(params_roi: dict) -> None:
@@ -175,6 +176,26 @@ def _validate_drive_export_params(params: dict) -> None:
         raise ValueError("sentinel2_download.drive_export.priority debe estar entre 0 y 9999.")
     _require_positive_integer(params.get("poll_interval_seconds", 30), "sentinel2_download.drive_export.poll_interval_seconds")
     _require_positive_integer(params.get("timeout_seconds", 7200), "sentinel2_download.drive_export.timeout_seconds")
+
+
+def _validate_local_download_params(params: dict) -> None:
+    if not isinstance(params, dict):
+        raise ValueError("sentinel2_download.local_download debe ser un diccionario.")
+    if not isinstance(params.get("enabled", True), bool):
+        raise ValueError("sentinel2_download.local_download.enabled debe ser true o false.")
+    if params.get("output_dir") is not None:
+        _require_text(params.get("output_dir"), "sentinel2_download.local_download.output_dir")
+    if params.get("file_name_template") is not None:
+        _require_text(
+            params.get("file_name_template"),
+            "sentinel2_download.local_download.file_name_template",
+        )
+    if params.get("format", "GEO_TIFF") not in {"GEO_TIFF", "ZIPPED_GEO_TIFF"}:
+        raise ValueError("sentinel2_download.local_download.format debe ser GEO_TIFF o ZIPPED_GEO_TIFF.")
+    _require_positive_integer(
+        params.get("timeout_seconds", 300),
+        "sentinel2_download.local_download.timeout_seconds",
+    )
 
 
 def _validate_scl_classes(value: Any) -> None:

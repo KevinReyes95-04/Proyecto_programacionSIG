@@ -4,6 +4,9 @@ from centromonitoreo_mineria.pipelines.download_sentinel2.nodes.build_sentinel2_
 from centromonitoreo_mineria.pipelines.download_sentinel2.nodes.build_sentinel2_download_metadata import (
     build_sentinel2_download_metadata,
 )
+from centromonitoreo_mineria.pipelines.download_sentinel2.nodes.download_sentinel2_bands_to_local import (
+    download_sentinel2_bands_to_local,
+)
 from centromonitoreo_mineria.pipelines.download_sentinel2.nodes.export_sentinel2_download_to_drive import (
     export_sentinel2_download_to_drive,
 )
@@ -18,4 +21,5 @@ __all__ = [
     "build_sentinel2_download_assets",
     "export_sentinel2_download_to_drive",
     "build_sentinel2_download_metadata",
+    "download_sentinel2_bands_to_local",
 ]

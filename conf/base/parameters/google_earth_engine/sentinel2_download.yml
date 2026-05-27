@@ -68,5 +68,11 @@ sentinel2_download:
     wait_for_completion: true
     poll_interval_seconds: 30
     timeout_seconds: 7200
+  local_download:
+    enabled: true
+    output_dir: data/04_feature/sentinel2_bands
+    file_name_template: "{file_name_prefix}_{band}_Masked.tif"
+    format: GEO_TIFF
+    timeout_seconds: 300
   apply_reflectance_scale: false
   reflectance_scale_factor: 0.0001
