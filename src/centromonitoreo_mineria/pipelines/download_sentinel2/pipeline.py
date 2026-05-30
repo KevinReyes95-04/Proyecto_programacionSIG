@@ -3,7 +3,7 @@ from kedro.pipeline import Pipeline, node
 from centromonitoreo_mineria.pipelines.download_sentinel2.nodes import (
     build_sentinel2_download_assets,
     build_sentinel2_download_metadata,
-    download_sentinel2_bands_to_local,
+    download_sentinel2_drive_export_to_local,
     export_sentinel2_download_to_drive,
     validate_sentinel2_download_config,
 )
@@ -42,14 +42,13 @@ def create_pipeline(**kwargs) -> Pipeline:
                 name="build_sentinel2_download_metadata_node",
             ),
             node(
-                func=download_sentinel2_bands_to_local,
+                func=download_sentinel2_drive_export_to_local,
                 inputs=[
-                    "sentinel2_download_assets",
-                    "sentinel2_download_metadata",
+                    "sentinel2_drive_export_metadata",
                     "sentinel2_download_config",
                 ],
                 outputs="sentinel2_local_download_metadata",
-                name="download_sentinel2_bands_to_local_node",
+                name="download_sentinel2_drive_export_to_local_node",
             ),
         ]
     )

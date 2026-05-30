@@ -80,6 +80,9 @@ def _align_image_if_configured(image: Any, params: dict) -> tuple[dict, Any]:
 
 
 def _reference_projection(image: Any, params: dict) -> Any | None:
+    if params.get("crs"):
+        return None
+
     drive = params.get("drive_export", {})
     if not drive.get("align_to_reference_band", False):
         return None

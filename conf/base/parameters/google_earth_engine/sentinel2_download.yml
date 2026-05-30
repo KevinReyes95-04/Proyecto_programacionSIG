@@ -63,6 +63,8 @@ sentinel2_download:
     enabled: true
     output_dir: data/04_feature/sentinel2_bands
     file_name_template: "{file_name_prefix}_{band}_Masked.tif"
+    target_crs: EPSG:9377
+    resampling: bilinear
     timeout_seconds: 300
   apply_reflectance_scale: false
   reflectance_scale_factor: 0.0001

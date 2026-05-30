@@ -16,6 +16,7 @@ from centromonitoreo_mineria.pipelines.helper.google_earth_engine.sentinel2_comp
 
 def build_sentinel2_download_assets(config: dict) -> dict[str, Any]:
     """Construye ROI, coleccion e imagen compuesta Sentinel-2."""
+    # Funcion para preparar los objetos de Earth Engine que se van a exportar.
     params = config["sentinel2_download"]
     gee_context = initialize_earth_engine_client(config["gee"])
     roi_geometry = build_roi_geometry(

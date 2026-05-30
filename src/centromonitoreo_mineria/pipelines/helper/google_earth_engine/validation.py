@@ -155,7 +155,7 @@ def _validate_drive_export_params(params: dict) -> None:
 def _validate_local_download_params(params: dict) -> None:
     if not isinstance(params, dict):
         raise ValueError("sentinel2_download.local_download debe ser un diccionario.")
-    if not isinstance(params.get("enabled", True), bool):
+    if not isinstance(params.get("enabled", False), bool):
         raise ValueError("sentinel2_download.local_download.enabled debe ser true o false.")
     if params.get("output_dir") is not None:
         _require_text(params.get("output_dir"), "sentinel2_download.local_download.output_dir")
@@ -164,6 +164,10 @@ def _validate_local_download_params(params: dict) -> None:
             params.get("file_name_template"),
             "sentinel2_download.local_download.file_name_template",
         )
+    if params.get("target_crs") is not None:
+        _require_text(params.get("target_crs"), "sentinel2_download.local_download.target_crs")
+    if params.get("resampling", "bilinear") not in {"nearest", "bilinear", "cubic"}:
+        raise ValueError("sentinel2_download.local_download.resampling debe ser nearest, bilinear o cubic.")
     _require_positive_integer(
         params.get("timeout_seconds", 300),
         "sentinel2_download.local_download.timeout_seconds",
