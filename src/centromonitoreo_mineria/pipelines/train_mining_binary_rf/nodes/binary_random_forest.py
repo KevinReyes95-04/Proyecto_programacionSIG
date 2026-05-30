@@ -1,3 +1,5 @@
+"""Nodos del entrenamiento Random Forest binario."""
+
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any

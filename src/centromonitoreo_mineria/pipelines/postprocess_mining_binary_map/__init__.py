@@ -1,1 +1,1 @@
-"""Postprocess binary mining map pipeline."""
+"""Pipeline para postprocesar el mapa binario de mineria."""

@@ -1,5 +1,4 @@
 from kedro.pipeline import Pipeline, node
-
 from centromonitoreo_mineria.pipelines.validate_mining_binary_map.nodes import (
     build_mining_binary_map_validation_metadata,
     plot_classification_points_overlay,

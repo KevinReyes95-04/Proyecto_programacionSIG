@@ -1,4 +1,4 @@
-from centromonitoreo_mineria.pipelines.helper.modeling.binary_random_forest import (
+from .binary_random_forest import (
     build_model_metadata as build_mining_binary_random_forest_metadata,
     evaluate_binary_predictions as evaluate_mining_binary_random_forest,
     feature_importance_table as build_mining_binary_feature_importance,
@@ -8,7 +8,6 @@ from centromonitoreo_mineria.pipelines.helper.modeling.binary_random_forest impo
     train_random_forest as train_mining_binary_random_forest,
     validate_binary_random_forest_params as validate_mining_binary_random_forest_config,
 )
-
 from .build_mining_binary_datasets import build_mining_binary_datasets
 
 __all__ = [

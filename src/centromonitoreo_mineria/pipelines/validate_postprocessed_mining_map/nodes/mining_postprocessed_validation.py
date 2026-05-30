@@ -1,3 +1,5 @@
+"""Nodos para validar el mapa de mineria postprocesado."""
+
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -16,6 +18,7 @@ import matplotlib.pyplot as plt
 
 
 def validate_postprocessed_mining_map_validation_params(params: dict[str, Any]) -> dict[str, Any]:
+    """Valida los parametros para contrastar puntos contra el mapa postprocesado."""
     if not isinstance(params, dict):
         raise ValueError("postprocessed_mining_map_validation debe ser un diccionario.")
     _require_text(params.get("label_column"), "postprocessed_mining_map_validation.label_column")
@@ -34,6 +37,7 @@ def build_postprocessed_point_validation_table(
     postprocessing_metadata: dict[str, Any],
     params: dict[str, Any],
 ) -> pd.DataFrame:
+    """Cruza puntos de entrenamiento y prueba con poligonos mineros postprocesados."""
     polygons = _read_mining_polygons(postprocessing_metadata)
     points = _prepare_points(training_points, testing_points, polygons.crs, params)
     mining_area = polygons.geometry.union_all() if hasattr(polygons.geometry, "union_all") else polygons.unary_union
@@ -58,6 +62,7 @@ def build_postprocessed_class_summary(
     point_validation: pd.DataFrame,
     params: dict[str, Any],
 ) -> pd.DataFrame:
+    """Resume por clase cuantos puntos caen dentro de poligonos mineros."""
     label_column = params["label_column"]
     summary = (
         point_validation.groupby(["dataset_split", label_column], dropna=False)
@@ -78,6 +83,7 @@ def plot_postprocessed_validation_map(
     postprocessing_metadata: dict[str, Any],
     params: dict[str, Any],
 ) -> dict[str, Any]:
+    """Genera el mapa de validacion con estados TP, TN, FP y FN."""
     plot_params = params.get("map", {})
     output_path = Path(plot_params.get("output_path", "data/08_reporting/postprocessed_mining_map_validation.png"))
     output_path.parent.mkdir(parents=True, exist_ok=True)
@@ -108,6 +114,7 @@ def build_postprocessed_validation_metadata(
     postprocessing_metadata: dict[str, Any],
     params: dict[str, Any],
 ) -> dict[str, Any]:
+    """Resume conteos de validacion, area postprocesada y salidas graficas."""
     status_counts = point_validation["validation_status"].value_counts().to_dict()
     testing = point_validation[point_validation["dataset_split"] == "testing"]
     return {
@@ -267,6 +274,8 @@ def _add_scale_bar(axis: Any, extent: list[float], params: dict[str, Any]) -> No
 
 
 def _nice_scale_length(value: float) -> float:
+    if value <= 0:
+        return 1
     exponent = np.floor(np.log10(value))
     base = value / (10**exponent)
     nice_base = 1 if base < 2 else 2 if base < 5 else 5

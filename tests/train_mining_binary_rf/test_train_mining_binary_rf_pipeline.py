@@ -1,7 +1,7 @@
 import pandas as pd
 import pytest
 
-from centromonitoreo_mineria.pipelines.helper.modeling.binary_random_forest import (
+from centromonitoreo_mineria.pipelines.train_mining_binary_rf.nodes.binary_random_forest import (
     build_binary_dataset,
     predict_random_forest,
 )

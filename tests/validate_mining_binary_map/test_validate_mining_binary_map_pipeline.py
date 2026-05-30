@@ -1,9 +1,9 @@
 import pandas as pd
 import pytest
 
-from centromonitoreo_mineria.pipelines.helper.modeling.mining_map_validation import (
+from centromonitoreo_mineria.pipelines.validate_mining_binary_map.nodes import (
     build_mining_binary_map_validation_metadata,
-    validate_mining_binary_map_validation_params,
+    validate_mining_binary_map_validation_config,
 )
 from centromonitoreo_mineria.pipelines.validate_mining_binary_map.pipeline import (
     create_pipeline,
@@ -31,7 +31,7 @@ def test_validate_mining_binary_map_pipeline_has_expected_node_count():
 
 
 def test_mining_binary_map_validation_config_is_validated():
-    config = validate_mining_binary_map_validation_params(_params())
+    config = validate_mining_binary_map_validation_config(_params())
 
     assert config["positive_label"] == "Mineria"
     assert config["coordinate_columns"]["longitude"] == "x"
@@ -41,7 +41,7 @@ def test_mining_binary_map_validation_config_rejects_missing_crs():
     params = _params(coordinate_columns={"longitude": "x", "latitude": "y"})
 
     with pytest.raises(ValueError, match="source_crs"):
-        validate_mining_binary_map_validation_params(params)
+        validate_mining_binary_map_validation_config(params)
 
 
 def test_mining_binary_map_validation_metadata_counts_errors():
@@ -53,11 +53,11 @@ def test_mining_binary_map_validation_metadata_counts_errors():
     )
 
     metadata = build_mining_binary_map_validation_metadata(
-        testing_predictions=predictions,
-        classification_points_metadata={"output_path": "a.png"},
-        probability_points_metadata={"output_path": "b.png"},
-        testing_errors_metadata={"output_path": "c.png"},
-        params=_params(),
+        mining_binary_predictions=predictions,
+        mining_binary_classification_points_plot_metadata={"output_path": "a.png"},
+        mining_binary_probability_points_plot_metadata={"output_path": "b.png"},
+        mining_binary_testing_errors_plot_metadata={"output_path": "c.png"},
+        mining_binary_map_validation_config=_params(),
     )
 
     assert metadata["false_negatives"] == 1

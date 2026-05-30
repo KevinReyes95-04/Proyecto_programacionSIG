@@ -1,1 +1,1 @@
-"""Pipeline for visual validation of the binary mining map."""
+"""Pipeline para validar visualmente el mapa binario de mineria."""

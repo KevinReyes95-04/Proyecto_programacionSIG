@@ -1,13 +1,11 @@
-from centromonitoreo_mineria.pipelines.postprocess_mining_binary_map.nodes.build_mining_binary_postprocessing_metadata import (
+from .build_mining_binary_postprocessing_metadata import (
     build_mining_binary_postprocessing_metadata,
 )
-from centromonitoreo_mineria.pipelines.postprocess_mining_binary_map.nodes.plot_mining_binary_postprocessed_map import (
+from .plot_mining_binary_postprocessed_map import (
     plot_mining_binary_postprocessed_map,
 )
-from centromonitoreo_mineria.pipelines.postprocess_mining_binary_map.nodes.postprocess_mining_binary_map import (
-    postprocess_mining_binary_map,
-)
-from centromonitoreo_mineria.pipelines.postprocess_mining_binary_map.nodes.validate_mining_binary_postprocessing_config import (
+from .postprocess_mining_binary_map import postprocess_mining_binary_map
+from .validate_mining_binary_postprocessing_config import (
     validate_mining_binary_postprocessing_config,
 )
 

@@ -4,7 +4,7 @@ from uuid import uuid4
 
 import pandas as pd
 
-from centromonitoreo_mineria.pipelines.helper.modeling.mining_postprocessed_validation import (
+from centromonitoreo_mineria.pipelines.validate_postprocessed_mining_map.nodes.mining_postprocessed_validation import (
     build_postprocessed_class_summary,
     build_postprocessed_point_validation_table,
     validate_postprocessed_mining_map_validation_params,

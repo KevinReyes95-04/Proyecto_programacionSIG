@@ -1,6 +1,6 @@
 import pandas as pd
 
-from centromonitoreo_mineria.pipelines.helper.modeling.binary_random_forest import (
+from .binary_random_forest import (
     build_binary_dataset,
 )
 
