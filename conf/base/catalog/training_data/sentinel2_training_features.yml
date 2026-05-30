@@ -1,18 +1,6 @@
 sentinel2_training_features_config:
   type: MemoryDataset
 
-sentinel2_training_features_gee_context:
-  type: MemoryDataset
-
-sentinel2_training_features_roi_geometry:
-  type: MemoryDataset
-
-sentinel2_training_features_image_collection:
-  type: MemoryDataset
-
-sentinel2_training_features_composite_image:
-  type: MemoryDataset
-
 sentinel2_training_features_image:
   type: MemoryDataset
 

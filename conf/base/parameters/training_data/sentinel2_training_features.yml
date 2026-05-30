@@ -8,35 +8,8 @@ sentinel2_training_features:
     longitude: x
     latitude: y
     crs: EPSG:4326
-  properties_to_keep:
-    - Codigo
-    - Cobertura
-    - x
-    - y
-    - longitude
-    - latitude
-    - geometry_wkt
-  feature_columns:
-    - B1
-    - B2
-    - B3
-    - B4
-    - B5
-    - B6
-    - B7
-    - B8
-    - B8A
-    - B9
-    - B11
-    - B12
-    - NDVI
-    - MSAVI
-    - NDWI
-    - BSI
-    - MBSI
-    - NDSI
-    - MSWI
-    - NDBI
+  properties_to_keep: [Codigo, Cobertura, x, y, longitude, latitude, geometry_wkt]
+  feature_columns: [B1, B2, B3, B4, B5, B6, B7, B8, B8A, B9, B11, B12, NDVI, MSAVI, NDWI, BSI, MBSI, NDSI, MSWI, NDBI]
   sample_scale: 10
   tile_scale: 4
   geometries: false

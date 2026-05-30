@@ -2,37 +2,12 @@ mining_binary_random_forest:
   label_column: Cobertura
   positive_label: Mineria
   negative_label: No Mineria
-  negative_source_labels:
-    - Bosque Natural
-    - Cuerpos de Agua
-    - Nubes
-    - Suelo Desnudo
-    - Vegetacion
+  negative_source_labels: [Bosque Natural, Cuerpos de Agua, Nubes, Suelo Desnudo, Vegetacion]
   target_column: target
   prediction_column: predicted_target
   probability_column: probability_mineria
   classification_threshold: 0.4
-  feature_columns:
-    - B1
-    - B2
-    - B3
-    - B4
-    - B5
-    - B6
-    - B7
-    - B8
-    - B8A
-    - B9
-    - B11
-    - B12
-    - NDVI
-    - MSAVI
-    - NDWI
-    - BSI
-    - MBSI
-    - NDSI
-    - MSWI
-    - NDBI
+  feature_columns: [B1, B2, B3, B4, B5, B6, B7, B8, B8A, B9, B11, B12, NDVI, MSAVI, NDWI, BSI, MBSI, NDSI, MSWI, NDBI]
   random_forest:
     n_estimators: 500
     criterion: gini

@@ -2,7 +2,6 @@ from itertools import cycle
 from pathlib import Path
 from textwrap import fill
 from typing import Any
-
 import geopandas as gpd
 import matplotlib
 
@@ -10,10 +9,10 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
 
+# Funcion para graficar cuantas muestras hay por clase.
 def plot_labeled_points_class_distribution(
     labeled_points: gpd.GeoDataFrame, params: dict[str, Any]
 ) -> dict[str, Any]:
-    """Genera una grafica de cantidad de muestras por clase."""
     label_column = params["label_column"]
     plot_params = params.get("class_distribution_plot", {})
     output_path = Path(
@@ -47,6 +46,7 @@ def plot_labeled_points_class_distribution(
     }
 
 
+# Funcion para ordenar las clases antes de graficarlas.
 def _ordered_class_counts(
     labeled_points: gpd.GeoDataFrame, label_column: str, plot_params: dict[str, Any]
 ) -> Any:
@@ -59,6 +59,7 @@ def _ordered_class_counts(
     return counts.sort_index().sort_values(ascending=False, kind="stable")
 
 
+# Funcion para repetir colores cuando hay mas clases que colores configurados.
 def _colors(colors: list[str], count: int) -> list[str]:
     default_colors = ["#8DD34F", "#0CB354", "#1379B9", "#FFC107", "#F5F500", "#18A8D8"]
     return [color for _, color in zip(range(count), cycle(colors or default_colors))]

@@ -1,10 +1,9 @@
 from kedro.pipeline import Pipeline, node
 
 from centromonitoreo_mineria.pipelines.train_mining_binary_rf.nodes import (
+    build_mining_binary_datasets,
     build_mining_binary_feature_importance,
     build_mining_binary_random_forest_metadata,
-    build_testing_dataset,
-    build_training_dataset,
     evaluate_mining_binary_random_forest,
     plot_mining_binary_confusion_matrix,
     plot_mining_binary_feature_importance,
@@ -25,22 +24,17 @@ def create_pipeline(**kwargs) -> Pipeline:
                 name="validate_mining_binary_random_forest_config_node",
             ),
             node(
-                func=build_training_dataset,
+                func=build_mining_binary_datasets,
                 inputs=[
                     "training_sentinel2_features",
-                    "mining_binary_random_forest_config",
-                ],
-                outputs="mining_binary_training_dataset",
-                name="build_mining_binary_training_dataset_node",
-            ),
-            node(
-                func=build_testing_dataset,
-                inputs=[
                     "testing_sentinel2_features",
                     "mining_binary_random_forest_config",
                 ],
-                outputs="mining_binary_testing_dataset",
-                name="build_mining_binary_testing_dataset_node",
+                outputs=[
+                    "mining_binary_training_dataset",
+                    "mining_binary_testing_dataset",
+                ],
+                name="build_mining_binary_datasets_node",
             ),
             node(
                 func=train_mining_binary_random_forest,

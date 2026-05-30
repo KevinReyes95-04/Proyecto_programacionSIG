@@ -71,7 +71,7 @@ def _sentinel2_params(**overrides):
 
 
 def test_download_sentinel2_pipeline_has_expected_node_count():
-    assert len(create_pipeline().nodes) == 5
+    assert len(create_pipeline().nodes) == 6
 
 
 def test_sentinel2_download_config_is_validated_and_grouped():

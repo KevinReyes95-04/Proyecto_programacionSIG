@@ -1,1 +1,1 @@
-"""Pipeline for binary mining Random Forest classification."""
+"""Pipeline para entrenar clasificacion binaria de mineria con Random Forest."""

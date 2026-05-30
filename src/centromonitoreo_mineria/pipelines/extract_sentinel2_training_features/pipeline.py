@@ -1,14 +1,9 @@
 from kedro.pipeline import Pipeline, node
 
 from centromonitoreo_mineria.pipelines.extract_sentinel2_training_features.nodes import (
-    build_sentinel2_collection,
-    build_sentinel2_composite,
+    build_sentinel2_training_features_image,
     build_sentinel2_training_features_metadata,
-    calculate_sentinel2_spectral_indices,
-    extract_testing_sentinel2_features,
-    extract_training_sentinel2_features,
-    initialize_earth_engine,
-    load_roi_geometry,
+    extract_sentinel2_features,
     validate_sentinel2_training_features_config,
 )
 
@@ -28,67 +23,21 @@ def create_pipeline(**kwargs) -> Pipeline:
                 name="validate_sentinel2_training_features_config_node",
             ),
             node(
-                func=initialize_earth_engine,
+                func=build_sentinel2_training_features_image,
                 inputs="sentinel2_training_features_config",
-                outputs="sentinel2_training_features_gee_context",
-                name="initialize_sentinel2_training_features_earth_engine_node",
-            ),
-            node(
-                func=load_roi_geometry,
-                inputs=[
-                    "sentinel2_training_features_gee_context",
-                    "sentinel2_training_features_config",
-                ],
-                outputs="sentinel2_training_features_roi_geometry",
-                name="load_sentinel2_training_features_roi_geometry_node",
-            ),
-            node(
-                func=build_sentinel2_collection,
-                inputs=[
-                    "sentinel2_training_features_gee_context",
-                    "sentinel2_training_features_roi_geometry",
-                    "sentinel2_training_features_config",
-                ],
-                outputs="sentinel2_training_features_image_collection",
-                name="build_sentinel2_training_features_collection_node",
-            ),
-            node(
-                func=build_sentinel2_composite,
-                inputs=[
-                    "sentinel2_training_features_image_collection",
-                    "sentinel2_training_features_config",
-                ],
-                outputs="sentinel2_training_features_composite_image",
-                name="build_sentinel2_training_features_composite_node",
-            ),
-            node(
-                func=calculate_sentinel2_spectral_indices,
-                inputs=[
-                    "sentinel2_training_features_composite_image",
-                    "sentinel2_training_features_config",
-                ],
                 outputs="sentinel2_training_features_image",
-                name="calculate_sentinel2_training_features_indices_node",
+                name="build_sentinel2_training_features_image_node",
             ),
             node(
-                func=extract_training_sentinel2_features,
+                func=extract_sentinel2_features,
                 inputs=[
                     "training_labeled_points",
-                    "sentinel2_training_features_image",
-                    "sentinel2_training_features_config",
-                ],
-                outputs="training_sentinel2_features",
-                name="extract_training_sentinel2_features_node",
-            ),
-            node(
-                func=extract_testing_sentinel2_features,
-                inputs=[
                     "testing_labeled_points",
                     "sentinel2_training_features_image",
                     "sentinel2_training_features_config",
                 ],
-                outputs="testing_sentinel2_features",
-                name="extract_testing_sentinel2_features_node",
+                outputs=["training_sentinel2_features", "testing_sentinel2_features"],
+                name="extract_sentinel2_features_node",
             ),
             node(
                 func=build_sentinel2_training_features_metadata,

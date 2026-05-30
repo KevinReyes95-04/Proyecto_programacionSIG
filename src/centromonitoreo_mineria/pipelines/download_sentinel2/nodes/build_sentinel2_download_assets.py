@@ -1,17 +1,8 @@
 from typing import Any
-
-from centromonitoreo_mineria.pipelines.helper.google_earth_engine.earth_engine_initialization import (
-    initialize_earth_engine_client,
-)
-from centromonitoreo_mineria.pipelines.helper.google_earth_engine.roi_geometry import (
-    build_roi_geometry,
-)
-from centromonitoreo_mineria.pipelines.helper.google_earth_engine.sentinel2_collection import (
-    build_filtered_sentinel2_collection,
-)
-from centromonitoreo_mineria.pipelines.helper.google_earth_engine.sentinel2_composite import (
-    build_composite_image,
-)
+from centromonitoreo_mineria.pipelines.helper.google_earth_engine.earth_engine_initialization import initialize_earth_engine_client
+from centromonitoreo_mineria.pipelines.helper.google_earth_engine.roi_geometry import build_roi_geometry
+from centromonitoreo_mineria.pipelines.helper.google_earth_engine.sentinel2_collection import build_filtered_sentinel2_collection
+from centromonitoreo_mineria.pipelines.helper.google_earth_engine.sentinel2_composite import build_composite_image
 
 
 def build_sentinel2_download_assets(config: dict) -> dict[str, Any]:

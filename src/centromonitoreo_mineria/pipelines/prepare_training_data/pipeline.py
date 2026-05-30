@@ -1,12 +1,10 @@
 from kedro.pipeline import Pipeline, node
 from centromonitoreo_mineria.pipelines.prepare_training_data.nodes import (
     build_training_data_metadata,
-    load_labeled_points,
-    plot_labeled_points_class_distribution,
-    plot_labeled_points_distribution,
+    plot_labeled_points_reports,
     plot_training_testing_points_distribution,
+    prepare_labeled_points,
     split_training_testing_data,
-    validate_labeled_points,
 )
 
 
@@ -15,28 +13,16 @@ def create_pipeline(**kwargs) -> Pipeline:
     return Pipeline(
         [
             node(
-                func=load_labeled_points,
+                func=prepare_labeled_points,
                 inputs="params:training_data",
-                outputs="labeled_points",
-                name="load_labeled_points_node",
-            ),
-            node(
-                func=validate_labeled_points,
-                inputs=["labeled_points", "params:training_data"],
                 outputs="validated_labeled_points",
-                name="validate_labeled_points_node",
+                name="prepare_labeled_points_node",
             ),
             node(
-                func=plot_labeled_points_distribution,
+                func=plot_labeled_points_reports,
                 inputs=["validated_labeled_points", "params:training_data"],
-                outputs="labeled_points_spatial_plot_metadata",
-                name="plot_labeled_points_distribution_node",
-            ),
-            node(
-                func=plot_labeled_points_class_distribution,
-                inputs=["validated_labeled_points", "params:training_data"],
-                outputs="labeled_points_class_distribution_plot_metadata",
-                name="plot_labeled_points_class_distribution_node",
+                outputs="labeled_points_reports_metadata",
+                name="plot_labeled_points_reports_node",
             ),
             node(
                 func=split_training_testing_data,
@@ -60,8 +46,7 @@ def create_pipeline(**kwargs) -> Pipeline:
                     "validated_labeled_points",
                     "training_labeled_points",
                     "testing_labeled_points",
-                    "labeled_points_spatial_plot_metadata",
-                    "labeled_points_class_distribution_plot_metadata",
+                    "labeled_points_reports_metadata",
                     "training_testing_points_spatial_plot_metadata",
                     "params:training_data",
                 ],

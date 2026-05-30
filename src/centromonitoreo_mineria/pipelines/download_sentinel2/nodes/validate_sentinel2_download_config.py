@@ -1,9 +1,5 @@
 from copy import deepcopy
-
-from centromonitoreo_mineria.pipelines.helper.google_earth_engine.validation import (
-    validate_gee_params,
-    validate_sentinel2_download_params,
-)
+from centromonitoreo_mineria.pipelines.helper.google_earth_engine.validation import validate_gee_params, validate_sentinel2_download_params
 
 
 def validate_sentinel2_download_config(params_gee: dict, params_sentinel2_download: dict) -> dict:

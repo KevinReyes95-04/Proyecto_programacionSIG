@@ -19,10 +19,11 @@ class FakeMiningModel:
     classes_ = np.array(["No Mineria", "Mineria"])
 
     def predict(self, matrix):
-        return np.where(matrix[:, 0] > 0.3, "Mineria", "No Mineria")
+        return np.where(matrix.iloc[:, 0] > 0.3, "Mineria", "No Mineria")
 
     def predict_proba(self, matrix):
-        positive = np.where(matrix[:, 0] > 0.3, 0.8, 0.2)
+        assert list(matrix.columns) == ["B1", "B2", "B3", "B4", "B8", "B11", "B12", "NDVI", "BSI"]
+        positive = np.where(matrix.iloc[:, 0] > 0.3, 0.8, 0.2)
         return np.column_stack([1 - positive, positive])
 
 

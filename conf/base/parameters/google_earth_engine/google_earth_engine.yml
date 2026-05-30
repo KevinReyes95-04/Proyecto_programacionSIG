@@ -10,6 +10,4 @@ gee:
   auth_mode: localhost:0
   service_account_email: null
   service_account_key_path: null
-  adc_scopes:
-    - https://www.googleapis.com/auth/earthengine
-    - https://www.googleapis.com/auth/cloud-platform
+  adc_scopes: [https://www.googleapis.com/auth/earthengine, https://www.googleapis.com/auth/cloud-platform]

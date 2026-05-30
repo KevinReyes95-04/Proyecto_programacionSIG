@@ -2,40 +2,8 @@ mining_binary_map_prediction:
   raster_dir: data/04_feature/sentinel2_bands
   band_file_template: Sentinel2_{band}_Masked.tif
   reference_band: B2
-  bands:
-    - B1
-    - B2
-    - B3
-    - B4
-    - B5
-    - B6
-    - B7
-    - B8
-    - B8A
-    - B9
-    - B11
-    - B12
-  feature_columns:
-    - B1
-    - B2
-    - B3
-    - B4
-    - B5
-    - B6
-    - B7
-    - B8
-    - B8A
-    - B9
-    - B11
-    - B12
-    - NDVI
-    - MSAVI
-    - NDWI
-    - BSI
-    - MBSI
-    - NDSI
-    - MSWI
-    - NDBI
+  bands: [B1, B2, B3, B4, B5, B6, B7, B8, B8A, B9, B11, B12]
+  feature_columns: [B1, B2, B3, B4, B5, B6, B7, B8, B8A, B9, B11, B12, NDVI, MSAVI, NDWI, BSI, MBSI, NDSI, MSWI, NDBI]
   positive_label: Mineria
   negative_label: No Mineria
   class_values:

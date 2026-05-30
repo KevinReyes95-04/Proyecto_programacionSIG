@@ -1,15 +1,7 @@
 from copy import deepcopy
-
-from centromonitoreo_mineria.pipelines.helper.google_earth_engine.sentinel2_feature_extraction import (
-    sentinel2_params_for_training_features,
-    validate_sentinel2_training_features_params,
-)
-from centromonitoreo_mineria.pipelines.helper.google_earth_engine.sentinel2_spectral_indices import (
-    validate_sentinel2_spectral_indices_params,
-)
-from centromonitoreo_mineria.pipelines.helper.google_earth_engine.validation import (
-    validate_gee_params,
-)
+from centromonitoreo_mineria.pipelines.helper.google_earth_engine.sentinel2_feature_extraction import sentinel2_params_for_training_features, validate_sentinel2_training_features_params
+from centromonitoreo_mineria.pipelines.helper.google_earth_engine.sentinel2_spectral_indices import validate_sentinel2_spectral_indices_params
+from centromonitoreo_mineria.pipelines.helper.google_earth_engine.validation import validate_gee_params
 
 
 def validate_sentinel2_training_features_config(

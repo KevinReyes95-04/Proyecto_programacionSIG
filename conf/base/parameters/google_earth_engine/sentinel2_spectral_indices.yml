@@ -6,12 +6,7 @@ sentinel2_spectral_indices:
     bbox: null
     inline_geojson:
       type: Polygon
-      coordinates:
-        - - [-74.96723392, 7.79418315]
-          - [-74.96709889, 8.12991298]
-          - [-74.62519767, 8.1297761]
-          - [-74.62532856, 7.79405091]
-          - [-74.96723392, 7.79418315]
+      coordinates: [[[-74.96723392, 7.79418315], [-74.96709889, 8.12991298], [-74.62519767, 8.1297761], [-74.62532856, 7.79405091], [-74.96723392, 7.79418315]]]
     geojson_path: null
   # Keep this aligned with sentinel2_download so indices are calculated from
   # the same clean Sentinel-2 scene.
@@ -21,61 +16,23 @@ sentinel2_spectral_indices:
   cloud_cover_property: CLOUDY_PIXEL_PERCENTAGE
   cloud_mask: true
   cloud_mask_method: qa60_and_scl
-  cloud_mask_scl_classes:
-    - 3   # cloud shadows
-    - 8   # cloud medium probability
-    - 9   # cloud high probability
-    - 10  # thin cirrus
+  cloud_mask_scl_classes: [3, 8, 9, 10]
   composite_method: median
   sort_by: system:time_start
   sort_ascending: true
-  bands:
-    - B1
-    - B2
-    - B3
-    - B4
-    - B5
-    - B6
-    - B7
-    - B8
-    - B8A
-    - B9
-    - B11
-    - B12
+  bands: [B1, B2, B3, B4, B5, B6, B7, B8, B8A, B9, B11, B12]
   scale: 10
   crs: null
   apply_reflectance_scale: true
   reflectance_scale_factor: 0.0001
   include_original_bands: true
-  output_band_order:
-    - B1
-    - B2
-    - B3
-    - B4
-    - B5
-    - B6
-    - B7
-    - B8
-    - B8A
-    - B9
-    - B11
-    - B12
-    - NDVI
-    - MSAVI
-    - NDWI
-    - BSI
-    - MBSI
-    - NDSI
-    - MSWI
-    - NDBI
+  output_band_order: [B1, B2, B3, B4, B5, B6, B7, B8, B8A, B9, B11, B12, NDVI, MSAVI, NDWI, BSI, MBSI, NDSI, MSWI, NDBI]
   indices:
     NDVI:
       enabled: true
       name: Indice de vegetacion de diferencia normalizada
       formula: normalized_difference
-      bands:
-        first: B8
-        second: B4
+      bands: {first: B8, second: B4}
       expression_label: "(B8 - B4) / (B8 + B4)"
       rationale: Deteccion de perdida o reduccion de cobertura vegetal presente en zonas mineras.
 
@@ -84,9 +41,7 @@ sentinel2_spectral_indices:
       name: Indice de Vegetacion Ajustado al Suelo Modificado
       formula: expression
       expression: "(2 * nir + 1 - sqrt(pow((2 * nir + 1), 2) - 8 * (nir - red))) / 2"
-      bands:
-        nir: B8
-        red: B4
+      bands: {nir: B8, red: B4}
       expression_label: "(2 * B8 + 1 - sqrt((2 * B8 + 1)^2 - 8 * (B8 - B4))) / 2"
       rationale: Aumentar el contraste entre la vegetacion y las areas mineras a cielo abierto.
 
@@ -94,9 +49,7 @@ sentinel2_spectral_indices:
       enabled: true
       name: Indice de agua de diferencia normalizada
       formula: normalized_difference
-      bands:
-        first: B3
-        second: B8
+      bands: {first: B3, second: B8}
       expression_label: "(B3 - B8) / (B3 + B8)"
       rationale: Mapeo de humedad del suelo y cuerpos de agua presentes en zonas mineras.
 
@@ -105,11 +58,7 @@ sentinel2_spectral_indices:
       name: Indice de suelo desnudo
       formula: expression
       expression: "((swir1 + red) - (nir + blue)) / ((swir1 + red) + (nir + blue))"
-      bands:
-        swir1: B11
-        red: B4
-        nir: B8
-        blue: B2
+      bands: {swir1: B11, red: B4, nir: B8, blue: B2}
       expression_label: "((B11 + B4) - (B8 + B2)) / ((B11 + B4) + (B8 + B2))"
       rationale: Identificacion de zonas de suelo desnudo como proceso previo a la aparicion de zonas mineras.
 
@@ -117,9 +66,7 @@ sentinel2_spectral_indices:
       enabled: true
       name: Indice de Suelo Desnudo Modificado
       formula: normalized_difference
-      bands:
-        first: B11
-        second: B4
+      bands: {first: B11, second: B4}
       expression_label: "(B11 - B4) / (B11 + B4)"
       rationale: Identificacion de suelo desnudo asociado a zonas mineras.
 
@@ -127,9 +74,7 @@ sentinel2_spectral_indices:
       enabled: true
       name: Indice de Suelo de Diferencia Normalizada
       formula: normalized_difference
-      bands:
-        first: B11
-        second: B3
+      bands: {first: B11, second: B3}
       expression_label: "(B11 - B3) / (B11 + B3)"
       rationale: Aumentar el contraste entre la vegetacion y las areas con mineria.
 
@@ -137,9 +82,7 @@ sentinel2_spectral_indices:
       enabled: true
       name: Indice de Residuos Solidos Mineros
       formula: normalized_difference
-      bands:
-        first: B12
-        second: B4
+      bands: {first: B12, second: B4}
       expression_label: "(B12 - B4) / (B12 + B4)"
       rationale: Resalta residuos solidos generados por actividades mineras. Ajusta second si tu metodologia usa otra banda.
 
@@ -147,9 +90,7 @@ sentinel2_spectral_indices:
       enabled: true
       name: Indice de estructura construida
       formula: normalized_difference
-      bands:
-        first: B11
-        second: B8
+      bands: {first: B11, second: B8}
       expression_label: "(B11 - B8) / (B11 + B8)"
       rationale: Distinguir zonas urbanas, suelo desnudo y mineria.
 
@@ -163,91 +104,52 @@ sentinel2_spectral_indices:
     figure_size: [8, 8]
     dpi: 160
     colorbar_orientation: vertical
+    combined_map: {enabled: true, output_path: data/08_reporting/sentinel2_spectral_indices_maps/all_indices_map.png, columns: 4, figure_size: [14, 8]}
     default_style:
       min: -1
       max: 1
-      palette:
-        - "#8c510a"
-        - "#d8b365"
-        - "#f6e8c3"
-        - "#c7eae5"
-        - "#5ab4ac"
-        - "#01665e"
+      palette: ["#8c510a", "#d8b365", "#f6e8c3", "#c7eae5", "#5ab4ac", "#01665e"]
     indices:
       NDVI:
         min: -0.2
         max: 0.9
-        palette:
-          - "#8c510a"
-          - "#d8b365"
-          - "#ffffbf"
-          - "#a6d96a"
-          - "#1a9850"
+        palette: ["#8c510a", "#d8b365", "#ffffbf", "#a6d96a", "#1a9850"]
       MSAVI:
         min: -1
         max: 1
-        palette:
-          - "#8c510a"
-          - "#d9f0a3"
-          - "#78c679"
-          - "#006837"
+        palette: ["#8c510a", "#d9f0a3", "#78c679", "#006837"]
       NDWI:
         min: -1
         max: 1
-        palette:
-          - "#8c510a"
-          - "#f6e8c3"
-          - "#67a9cf"
-          - "#2166ac"
+        palette: ["#8c510a", "#f6e8c3", "#67a9cf", "#2166ac"]
       BSI:
         min: -1
         max: 1
-        palette:
-          - "#1a9850"
-          - "#ffffbf"
-          - "#fdae61"
-          - "#d73027"
+        palette: ["#1a9850", "#ffffbf", "#fdae61", "#d73027"]
       MBSI:
         min: -1
         max: 1
-        palette:
-          - "#1a9850"
-          - "#ffffbf"
-          - "#fdae61"
-          - "#d73027"
+        palette: ["#1a9850", "#ffffbf", "#fdae61", "#d73027"]
       NDSI:
         min: -1
         max: 1
-        palette:
-          - "#1a9850"
-          - "#ffffbf"
-          - "#fdae61"
-          - "#d73027"
+        palette: ["#1a9850", "#ffffbf", "#fdae61", "#d73027"]
       MSWI:
         min: -1
         max: 1
-        palette:
-          - "#2c7bb6"
-          - "#ffffbf"
-          - "#fdae61"
-          - "#d7191c"
+        palette: ["#2c7bb6", "#ffffbf", "#fdae61", "#d7191c"]
       NDBI:
         min: -1
         max: 1
-        palette:
-          - "#1a9850"
-          - "#ffffbf"
-          - "#fdae61"
-          - "#d73027"
+        palette: ["#1a9850", "#ffffbf", "#fdae61", "#d73027"]
+
+  local_tif_export:
+    enabled: true
+    input_dir: data/04_feature/sentinel2_bands
+    output_dir: data/04_feature/sentinel2_bands
+    source_band_template: "Sentinel2_{band}_Masked.tif"
+    index_file_template: "Sentinel2_{index}_Masked.tif"
 
   drive_export:
-    folder: centromonitoreo_mineria
-    file_name_prefix: Sentinel2_SpectralIndices_Masked
-    description: Sentinel2_SpectralIndices_Masked
-    file_format: GeoTIFF
     align_to_reference_band: true
     reference_band: B2
-    max_pixels: 10000000000
-    wait_for_completion: true
-    poll_interval_seconds: 30
-    timeout_seconds: 7200

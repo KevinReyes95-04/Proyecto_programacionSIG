@@ -1,8 +1,5 @@
 import pandas as pd
-
-from centromonitoreo_mineria.pipelines.helper.modeling.mining_map_validation import (
-    plot_probability_points_overlay as plot_overlay,
-)
+from centromonitoreo_mineria.pipelines.helper.modeling.mining_map_validation import plot_probability_points_overlay as plot_overlay
 
 
 def plot_probability_points_overlay(

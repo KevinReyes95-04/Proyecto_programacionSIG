@@ -1,4 +1,3 @@
-from copy import deepcopy
 from typing import Any
 
 from centromonitoreo_mineria.pipelines.helper.google_earth_engine.validation import (
@@ -21,6 +20,7 @@ def validate_sentinel2_spectral_indices_params(params: dict[str, Any]) -> None:
     for name, config in params["indices"].items():
         _validate_index_config(name=name, config=config, source_bands=source_bands)
     _validate_output_band_order(params, enabled_indices)
+    _validate_local_tif_export(params.get("local_tif_export", {}))
 
 
 def build_sentinel2_indices_image(sentinel2_composite_image: Any, params: dict[str, Any]) -> Any:
@@ -47,12 +47,6 @@ def output_bands(params: dict[str, Any]) -> list[str]:
         return list(params["output_band_order"])
     index_names = [name for name, config in params["indices"].items() if config.get("enabled", True)]
     return list(params.get("bands", [])) + index_names if params.get("include_original_bands", True) else index_names
-
-
-def export_params_with_output_bands(params: dict[str, Any]) -> dict[str, Any]:
-    export_params = deepcopy(params)
-    export_params["bands"] = output_bands(params)
-    return export_params
 
 
 def _validate_index_config(name: str, config: dict[str, Any], source_bands: set[str]) -> None:
@@ -86,6 +80,17 @@ def _validate_output_band_order(params: dict[str, Any], enabled_indices: list[st
     unknown_bands = set(output_band_order) - allowed_bands
     if unknown_bands:
         raise ValueError(f"output_band_order incluye bandas desconocidas: {sorted(unknown_bands)}.")
+
+
+def _validate_local_tif_export(params: dict[str, Any]) -> None:
+    if not isinstance(params, dict):
+        raise ValueError("sentinel2_spectral_indices.local_tif_export debe ser un diccionario.")
+    if not isinstance(params.get("enabled", True), bool):
+        raise ValueError("sentinel2_spectral_indices.local_tif_export.enabled debe ser true o false.")
+    for key in ("input_dir", "output_dir", "source_band_template", "index_file_template"):
+        value = params.get(key)
+        if value is not None and (not isinstance(value, str) or not value.strip()):
+            raise ValueError(f"sentinel2_spectral_indices.local_tif_export.{key} debe ser texto no vacio.")
 
 
 def _calculate_index(image: Any, name: str, config: dict[str, Any]) -> Any:

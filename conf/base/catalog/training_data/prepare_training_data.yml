@@ -1,16 +1,9 @@
-labeled_points:
-  type: MemoryDataset
-
 validated_labeled_points:
   type: MemoryDataset
 
-labeled_points_spatial_plot_metadata:
+labeled_points_reports_metadata:
   type: json.JSONDataset
-  filepath: data/08_reporting/labeled_points_spatial_plot_metadata.json
-
-labeled_points_class_distribution_plot_metadata:
-  type: json.JSONDataset
-  filepath: data/08_reporting/labeled_points_class_distribution_plot_metadata.json
+  filepath: data/08_reporting/labeled_points_reports_metadata.json
 
 training_testing_points_spatial_plot_metadata:
   type: json.JSONDataset

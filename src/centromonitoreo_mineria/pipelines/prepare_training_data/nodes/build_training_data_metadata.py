@@ -3,16 +3,16 @@ from typing import Any
 import geopandas as gpd
 import pandas as pd
 
+
+# Funcion para resumir la preparacion del conjunto de entrenamiento.
 def build_training_data_metadata(
     labeled_points: gpd.GeoDataFrame,
     training_labeled_points: pd.DataFrame,
     testing_labeled_points: pd.DataFrame,
-    spatial_plot_metadata: dict[str, Any],
-    class_distribution_plot_metadata: dict[str, Any],
+    labeled_points_reports_metadata: dict[str, Any],
     training_testing_spatial_plot_metadata: dict[str, Any],
     params: dict[str, Any],
 ) -> dict[str, Any]:
-    """Construye metadatos reproducibles del particionamiento."""
     label_column = params["label_column"]
     return {
         "created_at_utc": datetime.now(timezone.utc).isoformat(),
@@ -26,7 +26,7 @@ def build_training_data_metadata(
         "random_state": params.get("random_state", 42),
         "stratify": params.get("stratify", True),
         "class_counts": labeled_points[label_column].value_counts().to_dict(),
-        "spatial_plot": spatial_plot_metadata,
-        "class_distribution_plot": class_distribution_plot_metadata,
+        "spatial_plot": labeled_points_reports_metadata.get("spatial", {}),
+        "class_distribution_plot": labeled_points_reports_metadata.get("class_distribution", {}),
         "training_testing_spatial_plot": training_testing_spatial_plot_metadata,
     }

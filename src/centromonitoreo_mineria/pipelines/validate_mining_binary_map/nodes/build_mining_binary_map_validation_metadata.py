@@ -1,8 +1,5 @@
 import pandas as pd
-
-from centromonitoreo_mineria.pipelines.helper.modeling.mining_map_validation import (
-    build_mining_binary_map_validation_metadata as build_metadata,
-)
+from centromonitoreo_mineria.pipelines.helper.modeling.mining_map_validation import build_mining_binary_map_validation_metadata as build_metadata
 
 
 def build_mining_binary_map_validation_metadata(

@@ -1,8 +1,5 @@
 import pandas as pd
-
-from centromonitoreo_mineria.pipelines.helper.modeling.mining_map_validation import (
-    plot_classification_points_overlay as plot_overlay,
-)
+from centromonitoreo_mineria.pipelines.helper.modeling.mining_map_validation import plot_classification_points_overlay as plot_overlay
 
 
 def plot_classification_points_overlay(

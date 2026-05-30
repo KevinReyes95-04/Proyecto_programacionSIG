@@ -5,7 +5,8 @@ from centromonitoreo_mineria.pipelines.helper.modeling.binary_random_forest impo
     build_binary_dataset,
     predict_random_forest,
 )
-from centromonitoreo_mineria.pipelines.train_mining_binary_rf.nodes.validate_mining_binary_random_forest_config import (
+from centromonitoreo_mineria.pipelines.train_mining_binary_rf.nodes import (
+    build_mining_binary_datasets,
     validate_mining_binary_random_forest_config,
 )
 from centromonitoreo_mineria.pipelines.train_mining_binary_rf.pipeline import (
@@ -34,7 +35,7 @@ def _params(**overrides):
 
 
 def test_train_mining_binary_rf_pipeline_has_expected_node_count():
-    assert len(create_pipeline().nodes) == 10
+    assert len(create_pipeline().nodes) == 9
 
 
 def test_mining_binary_random_forest_config_is_validated():
@@ -59,6 +60,35 @@ def test_binary_dataset_maps_nubes_to_no_mineria():
 
     assert dataset["y"].tolist() == ["Mineria", "No Mineria", "No Mineria"]
     assert dataset["X"].shape == (3, 3)
+
+
+def test_build_mining_binary_datasets_returns_training_and_testing_sets():
+    training = pd.DataFrame(
+        {
+            "Cobertura": ["Mineria", "Nubes"],
+            "B4": [0.1, 0.8],
+            "B8": [0.2, 0.7],
+            "NDVI": [0.3, -0.1],
+        }
+    )
+    testing = pd.DataFrame(
+        {
+            "Cobertura": ["Bosque Natural"],
+            "B4": [0.2],
+            "B8": [0.6],
+            "NDVI": [0.5],
+        }
+    )
+
+    training_dataset, testing_dataset = build_mining_binary_datasets(
+        training_sentinel2_features=training,
+        testing_sentinel2_features=testing,
+        mining_binary_random_forest_config=_params(),
+    )
+
+    assert training_dataset["name"] == "training_sentinel2_features"
+    assert testing_dataset["name"] == "testing_sentinel2_features"
+    assert testing_dataset["y"].tolist() == ["No Mineria"]
 
 
 def test_binary_dataset_rejects_unconfigured_class():

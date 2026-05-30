@@ -20,7 +20,7 @@ training_data:
     basemap_zoom: auto
     basemap_strict: false
     sentinel2_background:
-      enabled: false
+      enabled: true
       image_path: data/08_reporting/sentinel2_download_visualizations/sentinel2_true_color_background.png
       extent_crs: EPSG:4326
       extent: [-74.96723392, 7.79405091, -74.62519767, 8.12991298]
@@ -43,6 +43,7 @@ training_data:
     basemap_source: Esri.WorldImagery
     basemap_zoom: auto
     basemap_strict: false
+    sentinel2_background: {enabled: false}
 
   class_distribution_plot:
     output_path: data/08_reporting/labeled_points_class_distribution.png
@@ -54,10 +55,4 @@ training_data:
     value_font_size: 9
     label_wrap_width: 16
     class_order: null
-    colors:
-      - "#8DD34F"
-      - "#0CB354"
-      - "#1379B9"
-      - "#FFC107"
-      - "#F5F500"
-      - "#18A8D8"
+    colors: ["#8DD34F", "#0CB354", "#1379B9", "#FFC107", "#F5F500", "#18A8D8"]

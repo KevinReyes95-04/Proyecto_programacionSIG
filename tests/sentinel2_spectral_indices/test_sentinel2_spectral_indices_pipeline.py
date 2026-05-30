@@ -60,21 +60,20 @@ def _spectral_indices_params(**overrides):
                 "palette": ["#000000", "#ffffff"],
             },
         },
-        "drive_export": {
-            "folder": "centromonitoreo_mineria",
-            "file_name_prefix": "sentinel2_spectral_indices_test",
-            "description": "sentinel2_spectral_indices_test",
-            "file_format": "GeoTIFF",
-            "align_to_reference_band": True,
-            "reference_band": "B2",
-            "max_pixels": 10_000_000_000,
+        "local_tif_export": {
+            "enabled": True,
+            "input_dir": "data/04_feature/sentinel2_bands",
+            "output_dir": "data/04_feature/sentinel2_bands",
+            "source_band_template": "Sentinel2_{band}_Masked.tif",
+            "index_file_template": "Sentinel2_{index}_Masked.tif",
         },
+        "drive_export": {"align_to_reference_band": True, "reference_band": "B2"},
     }
     return params | overrides
 
 
 def test_sentinel2_spectral_indices_pipeline_has_expected_node_count():
-    assert len(create_pipeline().nodes) == 9
+    assert len(create_pipeline().nodes) == 5
 
 
 def test_sentinel2_spectral_indices_config_is_validated_and_grouped():

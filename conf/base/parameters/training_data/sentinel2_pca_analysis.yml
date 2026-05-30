@@ -3,36 +3,8 @@ sentinel2_pca_analysis:
   split_column: split
   n_components: 8
   random_state: 42
-  columns_to_keep:
-    - sample_id
-    - Codigo
-    - Cobertura
-    - x
-    - y
-    - longitude
-    - latitude
-    - geometry_wkt
-  feature_columns:
-    - B1
-    - B2
-    - B3
-    - B4
-    - B5
-    - B6
-    - B7
-    - B8
-    - B8A
-    - B9
-    - B11
-    - B12
-    - NDVI
-    - MSAVI
-    - NDWI
-    - BSI
-    - MBSI
-    - NDSI
-    - MSWI
-    - NDBI
+  columns_to_keep: [sample_id, Codigo, Cobertura, x, y, longitude, latitude, geometry_wkt]
+  feature_columns: [B1, B2, B3, B4, B5, B6, B7, B8, B8A, B9, B11, B12, NDVI, MSAVI, NDWI, BSI, MBSI, NDSI, MSWI, NDBI]
   scatter_plot:
     output_path: data/08_reporting/sentinel2_pca_scatter.png
     title: PCA Sentinel-2 por cobertura
@@ -43,13 +15,7 @@ sentinel2_pca_analysis:
     point_size: 28
     alpha: 0.75
     legend_font_size: 8
-    colors:
-      - "#1379B9"
-      - "#0CB354"
-      - "#FFC107"
-      - "#D55E00"
-      - "#8DD34F"
-      - "#18A8D8"
+    colors: ["#1379B9", "#0CB354", "#FFC107", "#D55E00", "#8DD34F", "#18A8D8"]
   scree_plot:
     output_path: data/08_reporting/sentinel2_pca_scree.png
     title: Varianza explicada por componentes principales

@@ -1,27 +1,16 @@
 sentinel2_spectral_indices_config:
   type: MemoryDataset
 
-sentinel2_spectral_indices_gee_context:
-  type: MemoryDataset
-
-sentinel2_spectral_indices_roi_geometry:
-  type: MemoryDataset
-
-sentinel2_spectral_indices_image_collection:
-  type: MemoryDataset
-
-sentinel2_spectral_indices_composite_image:
-  type: MemoryDataset
-
-sentinel2_spectral_indices_image:
-  type: MemoryDataset
-
-sentinel2_spectral_indices_drive_export_metadata:
+sentinel2_spectral_indices_assets:
   type: MemoryDataset
 
 sentinel2_spectral_indices_maps_metadata:
   type: json.JSONDataset
   filepath: data/08_reporting/sentinel2_spectral_indices_maps_metadata.json
+
+sentinel2_spectral_indices_tifs_metadata:
+  type: json.JSONDataset
+  filepath: data/08_reporting/sentinel2_spectral_indices_tifs_metadata.json
 
 sentinel2_spectral_indices_metadata:
   type: json.JSONDataset

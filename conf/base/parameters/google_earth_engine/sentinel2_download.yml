@@ -9,12 +9,7 @@ sentinel2_download:
     # Use inline_geojson for polygons fully defined in parameters.
     inline_geojson:
       type: Polygon
-      coordinates:
-        - - [-74.96723392, 7.79418315]
-          - [-74.96709889, 8.12991298]
-          - [-74.62519767, 8.12977610]
-          - [-74.62532856, 7.79405091]
-          - [-74.96723392, 7.79418315]
+      coordinates: [[[-74.96723392, 7.79418315], [-74.96709889, 8.12991298], [-74.62519767, 8.12977610], [-74.62532856, 7.79405091], [-74.96723392, 7.79418315]]]
     # Use geojson_path when the ROI lives in an external .geojson/.json file.
     geojson_path: null
   # The ROI crosses several Sentinel-2 MGRS tiles. This one-day window has
@@ -25,27 +20,11 @@ sentinel2_download:
   cloud_cover_property: CLOUDY_PIXEL_PERCENTAGE
   cloud_mask: true
   cloud_mask_method: qa60
-  cloud_mask_scl_classes:
-    - 3   # cloud shadows
-    - 8   # cloud medium probability
-    - 9   # cloud high probability
-    - 10  # thin cirrus
+  cloud_mask_scl_classes: [3, 8, 9, 10]
   composite_method: median
   sort_by: system:time_start
   sort_ascending: true
-  bands:
-    - B1
-    - B2
-    - B3
-    - B4
-    - B5
-    - B6
-    - B7
-    - B8
-    - B8A
-    - B9
-    - B11
-    - B12
+  bands: [B1, B2, B3, B4, B5, B6, B7, B8, B8A, B9, B11, B12]
   scale: 10
   crs: null
   drive_export:
@@ -66,5 +45,15 @@ sentinel2_download:
     target_crs: EPSG:9377
     resampling: bilinear
     timeout_seconds: 300
+  visualization:
+    enabled: true
+    output_dir: data/08_reporting/sentinel2_download_visualizations
+    percentile_range: [2, 98]
+    figure_size: [8, 8]
+    dpi: 160
+    true_color: {bands: [B4, B3, B2], output_name: sentinel2_true_color.png, title: Sentinel-2 color verdadero}
+    true_color_background: {bands: [B4, B3, B2], output_name: sentinel2_true_color_background.png, title: null}
+    false_color: {bands: [B8, B4, B3], output_name: sentinel2_false_color.png, title: Sentinel-2 falso color}
+    band_grid: {enabled: true, output_name: sentinel2_bands_grid.png, columns: 4, figure_size: [14, 10]}
   apply_reflectance_scale: false
   reflectance_scale_factor: 0.0001

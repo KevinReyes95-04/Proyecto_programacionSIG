@@ -5,6 +5,7 @@ from typing import Any
 
 import matplotlib
 import numpy as np
+import pandas as pd
 import rasterio
 from rasterio.windows import Window
 
@@ -181,7 +182,13 @@ def _predict_window(model: Any, features: dict[str, np.ndarray], params: dict[st
     if not valid_mask.any():
         return class_array, probability_array, valid_mask
 
-    matrix = np.column_stack([array[valid_mask] for array in feature_arrays])
+    matrix = pd.DataFrame(
+        {
+            column: features[column][valid_mask]
+            for column in params["feature_columns"]
+        },
+        columns=params["feature_columns"],
+    )
     if hasattr(model, "predict_proba"):
         positive_index = list(model.classes_).index(params["positive_label"])
         positive_probability = model.predict_proba(matrix)[:, positive_index].astype("float32")

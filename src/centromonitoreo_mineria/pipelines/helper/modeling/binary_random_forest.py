@@ -20,6 +20,7 @@ import matplotlib.pyplot as plt
 
 
 def validate_binary_random_forest_params(params: dict[str, Any]) -> dict[str, Any]:
+    """Valida la configuracion del clasificador Random Forest binario."""
     if not isinstance(params, dict):
         raise ValueError("mining_binary_random_forest debe ser un diccionario.")
     _require_text(params.get("label_column"), "mining_binary_random_forest.label_column")
@@ -33,6 +34,7 @@ def validate_binary_random_forest_params(params: dict[str, Any]) -> dict[str, An
 
 
 def build_binary_dataset(table: pd.DataFrame, params: dict[str, Any], dataset_name: str) -> dict[str, Any]:
+    """Prepara matriz de variables y etiqueta binaria para entrenamiento o prueba."""
     label_column = params["label_column"]
     feature_columns = params["feature_columns"]
     _validate_required_columns(table, [label_column, *feature_columns], dataset_name)
@@ -52,6 +54,7 @@ def build_binary_dataset(table: pd.DataFrame, params: dict[str, Any], dataset_na
 
 
 def train_random_forest(training_dataset: dict[str, Any], params: dict[str, Any]) -> RandomForestClassifier:
+    """Entrena un RandomForestClassifier con los parametros configurados."""
     model = RandomForestClassifier(**params.get("random_forest", {}))
     model.fit(training_dataset["X"], training_dataset["y"])
     return model
@@ -62,6 +65,7 @@ def predict_random_forest(
     testing_dataset: dict[str, Any],
     params: dict[str, Any],
 ) -> pd.DataFrame:
+    """Predice clase binaria y probabilidad de mineria sobre el conjunto de prueba."""
     predictions = testing_dataset["source"].copy()
     prediction_column = params.get("prediction_column", "predicted_target")
     probability_column = params.get("probability_column", "probability_mineria")
@@ -80,6 +84,7 @@ def predict_random_forest(
 
 
 def evaluate_binary_predictions(predictions: pd.DataFrame, params: dict[str, Any]) -> dict[str, Any]:
+    """Calcula metricas de clasificacion para el modelo binario."""
     target_column = params.get("target_column", "target")
     prediction_column = params.get("prediction_column", "predicted_target")
     labels = [params["negative_label"], params["positive_label"]]
@@ -99,6 +104,7 @@ def evaluate_binary_predictions(predictions: pd.DataFrame, params: dict[str, Any
 
 
 def feature_importance_table(model: RandomForestClassifier, params: dict[str, Any]) -> pd.DataFrame:
+    """Construye la tabla ordenada de importancia de variables."""
     feature_columns = params["feature_columns"]
     importance = pd.DataFrame(
         {
@@ -110,6 +116,7 @@ def feature_importance_table(model: RandomForestClassifier, params: dict[str, An
 
 
 def plot_confusion_matrix(metrics: dict[str, Any], params: dict[str, Any]) -> dict[str, Any]:
+    """Guarda la matriz de confusion como imagen y retorna sus metadatos."""
     plot_params = params.get("confusion_matrix_plot", {})
     output_path = Path(plot_params.get("output_path", "data/08_reporting/mining_binary_confusion_matrix.png"))
     output_path.parent.mkdir(parents=True, exist_ok=True)
@@ -131,6 +138,7 @@ def plot_confusion_matrix(metrics: dict[str, Any], params: dict[str, Any]) -> di
 
 
 def plot_feature_importance(importance: pd.DataFrame, params: dict[str, Any]) -> dict[str, Any]:
+    """Guarda la grafica de importancia de variables y retorna sus metadatos."""
     plot_params = params.get("feature_importance_plot", {})
     output_path = Path(plot_params.get("output_path", "data/08_reporting/mining_binary_feature_importance.png"))
     output_path.parent.mkdir(parents=True, exist_ok=True)
@@ -156,6 +164,7 @@ def build_model_metadata(
     feature_importance_plot_metadata: dict[str, Any],
     params: dict[str, Any],
 ) -> dict[str, Any]:
+    """Resume configuracion, datos y resultados del entrenamiento."""
     return {
         "created_at_utc": datetime.now(timezone.utc).isoformat(),
         "model": "RandomForestClassifier",

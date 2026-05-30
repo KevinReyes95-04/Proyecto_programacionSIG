@@ -14,6 +14,7 @@ def sentinel2_params_for_training_features(
     spectral_indices_params: dict[str, Any],
     training_features_params: dict[str, Any],
 ) -> dict[str, Any]:
+    """Aplica sobre la configuracion Sentinel-2 los ajustes usados para muestreo."""
     overrides = training_features_params.get("sentinel2_overrides", {})
     if not isinstance(overrides, dict):
         raise ValueError("sentinel2_training_features.sentinel2_overrides debe ser un diccionario.")
@@ -26,6 +27,7 @@ def validate_sentinel2_training_features_params(
     params: dict[str, Any],
     spectral_indices_params: dict[str, Any],
 ) -> dict[str, Any]:
+    """Valida los parametros que controlan la extraccion puntual de variables."""
     if not isinstance(params, dict):
         raise ValueError("sentinel2_training_features debe ser un diccionario.")
 
@@ -64,6 +66,7 @@ def sample_points_from_image(
     params: dict[str, Any],
     dataset_name: str,
 ) -> pd.DataFrame:
+    """Muestrea una imagen de Earth Engine sobre puntos etiquetados."""
     feature_columns = params["feature_columns"]
     if points.empty:
         return pd.DataFrame(columns=_ordered_columns(params, feature_columns))
@@ -93,6 +96,7 @@ def build_sentinel2_training_features_metadata(
     testing_features: pd.DataFrame,
     config: dict[str, Any],
 ) -> dict[str, Any]:
+    """Resume entradas, salidas y configuracion de la extraccion Sentinel-2."""
     params = config["sentinel2_training_features"]
     label_column = params["label_column"]
     return {
