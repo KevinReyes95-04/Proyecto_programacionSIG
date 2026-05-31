@@ -22,7 +22,7 @@ mining_binary_map_validation:
   visualization:
     max_size: 1600
   classification_points_plot:
-    output_path: data/08_reporting/mining_binary_classification_points_overlay.png
+    output_path: data/08_reporting/validate_mining_binary_map/mining_binary_classification_points_overlay.png
     title: Clasificacion binaria con puntos etiquetados
     figure_size: [9, 9]
     dpi: 160
@@ -33,7 +33,7 @@ mining_binary_map_validation:
     legend_font_size: 7
     legend_location: lower left
   probability_points_plot:
-    output_path: data/08_reporting/mining_binary_probability_points_overlay.png
+    output_path: data/08_reporting/validate_mining_binary_map/mining_binary_probability_points_overlay.png
     title: Probabilidad de mineria con puntos de prueba
     figure_size: [9, 9]
     dpi: 160
@@ -43,7 +43,7 @@ mining_binary_map_validation:
     legend_font_size: 7
     legend_location: lower left
   errors_plot:
-    output_path: data/08_reporting/mining_binary_testing_errors_overlay.png
+    output_path: data/08_reporting/validate_mining_binary_map/mining_binary_testing_errors_overlay.png
     title: Errores de prueba sobre mapa clasificado
     figure_size: [9, 9]
     dpi: 160

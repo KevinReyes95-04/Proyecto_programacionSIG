@@ -65,8 +65,10 @@ def _save_band_grid(input_dir: Path, output_dir: Path, params: dict, visualizati
     output_path = output_dir / grid.get("output_name", "sentinel2_bands_grid.png")
     figure, axes = plt.subplots(rows, columns, figsize=tuple(grid.get("figure_size", [14, 10])))
     axes = axes.ravel() if hasattr(axes, "ravel") else [axes]
+    cmap = plt.get_cmap("gray").copy()
+    cmap.set_bad("white")
     for axis, band in zip(axes, bands):
-        axis.imshow(_read_stretched_band(input_dir, params, band, visualization), cmap="gray")
+        axis.imshow(np.ma.masked_invalid(_read_stretched_band(input_dir, params, band, visualization)), cmap=cmap)
         axis.set_title(band)
         axis.set_axis_off()
     for axis in axes[len(bands):]:
@@ -84,6 +86,8 @@ def _read_stretched_band(input_dir: Path, params: dict, band: str, visualization
         raise FileNotFoundError(f"No se encontro la banda requerida para visualizar: {path.as_posix()}")
     with rasterio.open(path) as source:
         array = source.read(1, masked=True).astype("float32").filled(np.nan)
+    if visualization.get("mask_zero_values", True):
+        array[array == 0] = np.nan
     lower, upper = np.nanpercentile(array, visualization.get("percentile_range", [2, 98]))
     if not np.isfinite(lower) or not np.isfinite(upper) or lower == upper:
         return np.zeros(array.shape, dtype="float32")
@@ -93,13 +97,23 @@ def _read_stretched_band(input_dir: Path, params: dict, band: str, visualization
 def _save_image(image: Any, output_path: Path, title: str | None, visualization: dict, background: bool = False) -> None:
     # Funcion para guardar una imagen PNG con o sin titulo/ejes.
     figure, axis = plt.subplots(figsize=tuple(visualization.get("figure_size", [8, 8])))
-    axis.imshow(image)
+    axis.imshow(_fill_invalid_rgb_pixels(image))
     axis.set_axis_off()
     if title:
         axis.set_title(title)
     figure.tight_layout(pad=0 if background else 0.4)
     figure.savefig(output_path, dpi=visualization.get("dpi", 160), bbox_inches="tight", pad_inches=0 if background else 0.1)
     plt.close(figure)
+
+
+def _fill_invalid_rgb_pixels(image: Any) -> np.ndarray:
+    # Funcion para pintar como blanco los pixeles RGB sin datos validos.
+    rgb = np.asarray(image, dtype="float32")
+    invalid = ~np.isfinite(rgb).all(axis=2)
+    rgb = np.nan_to_num(rgb, nan=1.0, posinf=1.0, neginf=0.0)
+    rgb = np.clip(rgb, 0, 1)
+    rgb[invalid] = 1.0
+    return rgb
 
 
 def _band_filename(params: dict, band: str) -> str:

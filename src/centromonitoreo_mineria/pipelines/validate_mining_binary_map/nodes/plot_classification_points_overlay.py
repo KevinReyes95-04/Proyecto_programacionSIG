@@ -25,7 +25,7 @@ def plot_classification_points_overlay(
     plot_params = params.get("classification_points_plot", {})
     output_path = map_output_path(
         plot_params,
-        "data/08_reporting/mining_binary_classification_points.png",
+        "data/08_reporting/validate_mining_binary_map/mining_binary_classification_points.png",
     )
 
     figure, axis = map_figure(plot_params)

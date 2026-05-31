@@ -7,7 +7,7 @@ training_data:
   stratify: true
   
   spatial_plot:
-    output_path: data/08_reporting/labeled_points_distribution.png
+    output_path: data/08_reporting/prepare_training_data/labeled_points_distribution.png
     title: Distribucion espacial de puntos etiquetados
     figure_size: [8, 8]
     dpi: 160
@@ -31,8 +31,8 @@ training_data:
       strict: false
 
   split_spatial_plot:
-    training_output_path: data/08_reporting/training_labeled_points_distribution.png
-    testing_output_path: data/08_reporting/testing_labeled_points_distribution.png
+    training_output_path: data/08_reporting/prepare_training_data/training_labeled_points_distribution.png
+    testing_output_path: data/08_reporting/prepare_training_data/testing_labeled_points_distribution.png
     training_title: Distribucion espacial - entrenamiento
     testing_title: Distribucion espacial - prueba
     figure_size: [8, 8]
@@ -46,7 +46,7 @@ training_data:
     sentinel2_background: {enabled: false}
 
   class_distribution_plot:
-    output_path: data/08_reporting/labeled_points_class_distribution.png
+    output_path: data/08_reporting/prepare_training_data/labeled_points_class_distribution.png
     title: Conjunto de datos
     x_label: Cobertura
     y_label: Numero de muestras

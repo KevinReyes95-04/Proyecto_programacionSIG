@@ -14,7 +14,7 @@ mining_binary_map_postprocessing:
     polygon_layer: mining_binary_polygons
     polygon_summary_csv: data/07_model_output/mining_binary_polygons.csv
   map:
-    output_path: data/08_reporting/mining_binary_postprocessed_map.png
+    output_path: data/08_reporting/postprocess_mining_binary_map/mining_binary_postprocessed_map.png
     title: Mapa postprocesado de mineria
     figure_size: [9, 9]
     dpi: 180

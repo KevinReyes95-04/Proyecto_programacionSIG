@@ -105,7 +105,8 @@ def _reproject_file(path: Path, local: dict) -> None:
     with rasterio.open(path) as source:
         if source.crs == target_crs:
             return
-        profile = _reprojected_profile(source, target_crs, source.count)
+        nodata = _nodata_value(local, source.nodata)
+        profile = _reprojected_profile(source, target_crs, source.count, nodata)
         temp_path = path.with_name(f"{path.stem}_reprojected{path.suffix}")
         with rasterio.open(temp_path, "w", **profile) as target:
             for index in range(1, source.count + 1):
@@ -117,6 +118,8 @@ def _reproject_file(path: Path, local: dict) -> None:
                     dst_transform=target.transform,
                     dst_crs=target.crs,
                     resampling=_resampling(local.get("resampling", "bilinear")),
+                    src_nodata=nodata,
+                    dst_nodata=nodata,
                 )
 
     temp_path.replace(path)
@@ -134,7 +137,8 @@ def _split_bands(
         if source.count < len(params["bands"]):
             raise ValueError("El GeoTIFF descargado tiene menos bandas que las configuradas.")
 
-        profile = source.profile | {"count": 1}
+        nodata = _nodata_value(local, source.nodata)
+        profile = source.profile | {"count": 1, "nodata": nodata}
         for index, band in enumerate(params["bands"], start=1):
             output_path = output_dir / _band_filename(params, local, band)
             with rasterio.open(output_path, "w", **profile) as target:
@@ -144,13 +148,14 @@ def _split_bands(
                     "band": band,
                     "output_path": output_path.as_posix(),
                     "crs": str(profile.get("crs")),
+                    "nodata": nodata,
                     "file_size_bytes": output_path.stat().st_size,
                 }
             )
     return downloaded_files
 
 
-def _reprojected_profile(source: Any, target_crs: CRS, count: int) -> dict:
+def _reprojected_profile(source: Any, target_crs: CRS, count: int, nodata: Any) -> dict:
     # Funcion para calcular el perfil raster de salida reproyectado.
     transform, width, height = calculate_default_transform(
         source.crs,
@@ -165,7 +170,15 @@ def _reprojected_profile(source: Any, target_crs: CRS, count: int) -> dict:
         "transform": transform,
         "width": width,
         "height": height,
+        "nodata": nodata,
     }
+
+
+def _nodata_value(local: dict, source_nodata: Any = None) -> Any:
+    # Funcion para decidir que valor se guarda como NoData en las bandas locales.
+    if not local.get("mask_zero_as_nodata", True):
+        return source_nodata
+    return local.get("nodata_value", 0)
 
 
 def _resampling(name: str) -> Resampling:

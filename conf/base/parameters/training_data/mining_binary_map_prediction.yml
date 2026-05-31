@@ -19,7 +19,7 @@ mining_binary_map_prediction:
     classification_map: data/07_model_output/mining_binary_classification_map.tif
     probability_map: data/07_model_output/mining_binary_probability_map.tif
   visualization:
-    output_path: data/08_reporting/mining_binary_classification_map.png
+    output_path: data/08_reporting/predict_mining_binary_map/mining_binary_classification_map.png
     title: Mapa binario de mineria
     figure_size: [8, 8]
     dpi: 160
@@ -28,7 +28,7 @@ mining_binary_map_prediction:
     background:
       enabled: true
   categorical_visualization:
-    output_path: data/08_reporting/mining_binary_classification_categorical_map.png
+    output_path: data/08_reporting/predict_mining_binary_map/mining_binary_classification_categorical_map.png
     title: Mapa categorico - Mineria vs No Mineria
     figure_size: [8, 8]
     dpi: 160

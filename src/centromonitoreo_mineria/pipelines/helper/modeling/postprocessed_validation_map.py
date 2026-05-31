@@ -20,7 +20,7 @@ def save_postprocessed_validation_map(
     params: dict[str, Any],
 ) -> dict[str, Any]:
     plot_params = params.get("map", {})
-    output_path = Path(plot_params.get("output_path", "data/08_reporting/postprocessed_mining_map_validation.png"))
+    output_path = Path(plot_params.get("output_path", "data/08_reporting/validate_postprocessed_mining_map/postprocessed_mining_map_validation.png"))
     output_path.parent.mkdir(parents=True, exist_ok=True)
     class_map, extent, crs = _read_postprocessed_raster(postprocessing_metadata)
     points = _points_from_validation_table(point_validation, crs, params)

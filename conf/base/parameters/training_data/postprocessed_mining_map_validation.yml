@@ -11,7 +11,7 @@ postprocessed_mining_map_validation:
     point_validation: data/07_model_output/postprocessed_mining_point_validation.csv
     class_summary: data/07_model_output/postprocessed_mining_class_summary.csv
   map:
-    output_path: data/08_reporting/postprocessed_mining_map_validation.png
+    output_path: data/08_reporting/validate_postprocessed_mining_map/postprocessed_mining_map_validation.png
     title: Validacion cartografica del mapa postprocesado
     figure_size: [9, 9]
     dpi: 180

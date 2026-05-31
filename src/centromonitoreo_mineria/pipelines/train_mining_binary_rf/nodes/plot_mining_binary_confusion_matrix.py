@@ -14,7 +14,7 @@ def plot_mining_binary_confusion_matrix(
     mining_binary_random_forest_config: dict[str, Any],
 ) -> dict[str, Any]:
     plot_params = mining_binary_random_forest_config.get("confusion_matrix_plot", {})
-    output_path = Path(plot_params.get("output_path", "data/08_reporting/mining_binary_confusion_matrix.png"))
+    output_path = Path(plot_params.get("output_path", "data/08_reporting/train_mining_binary_rf/mining_binary_confusion_matrix.png"))
     output_path.parent.mkdir(parents=True, exist_ok=True)
     matrix = np.array(mining_binary_metrics["confusion_matrix"])
     labels = mining_binary_metrics["labels"]

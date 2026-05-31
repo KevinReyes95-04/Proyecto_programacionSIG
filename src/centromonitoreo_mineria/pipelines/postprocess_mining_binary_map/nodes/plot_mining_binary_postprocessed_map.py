@@ -20,7 +20,7 @@ def plot_mining_binary_postprocessed_map(
     """Genera un mapa cartografico del raster binario postprocesado."""
     params = mining_binary_map_postprocessing_config
     map_params = params.get("map", {})
-    output_path = Path(map_params.get("output_path", "data/08_reporting/mining_binary_postprocessed_map.png"))
+    output_path = Path(map_params.get("output_path", "data/08_reporting/postprocess_mining_binary_map/mining_binary_postprocessed_map.png"))
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
     with rasterio.open(mining_binary_map_postprocessing_output_metadata["postprocessed_classification_map"]) as source:

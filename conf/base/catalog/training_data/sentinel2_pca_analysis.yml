@@ -37,12 +37,12 @@ sentinel2_pca_loadings:
 
 sentinel2_pca_scatter_plot_metadata:
   type: json.JSONDataset
-  filepath: data/08_reporting/sentinel2_pca_scatter_plot_metadata.json
+  filepath: data/08_reporting/analyze_sentinel2_pca/sentinel2_pca_scatter_plot_metadata.json
 
 sentinel2_pca_scree_plot_metadata:
   type: json.JSONDataset
-  filepath: data/08_reporting/sentinel2_pca_scree_plot_metadata.json
+  filepath: data/08_reporting/analyze_sentinel2_pca/sentinel2_pca_scree_plot_metadata.json
 
 sentinel2_pca_metadata:
   type: json.JSONDataset
-  filepath: data/08_reporting/sentinel2_pca_metadata.json
+  filepath: data/08_reporting/analyze_sentinel2_pca/sentinel2_pca_metadata.json

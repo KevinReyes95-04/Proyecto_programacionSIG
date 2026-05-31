@@ -44,6 +44,8 @@ sentinel2_download:
     file_name_template: "{file_name_prefix}_{band}_Masked.tif"
     target_crs: EPSG:9377
     resampling: bilinear
+    mask_zero_as_nodata: true
+    nodata_value: 0
     timeout_seconds: 300
   visualization:
     enabled: true
@@ -51,6 +53,7 @@ sentinel2_download:
     percentile_range: [2, 98]
     figure_size: [8, 8]
     dpi: 160
+    mask_zero_values: true
     true_color: {bands: [B4, B3, B2], output_name: sentinel2_true_color.png, title: Sentinel-2 color verdadero}
     true_color_background: {bands: [B4, B3, B2], output_name: sentinel2_true_color_background.png, title: null}
     false_color: {bands: [B8, B4, B3], output_name: sentinel2_false_color.png, title: Sentinel-2 falso color}

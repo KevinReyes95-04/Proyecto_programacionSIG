@@ -88,7 +88,7 @@ def predict_mining_map_rasters(model: Any, params: dict[str, Any]) -> dict[str, 
 
 def plot_mining_map(prediction_metadata: dict[str, Any], params: dict[str, Any]) -> dict[str, Any]:
     plot_params = params.get("visualization", {})
-    output_path = Path(plot_params.get("output_path", "data/08_reporting/mining_binary_classification_map.png"))
+    output_path = Path(plot_params.get("output_path", "data/08_reporting/predict_mining_binary_map/mining_binary_classification_map.png"))
     output_path.parent.mkdir(parents=True, exist_ok=True)
     with rasterio.open(prediction_metadata["classification_map"]) as source:
         class_map = source.read(1)
@@ -276,7 +276,7 @@ def _plot_class_overlay(axis: Any, class_map: np.ndarray, params: dict[str, Any]
 
 def _plot_categorical_map(class_map: np.ndarray, extent: list[float], params: dict[str, Any]) -> dict[str, Any]:
     plot_params = params.get("categorical_visualization", {})
-    output_path = Path(plot_params.get("output_path", "data/08_reporting/mining_binary_classification_categorical_map.png"))
+    output_path = Path(plot_params.get("output_path", "data/08_reporting/predict_mining_binary_map/mining_binary_classification_categorical_map.png"))
     output_path.parent.mkdir(parents=True, exist_ok=True)
     negative_value = _class_value(params["negative_label"], params)
     positive_value = _class_value(params["positive_label"], params)

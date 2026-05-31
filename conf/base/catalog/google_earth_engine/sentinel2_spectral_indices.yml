@@ -6,12 +6,12 @@ sentinel2_spectral_indices_assets:
 
 sentinel2_spectral_indices_maps_metadata:
   type: json.JSONDataset
-  filepath: data/08_reporting/sentinel2_spectral_indices_maps_metadata.json
+  filepath: data/08_reporting/sentinel2_spectral_indices_maps/sentinel2_spectral_indices_maps_metadata.json
 
 sentinel2_spectral_indices_tifs_metadata:
   type: json.JSONDataset
-  filepath: data/08_reporting/sentinel2_spectral_indices_tifs_metadata.json
+  filepath: data/08_reporting/sentinel2_spectral_indices_maps/sentinel2_spectral_indices_tifs_metadata.json
 
 sentinel2_spectral_indices_metadata:
   type: json.JSONDataset
-  filepath: data/08_reporting/sentinel2_spectral_indices_metadata.json
+  filepath: data/08_reporting/sentinel2_spectral_indices_maps/sentinel2_spectral_indices_metadata.json

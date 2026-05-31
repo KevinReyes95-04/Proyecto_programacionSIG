@@ -9,12 +9,12 @@ sentinel2_drive_export_metadata:
 
 sentinel2_download_metadata:
   type: json.JSONDataset
-  filepath: data/08_reporting/sentinel2_download_metadata.json
+  filepath: data/08_reporting/sentinel2_download_visualizations/sentinel2_download_metadata.json
 
 sentinel2_local_download_metadata:
   type: json.JSONDataset
-  filepath: data/08_reporting/sentinel2_local_download_metadata.json
+  filepath: data/08_reporting/sentinel2_download_visualizations/sentinel2_local_download_metadata.json
 
 sentinel2_download_visualizations_metadata:
   type: json.JSONDataset
-  filepath: data/08_reporting/sentinel2_download_visualizations_metadata.json
+  filepath: data/08_reporting/sentinel2_download_visualizations/sentinel2_download_visualizations_metadata.json

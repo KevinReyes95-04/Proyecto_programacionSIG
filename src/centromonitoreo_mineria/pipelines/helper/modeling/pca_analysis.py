@@ -93,7 +93,7 @@ def plot_pca_scatter(
     params: dict[str, Any],
 ) -> dict[str, Any]:
     plot_params = params.get("scatter_plot", {})
-    output_path = Path(plot_params.get("output_path", "data/08_reporting/sentinel2_pca_scatter.png"))
+    output_path = Path(plot_params.get("output_path", "data/08_reporting/analyze_sentinel2_pca/sentinel2_pca_scatter.png"))
     output_path.parent.mkdir(parents=True, exist_ok=True)
     data = pd.concat([training_scores, testing_scores], ignore_index=True)
     x_component = plot_params.get("x_component", "PC1")
@@ -113,7 +113,7 @@ def plot_pca_scatter(
 
 def plot_pca_scree(explained_variance: pd.DataFrame, params: dict[str, Any]) -> dict[str, Any]:
     plot_params = params.get("scree_plot", {})
-    output_path = Path(plot_params.get("output_path", "data/08_reporting/sentinel2_pca_scree.png"))
+    output_path = Path(plot_params.get("output_path", "data/08_reporting/analyze_sentinel2_pca/sentinel2_pca_scree.png"))
     output_path.parent.mkdir(parents=True, exist_ok=True)
     figure, axis = plt.subplots(figsize=tuple(plot_params.get("figure_size", [8, 5])))
     axis.bar(explained_variance["component"], explained_variance["explained_variance_ratio"], color=plot_params.get("bar_color", "#1379B9"))

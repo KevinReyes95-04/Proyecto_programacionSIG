@@ -3,12 +3,12 @@ mining_binary_map_postprocessing_config:
 
 mining_binary_map_postprocessing_output_metadata:
   type: json.JSONDataset
-  filepath: data/08_reporting/mining_binary_map_postprocessing_output_metadata.json
+  filepath: data/08_reporting/postprocess_mining_binary_map/mining_binary_map_postprocessing_output_metadata.json
 
 mining_binary_postprocessed_map_plot_metadata:
   type: json.JSONDataset
-  filepath: data/08_reporting/mining_binary_postprocessed_map_plot_metadata.json
+  filepath: data/08_reporting/postprocess_mining_binary_map/mining_binary_postprocessed_map_plot_metadata.json
 
 mining_binary_map_postprocessing_metadata:
   type: json.JSONDataset
-  filepath: data/08_reporting/mining_binary_map_postprocessing_metadata.json
+  filepath: data/08_reporting/postprocess_mining_binary_map/mining_binary_map_postprocessing_metadata.json

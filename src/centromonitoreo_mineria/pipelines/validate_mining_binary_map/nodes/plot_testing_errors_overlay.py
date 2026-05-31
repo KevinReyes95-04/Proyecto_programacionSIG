@@ -27,7 +27,7 @@ def plot_testing_errors_overlay(
     plot_params = params.get("errors_plot", {})
     output_path = map_output_path(
         plot_params,
-        "data/08_reporting/mining_binary_testing_errors.png",
+        "data/08_reporting/validate_mining_binary_map/mining_binary_testing_errors.png",
     )
 
     figure, axis = map_figure(plot_params)

@@ -18,4 +18,4 @@ testing_sentinel2_features:
 
 sentinel2_training_features_metadata:
   type: json.JSONDataset
-  filepath: data/08_reporting/sentinel2_training_features_metadata.json
+  filepath: data/08_reporting/extract_sentinel2_training_features/sentinel2_training_features_metadata.json

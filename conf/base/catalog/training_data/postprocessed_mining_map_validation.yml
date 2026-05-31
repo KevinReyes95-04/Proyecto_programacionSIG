@@ -15,8 +15,8 @@ postprocessed_mining_class_summary:
 
 postprocessed_mining_validation_plot_metadata:
   type: json.JSONDataset
-  filepath: data/08_reporting/postprocessed_mining_validation_plot_metadata.json
+  filepath: data/08_reporting/validate_postprocessed_mining_map/postprocessed_mining_validation_plot_metadata.json
 
 postprocessed_mining_map_validation_metadata:
   type: json.JSONDataset
-  filepath: data/08_reporting/postprocessed_mining_map_validation_metadata.json
+  filepath: data/08_reporting/validate_postprocessed_mining_map/postprocessed_mining_map_validation_metadata.json

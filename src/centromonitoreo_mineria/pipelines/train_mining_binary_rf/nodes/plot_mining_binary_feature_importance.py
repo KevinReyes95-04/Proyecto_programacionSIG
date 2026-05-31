@@ -14,7 +14,7 @@ def plot_mining_binary_feature_importance(
     mining_binary_random_forest_config: dict[str, Any],
 ) -> dict[str, Any]:
     plot_params = mining_binary_random_forest_config.get("feature_importance_plot", {})
-    output_path = Path(plot_params.get("output_path", "data/08_reporting/mining_binary_feature_importance.png"))
+    output_path = Path(plot_params.get("output_path", "data/08_reporting/train_mining_binary_rf/mining_binary_feature_importance.png"))
     output_path.parent.mkdir(parents=True, exist_ok=True)
     top_n = int(plot_params.get("top_n", 20))
     data = mining_binary_feature_importance.head(top_n).sort_values("importance")

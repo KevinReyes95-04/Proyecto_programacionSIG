@@ -18,7 +18,7 @@ def plot_labeled_points_class_distribution(
     output_path = Path(
         plot_params.get(
             "output_path",
-            "data/08_reporting/labeled_points_class_distribution.png",
+            "data/08_reporting/prepare_training_data/labeled_points_class_distribution.png",
         )
     )
     output_path.parent.mkdir(parents=True, exist_ok=True)
