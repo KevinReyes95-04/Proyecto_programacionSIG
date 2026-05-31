@@ -4,24 +4,33 @@ __pycache__/
 .env/
 .ipynb_checkpoints/
 .kedro/
+.viz/
 
 # Local secrets and user-specific configuration
 conf/local/
 *.service-account.json
 *service-account*.json
 
+# Rendered reports
+/docs/proyecto_final.html
+/docs/proyecto_final_files/
+
 # Data outputs
-/data/02_intermediate/test_predict_mining_binary_map/
-/data/02_intermediate/test_postprocess_mining_binary_map/
-/data/02_intermediate/test_validate_postprocessed_mining_map/
+/data/02_intermediate/*
+/data/03_primary/*
 /data/01_raw/sentinel2/*
-/data/04_feature/sentinel2_bands/
+/data/04_feature/sentinel2_bands/*
+/data/05_model_input/*
 /data/06_models/*
 /data/07_model_output/*
 /data/08_reporting/*
 
 # Keep directory structure
 !/data/01_raw/sentinel2/.gitkeep
+!/data/02_intermediate/.gitkeep
+!/data/03_primary/.gitkeep
+!/data/04_feature/sentinel2_bands/.gitkeep
+!/data/05_model_input/.gitkeep
 !/data/06_models/.gitkeep
 !/data/07_model_output/.gitkeep
 !/data/08_reporting/.gitkeep
