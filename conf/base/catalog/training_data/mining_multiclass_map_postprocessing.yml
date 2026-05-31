@@ -1,0 +1,19 @@
+mining_multiclass_map_postprocessing_config:
+  type: MemoryDataset
+
+mining_multiclass_map_postprocessing_output_metadata:
+  type: json.JSONDataset
+  filepath: data/08_reporting/postprocess_mining_multiclass_map/mining_multiclass_map_postprocessing_output_metadata.json
+
+mining_multiclass_postprocessed_class_summary:
+  type: pandas.CSVDataset
+  filepath: data/07_model_output/mining_multiclass_postprocessed_class_summary.csv
+
+mining_multiclass_postprocessed_map_plot_metadata:
+  type: json.JSONDataset
+  filepath: data/08_reporting/postprocess_mining_multiclass_map/mining_multiclass_postprocessed_map_plot_metadata.json
+
+mining_multiclass_map_postprocessing_metadata:
+  type: json.JSONDataset
+  filepath: data/08_reporting/postprocess_mining_multiclass_map/mining_multiclass_map_postprocessing_metadata.json
+

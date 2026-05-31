@@ -1,0 +1,37 @@
+mining_multiclass_map_validation:
+  label_column: Cobertura
+  prediction_column: predicted_map_class
+  class_labels: [Bosque Natural, Cuerpos de Agua, Mineria, Nubes, Suelo Desnudo, Vegetacion]
+  class_values: {Bosque Natural: 1, Cuerpos de Agua: 2, Mineria: 3, Nubes: 4, Suelo Desnudo: 5, Vegetacion: 6}
+  coordinate_columns:
+    longitude: x
+    latitude: y
+    source_crs: EPSG:4326
+  class_colors:
+    Bosque Natural: "#0CB354"
+    Cuerpos de Agua: "#1379B9"
+    Mineria: "#E31A1C"
+    Nubes: "#18A8D8"
+    Suelo Desnudo: "#FFC107"
+    Vegetacion: "#8DD34F"
+  visualization:
+    max_size: 1600
+  confusion_matrix_plot:
+    output_path: data/08_reporting/validate_mining_multiclass_map/mining_multiclass_validation_confusion_matrix.png
+    title: Matriz de confusion espacial multiclase
+    x_label: Prediccion raster
+    y_label: Observado
+    figure_size: [8, 7]
+    dpi: 160
+    cmap: Blues
+  validation_map:
+    output_path: data/08_reporting/validate_mining_multiclass_map/mining_multiclass_validation_map.png
+    title: Validacion espacial del mapa multiclase
+    figure_size: [9, 9]
+    dpi: 160
+    legend_location: lower left
+    legend_font_size: 8
+    correcto: {color: "#FFFFFF", edgecolor: "#111111", marker: o, point_size: 28, linewidth: 0.4, alpha: 0.75}
+    error: {color: "#FF00FF", edgecolor: "#000000", marker: X, point_size: 105, linewidth: 1.0, alpha: 0.95}
+    sin_datos: {color: "#808080", edgecolor: "#000000", marker: s, point_size: 80, linewidth: 0.8, alpha: 0.9}
+

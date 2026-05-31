@@ -116,155 +116,111 @@ blockquote {
 
 # Resumen
 
-Este proyecto desarrolla un flujo de trabajo reproducible para clasificar zonas
-asociadas a mineria de oro de aluvion mediante imagenes Sentinel-2, puntos
-etiquetados y aprendizaje automatico supervisado. El modelo principal es un
-**Random Forest** binario orientado a separar las clases **Mineria** y
-**No Mineria** a partir de bandas espectrales e indices derivados como NDVI,
-MSAVI, NDWI, BSI, MBSI, NDSI, MSWI y NDBI.
+Este proyecto construye un flujo reproducible para identificar coberturas
+asociadas a mineria de oro de aluvion en el Bajo Cauca antioqueno usando
+imagenes Sentinel-2, puntos etiquetados y modelos Random Forest. La solucion
+esta organizada con Kedro: cada etapa se declara como pipeline, cada pipeline
+contiene nodos pequenos, y las entradas/salidas se administran con catalogos y
+parametros YAML.
 
-El flujo se implementa en Python con Kedro, de manera que cada etapa queda
-organizada en pipelines, nodos, parametros y catalogos de datos. Esta
-estructura permite documentar y repetir el proceso desde la adquisicion de
-imagenes Sentinel-2 en Google Earth Engine hasta la generacion de mapas
-clasificados, salidas de validacion y productos cartograficos derivados.
+El analisis incluye dos aproximaciones complementarias. La primera es una
+clasificacion binaria orientada a separar **Mineria** y **No Mineria**. La
+segunda es una clasificacion multiclase que diferencia **Bosque Natural**,
+**Cuerpos de Agua**, **Mineria**, **Nubes**, **Suelo Desnudo** y
+**Vegetacion**. Esta combinacion permite evaluar el problema de forma mas
+didactica: el modelo binario responde donde hay mineria, mientras que el
+modelo multiclase ayuda a entender con que coberturas se confunde.
 
 ::: {.caja-alerta}
-**Alcance acotado del proyecto.** Para favorecer la replicabilidad, el proyecto
-se concentra exclusivamente en Sentinel-2 como fuente satelital abierta. No se
-incluyen imagenes PlanetScope ni fusiones multifuente en la implementacion
-principal. El uso de otros sensores o modelos queda como extension futura.
+**Alcance acotado.** El proyecto usa Sentinel-2 como fuente satelital abierta,
+Google Earth Engine para preparar los productos y Random Forest como modelo
+supervisado. No se incluyen sensores comerciales ni aprendizaje profundo,
+porque el objetivo principal es que el flujo sea explicable, ejecutable y
+reproducible en un contexto academico.
 :::
 
-# Introduccion y justificacion
+# Introduccion y Justificacion
 
-La mineria de oro de aluvion es una de las formas de extraccion de minerales
-mas controvertidas por sus impactos sociales y ambientales. Esta actividad se
-desarrolla con frecuencia en cauces, terrazas aluviales y zonas cercanas a
-redes hidrograficas, donde puede generar perdida de cobertura vegetal,
-degradacion de suelos, sedimentacion, transformacion del paisaje y afectaciones
-asociadas al uso de sustancias contaminantes [@perez2016impactos;
-@bansah2022guns; @cardona2022highly].
+La mineria de oro de aluvion genera transformaciones espaciales visibles sobre
+cauces, planicies de inundacion, suelos desnudos y coberturas vegetales. En
+territorios tropicales, estas intervenciones pueden relacionarse con perdida de
+vegetacion, cambios en la dinamica sedimentaria, alteracion de cuerpos de agua
+y fragmentacion del paisaje [@perez2016impactos; @bansah2022guns;
+@cardona2022highly].
 
-Desde la geomatica, la combinacion de Sistemas de Informacion Geografica,
-teledeteccion y programacion permite construir metodologias para observar estos
-cambios en el territorio. Sin embargo, la identificacion de mineria de oro de
-aluvion mediante sensores remotos presenta desafios tecnicos: las areas
-intervenidas tienen respuestas espectrales heterogeneas, pueden confundirse con
-suelo desnudo o zonas construidas, y su distribucion espacial suele ser
-fragmentada y dinamica.
+Desde la geomatica, el problema es espacial por naturaleza: la pregunta no es
+solo si existe mineria, sino donde se localiza, que tan extensa es, que tan
+cerca esta de rios y que coberturas se confunden con ella. Las imagenes
+Sentinel-2 ofrecen una entrada adecuada para una primera aproximacion porque
+son abiertas, multiespectrales, frecuentes y suficientemente detalladas para
+observar patrones regionales.
 
-En Colombia, entidades como la UNODC han usado imagenes satelitales para
-monitorear explotacion de oro de aluvion [@unodc2022evidencias]. Aunque estos
-productos son valiosos, la generacion de reportes institucionales puede tener
-desfases temporales y no siempre entrega un flujo replicable desde el codigo.
-En este contexto, un proyecto reproducible con datos abiertos, parametros
-explicitos y aprendizaje automatico ofrece una alternativa academica para
-automatizar parte del proceso de identificacion y evaluarlo de manera
-transparente.
-
-La propuesta se centra en Sentinel-2 porque es un sensor libre, con cobertura
-global, resolucion espacial adecuada para una primera aproximacion regional y
-bandas multiespectrales utiles para discriminar vegetacion, humedad, suelo
-desnudo y superficies alteradas. El enfoque con Random Forest se selecciona por
-su robustez en problemas de clasificacion supervisada, su capacidad para
-trabajar con variables correlacionadas y la interpretabilidad relativa de sus
-importancias de variables.
+La programacion aporta el componente de trazabilidad. En lugar de producir un
+mapa aislado, el repositorio documenta como se descargan las imagenes, como se
+calculan indices espectrales, como se preparan los datos de entrenamiento,
+como se entrena el modelo y como se validan las salidas. Este enfoque es clave
+para Open Science: otra persona puede leer la configuracion, ejecutar los
+pipelines y revisar los productos generados.
 
 # Estado del Arte / Revision Bibliografica
 
-El estudio de la mineria de oro de aluvion desde una perspectiva geoespacial ha
-cobrado interes con el avance de las tecnologias de observacion de la Tierra,
-los SIG y las herramientas de programacion aplicadas al analisis espacial. La
-literatura reciente muestra que la combinacion de imagenes satelitales,
-procesamiento digital, indices espectrales y aprendizaje automatico puede
-apoyar la identificacion y monitoreo de zonas mineras.
+La deteccion de mineria mediante sensores remotos ha evolucionado desde
+metodos visuales y clasificaciones tradicionales hacia flujos automatizados con
+indices espectrales, aprendizaje automatico y plataformas en la nube. En
+contextos internacionales, [@ngom2022recent] usaron Sentinel-2 y algoritmos de
+aprendizaje automatico para cuantificar mineria en Costa de Marfil. Otros
+trabajos han evaluado fusion multiespectral y radar para mineria artesanal
+[@nursamsi2024feasibility; @vanrensburg2022sar], o aproximaciones de
+aprendizaje profundo para segmentar huellas mineras [@saputra2025multimodal].
 
-En el contexto internacional, [@ngom2022recent] identificaron y cuantificaron
-la expansion de areas afectadas por mineria en el rio Bandama, Costa de Marfil,
-durante el periodo 2018-2021 usando imagenes Sentinel-2 y algoritmos de
-aprendizaje automatico. Este tipo de estudios evidencia el potencial de sensores
-abiertos para monitorear mineria artesanal o de pequena escala en contextos
-tropicales.
+En Colombia, el monitoreo institucional de explotacion de oro de aluvion ha
+sido trabajado por UNODC [@unodc2022evidencias]. A nivel academico,
+Castellanos [@castellanos2016tesis] y Castellanos et al.
+[@castellanos2017detection] exploraron imagenes, indices espectrales y
+clasificacion orientada a objetos para mineria a cielo abierto. En el Choco,
+[@sandoval2022metodologia] resaltan la importancia de considerar condiciones
+de nubosidad y sensores alternativos.
 
-Otros trabajos han explorado aproximaciones multiespectrales, radar o modelos
-mas complejos. [@nursamsi2024feasibility] analizaron la factibilidad de fusionar
-datos multiespectrales y SAR para mapear mineria artesanal en Indonesia;
-[@vanrensburg2022sar] integraron datos SAR y aprendizaje automatico para
-detectar mineria de pequena escala; y [@saputra2025multimodal] revisaron
-enfoques de aprendizaje profundo para segmentar huellas mineras. Aunque estos
-antecedentes muestran el avance del campo, el presente proyecto toma una
-decision metodologica mas acotada: usar solo Sentinel-2 y un modelo supervisado
-principal, con el fin de priorizar trazabilidad y replicabilidad.
-
-A nivel nacional, Castellanos [@castellanos2016tesis] y Castellanos et al.
-[@castellanos2017detection] desarrollaron una metodologia para clasificar zonas
-mineras a cielo abierto mediante fusion de imagenes, indices espectrales y
-clasificacion orientada a objetos en el nororiente de Antioquia. Por su parte,
-[@ibrahim2020small] aplicaron imagenes gratuitas para detectar mineria aurifera
-de pequena escala, y [@sandoval2022metodologia] utilizaron imagenes Sentinel-1
-en Choco para enfrentar condiciones de nubosidad persistente.
-
-Estos trabajos confirman que los sensores remotos son una fuente clave para
-analizar la mineria. No obstante, muchos estudios se concentran en el resultado
-cartografico o en una tecnica especifica, sin publicar necesariamente una
-estructura reproducible completa desde la adquisicion de datos hasta la
-validacion. La oportunidad de este proyecto esta en organizar todo el flujo con
-Kedro, de forma que las decisiones tecnicas queden versionadas en codigo,
-parametros y salidas intermedias.
+El aporte de este proyecto no es proponer el modelo mas complejo, sino
+documentar una cadena completa y reproducible. La metodologia prioriza
+decisiones comprensibles: Sentinel-2 como insumo abierto, indices espectrales
+con interpretacion fisica y Random Forest como clasificador robusto para un
+proyecto de clase.
 
 # Objetivos
 
 ## Pregunta guia
 
-> Como construir un flujo reproducible para clasificar zonas de mineria de oro
-> de aluvion usando imagenes Sentinel-2, variables espectrales y un modelo
-> Random Forest?
+> Como construir un flujo reproducible para clasificar zonas asociadas a
+> mineria de oro de aluvion usando imagenes Sentinel-2, variables espectrales y
+> modelos Random Forest?
 
 ## Objetivo general
 
 ::: {.caja-verde}
-Desarrollar un flujo de trabajo reproducible para la clasificacion binaria de
-zonas asociadas a mineria de oro de aluvion a partir de imagenes Sentinel-2,
-variables espectrales y un modelo Random Forest implementado en Python con
-Kedro.
+Desarrollar un flujo de trabajo reproducible para clasificar coberturas
+asociadas a mineria de oro de aluvion a partir de Sentinel-2, indices
+espectrales y Random Forest implementado en Python con Kedro.
 :::
 
 ## Objetivos especificos
 
 ::: {.caja-verde}
-1. Implementar un flujo reproducible para adquirir, componer y transformar
-imagenes Sentinel-2 en variables espectrales de entrenamiento mediante Google
-Earth Engine, Python y Kedro.
+1. Automatizar la descarga, preparacion y transformacion de imagenes Sentinel-2
+en bandas e indices espectrales utiles para clasificacion supervisada.
 
-2. Entrenar, evaluar y aplicar un modelo Random Forest para generar mapas de
-clasificacion y probabilidad de mineria, junto con salidas de posprocesamiento
-y validacion espacial.
+2. Entrenar, aplicar y validar modelos Random Forest binario y multiclase,
+generando mapas tematicos, metricas, matrices de confusion y productos de
+postprocesamiento espacial.
 :::
-
-# Alcance del proyecto
-
-El proyecto incluye la consulta y descarga de Sentinel-2 desde Google Earth
-Engine, el calculo de indices espectrales, la preparacion de puntos etiquetados,
-la extraccion de variables por punto, el analisis exploratorio con PCA, el
-entrenamiento del Random Forest, la prediccion raster, el posprocesamiento
-espacial y la validacion tabular/cartografica.
-
-El proyecto no incluye imagenes PlanetScope, fusion multifuente, modelos de
-aprendizaje profundo ni un sistema operacional de alertas tempranas en tiempo
-real. Estas alternativas se dejan como posibles extensiones metodologicas.
 
 # Area de Estudio
 
-El area de estudio se ubica en el Bajo Cauca antioqueno, una subregion con
-presencia historica de mineria de oro de aluvion y transformaciones
-territoriales asociadas a esta actividad. En el plan inicial se consideraron
-los municipios de **Nechi** y **Caucasia** como zona de interes por su
-representatividad dentro de la dinamica minera regional.
-
-En la implementacion del repositorio, el area operativa se define mediante un
-poligono GeoJSON parametrizado para Google Earth Engine. Este poligono cubre un
-sector del Bajo Cauca con los siguientes limites aproximados:
+El area operativa se ubica en el Bajo Cauca antioqueno, una subregion con
+presencia historica de mineria aurifera de aluvion y transformaciones
+territoriales asociadas a cauces y terrazas aluviales. En la implementacion,
+la zona de consulta se define con un poligono parametrizado para Google Earth
+Engine, aproximadamente dentro de los siguientes limites:
 
 | Limite | Valor |
 |---|---:|
@@ -273,67 +229,52 @@ sector del Bajo Cauca con los siguientes limites aproximados:
 | Latitud minima | 7.79405091 |
 | Latitud maxima | 8.12991298 |
 
-La @fig-area-estudio muestra el rectangulo operativo usado como area de
-consulta y descarga para Sentinel-2. El mapa base corresponde a una imagen
-satelital de Esri World Imagery, porque permite observar con mayor claridad el
-contexto fisico del territorio, la red hidrografica y las zonas con superficies
-expuestas.
-
-![Rectangulo del area de estudio definido por los limites oeste, este, sur y norte sobre imagen satelital Esri World Imagery.](images/mapa_area_estudio.png){#fig-area-estudio fig-align="center" width="90%"}
+![Area de estudio sobre imagen satelital base.](images/mapa_area_estudio.png){#fig-area-estudio fig-align="center" width="90%"}
 
 # Fuentes de Datos
 
-El flujo combina datos abiertos consultados por API, archivos vectoriales
-locales y configuracion versionada en el repositorio. Esta separacion es
-importante para la reproducibilidad: los datos satelitales se pueden volver a
-consultar, mientras que los puntos etiquetados y los parametros quedan
-controlados como insumos del proyecto.
-
-| Fuente | Tipo | Rol en el proyecto | Condicion de replicabilidad |
+| Fuente | Tipo | Uso | Reproducibilidad |
 |---|---|---|---|
-| `COPERNICUS/S2_SR_HARMONIZED` | API Google Earth Engine | Imagen multiespectral base | Abierta con cuenta GEE habilitada |
-| Puntos etiquetados `Datos_Entrenamiento.shp` | Vector local | Entrenamiento y prueba | Versionado como insumo local del proyecto |
-| Google Drive | Servicio intermedio | Descarga de GeoTIFF exportados desde GEE | Requiere credenciales del usuario |
-| Parametros YAML | Configuracion | ROI, fechas, bandas, indices, modelo y salidas | Versionados en `conf/base/parameters` |
-| Catalogos Kedro | Metadatos de datos | Entradas y salidas de cada pipeline | Versionados en `conf/base/catalog` |
-| Salidas `data/08_reporting` | Reportes | Mapas, metricas y metadatos | Regenerables al ejecutar los pipelines |
+| `COPERNICUS/S2_SR_HARMONIZED` | API Google Earth Engine | Bandas Sentinel-2 Surface Reflectance | Requiere cuenta GEE |
+| `Datos_Entrenamiento.shp` | Vector local | Puntos etiquetados para entrenamiento y prueba | Versionado como insumo |
+| Google Drive | Servicio intermedio | Recepcion de GeoTIFF exportados desde GEE | Requiere credenciales del usuario |
+| YAML de parametros | Configuracion | Fechas, ROI, bandas, indices, modelos y salidas | Versionado en `conf/base/parameters` |
+| Catalogos Kedro | Metadatos de datos | Declaracion de entradas y salidas | Versionado en `conf/base/catalog` |
+| `data/08_reporting` | Figuras y JSON | Evidencia grafica y metrica del flujo | Regenerable al correr pipelines |
 
-La fuente satelital usada por el codigo es `COPERNICUS/S2_SR_HARMONIZED`.
-La configuracion actual trabaja con una ventana temporal corta, filtro de
-nubosidad y composicion mediana. Las bandas consideradas son:
+La configuracion base de Sentinel-2 trabaja con bandas originales, escala de
+10 m y una ventana temporal corta. Las bandas y variables derivadas usadas por
+el modelo son:
 
 ```yaml
-collection: COPERNICUS/S2_SR_HARMONIZED
 bands: [B1, B2, B3, B4, B5, B6, B7, B8, B8A, B9, B11, B12]
-scale: 10
-cloud_cover_max: 10
-cloud_mask: true
-composite_method: median
+indices: [NDVI, MSAVI, NDWI, BSI, MBSI, NDSI, MSWI, NDBI]
+target_crs: EPSG:9377
 ```
 
 # Metodologia y Codigo
 
 ::: {.caja-morada}
-El proyecto se desarrolla en Visual Studio Code con un entorno virtual de
-Python. Kedro organiza el flujo en pipelines, nodos, parametros y catalogos de
-datos, lo que permite separar responsabilidades, repetir ejecuciones y rastrear
-las salidas generadas por cada etapa.
+La idea metodologica es simple: cada pipeline debe hacer una parte pequena y
+verificable. Por eso el informe se organiza igual que el codigo: primero se
+presenta el comando de ejecucion, luego el diagrama, despues el fragmento de
+codigo central y finalmente el resultado generado.
 :::
 
-La estructura principal del repositorio es:
+## Estructura del proyecto
 
 ```text
 conf/
   base/
     catalog/        # Entradas y salidas declaradas para Kedro
-    parameters/     # Parametros por pipeline
+    parameters/     # Parametros reproducibles por pipeline
 data/
-  01_raw/           # Datos fuente
-  03_primary/       # Datos primarios tabulares
-  05_model_input/   # Insumos de entrenamiento y prueba
+  01_raw/           # Insumos fuente
+  04_feature/       # Bandas Sentinel-2 e indices en GeoTIFF
+  05_model_input/   # Tablas de entrenamiento y prueba
   06_models/        # Modelos entrenados
-  07_model_output/  # Mapas y vectores derivados del modelo
-  08_reporting/     # Figuras y metadatos para reporte
+  07_model_output/  # Mapas raster, CSV y vectores derivados
+  08_reporting/     # Figuras, metricas y metadatos
 src/
   centromonitoreo_mineria/
     pipeline_registry.py
@@ -341,8 +282,10 @@ src/
 tests/
 ```
 
-El registro central de pipelines se encuentra en
-`src/centromonitoreo_mineria/pipeline_registry.py`:
+## Registro general de pipelines
+
+El archivo `pipeline_registry.py` es el indice del proyecto. Alli Kedro conoce
+que pipelines existen y con que nombre se ejecutan:
 
 ```python
 def register_pipelines() -> dict[str, Pipeline]:
@@ -357,890 +300,162 @@ def register_pipelines() -> dict[str, Pipeline]:
         "postprocess_mining_binary_map": postprocess_mining_binary_map_pipeline(),
         "validate_mining_binary_map": validate_mining_binary_map_pipeline(),
         "validate_postprocessed_mining_map": validate_postprocessed_mining_map_pipeline(),
-        "__default__": download_sentinel2_pipeline() + prepare_training_data_pipeline(),
+        "train_mining_multiclass_rf": train_mining_multiclass_rf_pipeline(),
+        "predict_mining_multiclass_map": predict_mining_multiclass_map_pipeline(),
+        "validate_mining_multiclass_map": validate_mining_multiclass_map_pipeline(),
+        "postprocess_mining_multiclass_map": postprocess_mining_multiclass_map_pipeline(),
+        "validate_postprocessed_mining_multiclass_map": validate_postprocessed_mining_multiclass_map_pipeline(),
     }
 ```
 
-## Flujo de trabajo implementado
+## Flujo completo
+
+```{mermaid}
+flowchart TD
+  A[Sentinel-2 en GEE] --> B[download_sentinel2]
+  B --> C[sentinel2_spectral_indices]
+  D[Puntos etiquetados] --> E[prepare_training_data]
+  C --> F[extract_sentinel2_training_features]
+  E --> F
+  F --> G[analyze_sentinel2_pca]
+  F --> H[train_mining_binary_rf]
+  H --> I[predict_mining_binary_map]
+  I --> J[postprocess_mining_binary_map]
+  I --> K[validate_mining_binary_map]
+  J --> L[validate_postprocessed_mining_map]
+  F --> M[train_mining_multiclass_rf]
+  M --> N[predict_mining_multiclass_map]
+  N --> O[validate_mining_multiclass_map]
+  N --> P[postprocess_mining_multiclass_map]
+  P --> Q[validate_postprocessed_mining_multiclass_map]
+```
+
+## Pipeline 1: descarga de Sentinel-2
+
+**Comando**
+
+```powershell
+kedro run --pipeline download_sentinel2
+```
 
 ```{mermaid}
 flowchart LR
-  A[ROI y parametros YAML] --> B[Descarga Sentinel-2]
-  B --> C[Composicion y mascara de nubes]
-  C --> D[Bandas e indices espectrales]
-  E[Puntos etiquetados] --> F[Preparacion y particion]
-  D --> G[Extraccion de variables por punto]
-  F --> G
-  G --> H[PCA exploratorio]
-  G --> I[Random Forest binario]
-  I --> J[Metricas e importancia de variables]
-  I --> K[Prediccion raster]
-  K --> L[Mapa de probabilidad]
-  K --> M[Mapa binario]
-  M --> N[Posprocesamiento espacial]
-  J --> O[Validacion tabular]
-  N --> P[Validacion cartografica]
+  p["params:gee + params:sentinel2_download"]:::data --> v("validar configuracion"):::node
+  v --> a("construir imagen Sentinel-2"):::node
+  a --> e("exportar GeoTIFF a Drive"):::node
+  e --> d("descargar y separar bandas"):::node
+  d --> r["data/04_feature/sentinel2_bands"]:::data
+  d --> m("generar RGB y falso color"):::node
+  m --> o["data/08_reporting/sentinel2_download_visualizations"]:::data
+  classDef data fill:#ffffff,stroke:#333,stroke-dasharray:5 5;
+  classDef node fill:#b7dce8,stroke:#111;
 ```
 
-## Etapas principales
-
-| Etapa | Pipeline | Producto principal |
-|---|---|---|
-| Descarga Sentinel-2 | `download_sentinel2` | Bandas Sentinel-2 exportadas desde Google Earth Engine |
-| Indices espectrales | `sentinel2_spectral_indices` | Bandas originales e indices derivados |
-| Preparacion de puntos | `prepare_training_data` | Puntos validados y particion entrenamiento/prueba |
-| Extraccion de variables | `extract_sentinel2_training_features` | Tablas con respuesta espectral por punto |
-| Analisis exploratorio | `analyze_sentinel2_pca` | Varianza explicada, cargas y graficos PCA |
-| Entrenamiento | `train_mining_binary_rf` | Modelo Random Forest, metricas e importancia de variables |
-| Prediccion | `predict_mining_binary_map` | Mapa de clases y mapa de probabilidad |
-| Posprocesamiento | `postprocess_mining_binary_map` | Mapa filtrado por area minima y poligonos |
-| Validacion | `validate_mining_binary_map`, `validate_postprocessed_mining_map` | Mapas de errores y resumen de validacion |
-
-## Diagramas y codigo por pipeline
-
-Los siguientes diagramas siguen una convencion similar a la usada por Kedro
-Viz: las cajas punteadas representan entradas o salidas de datos, y las cajas
-azules representan funciones/nodos. Debajo de cada diagrama se incluye el
-fragmento de codigo mas importante para entender la logica del procesamiento.
-
-### `download_sentinel2`
-
-```{mermaid}
-flowchart LR
-  subgraph LEG["Legend"]
-    direction TB
-    L1["input / output<br/>Dataset"]:::input
-    L2("function<br/>Node"):::func
-  end
-  gee["params:gee<br/>Dict"]:::input --> v("validate_sentinel2_download_config<br/>Function"):::func
-  s2["params:sentinel2_download<br/>Dict"]:::input --> v
-  v --> cfg["sentinel2_download_config<br/>Dict"]:::output
-  cfg --> assets("build_sentinel2_download_assets<br/>Function"):::func
-  assets --> obj["sentinel2_download_assets<br/>Dict"]:::output
-  obj --> export("export_sentinel2_download_to_drive<br/>Function"):::func
-  cfg --> export
-  export --> drive["sentinel2_drive_export_metadata<br/>Dict"]:::output
-  drive --> local("download_sentinel2_drive_export_to_local<br/>Function"):::func
-  cfg --> local
-  local --> files["sentinel2_local_download_metadata<br/>Dict"]:::output
-  files --> viz("build_sentinel2_download_visualizations<br/>Function"):::func
-  cfg --> viz
-  viz --> png["sentinel2_download_visualizations_metadata<br/>Dict"]:::output
-  obj --> meta("build_sentinel2_download_metadata<br/>Function"):::func
-  drive --> meta
-  cfg --> meta
-  meta --> out["sentinel2_download_metadata<br/>JSON"]:::output
-  classDef input fill:#ffffff,stroke:#333333,stroke-width:1px,stroke-dasharray:5 5,color:#111111;
-  classDef output fill:#ffffff,stroke:#333333,stroke-width:1px,stroke-dasharray:5 5,color:#111111;
-  classDef func fill:#b7dce8,stroke:#111111,stroke-width:1px,color:#111111;
-```
-
-Codigo central del pipeline: descargar el GeoTIFF exportado por Earth Engine,
-reproyectarlo si es necesario y separarlo en archivos por banda. Esta decision
-se tomo porque la descarga directa con `getDownloadURL` superaba el limite de
-tamano de Earth Engine.
+El primer intento de descarga directa desde Earth Engine superaba el limite de
+tamano de la API. Por eso el flujo final exporta primero a Google Drive y luego
+descarga localmente el GeoTIFF, reproyectandolo a `EPSG:9377` y separando las
+bandas.
 
 ```python
-def download_sentinel2_drive_export_to_local(
-    drive_export_metadata: dict,
-    config: dict,
-) -> dict:
-    """Descarga desde Drive el GeoTIFF exportado y lo separa por bandas."""
+# Funcion para descargar desde Drive el GeoTIFF exportado por Earth Engine.
+def download_sentinel2_drive_export_to_local(drive_export_metadata, config):
     params = config["sentinel2_download"]
-    local = params.get("local_download", {})
-    if drive_export_metadata.get("state") != "COMPLETED":
-        raise RuntimeError("La exportacion a Drive debe estar COMPLETED antes de descargarla.")
-
-    output_dir = Path(local.get("output_dir", "data/04_feature/sentinel2_bands"))
+    output_dir = Path(params["local_download"]["output_dir"])
     source_path = output_dir / f"{drive_export_metadata['file_name_prefix']}.tif"
+
     _download_from_drive(drive_export_metadata, source_path)
-    _reproject_file(source_path, local)
-    downloaded_files = _split_bands(source_path, output_dir, params, local)
+    _reproject_file(source_path, params["local_download"])
+    downloaded_files = _split_bands(source_path, output_dir, params, params["local_download"])
     return {"source_path": source_path.as_posix(), "downloaded_files": downloaded_files}
 ```
 
-### `sentinel2_spectral_indices`
+**Resultados**
+
+![Composicion Sentinel-2 en color real.](../data/08_reporting/sentinel2_download_visualizations/sentinel2_true_color.png){#fig-true-color fig-align="center" width="90%"}
+
+![Composicion Sentinel-2 en falso color.](../data/08_reporting/sentinel2_download_visualizations/sentinel2_false_color.png){#fig-false-color fig-align="center" width="90%"}
+
+![Vista general de bandas Sentinel-2 descargadas.](../data/08_reporting/sentinel2_download_visualizations/sentinel2_bands_grid.png){#fig-bands-grid fig-align="center" width="95%"}
+
+La salida visual permite revisar si la imagen cubre correctamente el area de
+estudio, si el CRS quedo consistente y si existen zonas NoData. La reproyeccion
+a `EPSG:9377` se usa porque el proyecto trabaja en Colombia y requiere medir
+areas en metros.
+
+## Pipeline 2: indices espectrales Sentinel-2
+
+**Comando**
+
+```powershell
+kedro run --pipeline sentinel2_spectral_indices
+```
 
 ```{mermaid}
 flowchart LR
-  gee["params:gee<br/>Dict"]:::input --> v("validate_sentinel2_spectral_indices_config<br/>Function"):::func
-  params["params:sentinel2_spectral_indices<br/>Dict"]:::input --> v
-  v --> cfg["sentinel2_spectral_indices_config<br/>Dict"]:::output
-  cfg --> assets("build_sentinel2_spectral_indices_assets<br/>Function"):::func
-  assets --> img["sentinel2_spectral_indices_assets<br/>ee.Image + metadata"]:::output
-  img --> maps("export_sentinel2_spectral_index_maps<br/>Function"):::func
-  cfg --> maps
-  maps --> png["sentinel2_spectral_indices_maps_metadata<br/>JSON"]:::output
-  cfg --> tifs("export_sentinel2_spectral_index_tifs<br/>Function"):::func
-  tifs --> geotiff["sentinel2_spectral_indices_tifs_metadata<br/>JSON"]:::output
-  img --> meta("build_sentinel2_spectral_indices_metadata<br/>Function"):::func
-  png --> meta
-  geotiff --> meta
-  cfg --> meta
-  meta --> out["sentinel2_spectral_indices_metadata<br/>JSON"]:::output
-  classDef input fill:#ffffff,stroke:#333333,stroke-dasharray:5 5,color:#111111;
-  classDef output fill:#ffffff,stroke:#333333,stroke-dasharray:5 5,color:#111111;
-  classDef func fill:#b7dce8,stroke:#111111,color:#111111;
+  b["Bandas Sentinel-2"]:::data --> c("calcular indices espectrales"):::node
+  c --> t["GeoTIFF por indice"]:::data
+  c --> p("exportar mapas PNG"):::node
+  p --> o["panel e indices individuales"]:::data
+  classDef data fill:#ffffff,stroke:#333,stroke-dasharray:5 5;
+  classDef node fill:#b7dce8,stroke:#111;
 ```
 
-Codigo central: los indices se calculan desde YAML. Esto evita escribir una
-funcion distinta para cada indice y permite cambiar formulas sin tocar la
-estructura del pipeline.
+Los indices se calculan para representar procesos fisicos utiles: vigor de
+vegetacion, humedad, suelo desnudo y superficies alteradas.
 
 ```python
-def build_sentinel2_indices_image(image: Any, params: dict[str, Any]) -> Any:
-    index_images = [
-        _calculate_index(image, name, config)
-        for name, config in params["indices"].items()
-        if config.get("enabled", True)
-    ]
-    output = index_images[0]
-    for index_image in index_images[1:]:
-        output = output.addBands(index_image)
-    if params.get("include_original_bands", True):
-        output = image.select(params["bands"]).addBands(output)
-    return output.select(params["output_band_order"]).toFloat()
+# Funcion para calcular indices espectrales con operaciones seguras.
+def add_sentinel2_spectral_indices(image):
+    ndvi = image.normalizedDifference(["B8", "B4"]).rename("NDVI")
+    ndwi = image.normalizedDifference(["B3", "B8"]).rename("NDWI")
+    ndbi = image.normalizedDifference(["B11", "B8"]).rename("NDBI")
+    bsi = image.expression(
+        "((swir + red) - (nir + blue)) / ((swir + red) + (nir + blue))",
+        {"swir": image.select("B11"), "red": image.select("B4"), "nir": image.select("B8"), "blue": image.select("B2")},
+    ).rename("BSI")
+    return image.addBands([ndvi, ndwi, ndbi, bsi])
 ```
 
-### `prepare_training_data`
+**Resultados**
+
+![Panel de indices espectrales calculados a partir de Sentinel-2.](../data/08_reporting/sentinel2_spectral_indices_maps/all_indices_map.png){#fig-indices-panel fig-align="center" width="95%"}
+
+![NDVI: respuesta de vegetacion.](../data/08_reporting/sentinel2_spectral_indices_maps/ndvi_map.png){#fig-ndvi fig-align="center" width="80%"}
+
+![BSI: zonas de suelo desnudo o superficies expuestas.](../data/08_reporting/sentinel2_spectral_indices_maps/bsi_map.png){#fig-bsi fig-align="center" width="80%"}
+
+## Pipeline 3: preparacion de puntos etiquetados
+
+**Comando**
+
+```powershell
+kedro run --pipeline prepare_training_data
+```
 
 ```{mermaid}
 flowchart LR
-  params["params:training_data<br/>Dict"]:::input --> prep("prepare_labeled_points<br/>Function"):::func
-  prep --> valid["validated_labeled_points<br/>GeoDataFrame"]:::output
-  valid --> reports("plot_labeled_points_reports<br/>Function"):::func
-  params --> reports
-  reports --> repmeta["labeled_points_reports_metadata<br/>JSON"]:::output
-  valid --> split("split_training_testing_data<br/>Function"):::func
-  params --> split
-  split --> train["training_labeled_points<br/>CSV"]:::output
-  split --> test["testing_labeled_points<br/>CSV"]:::output
-  train --> maps("plot_training_testing_points_distribution<br/>Function"):::func
-  test --> maps
-  params --> maps
-  maps --> mapmeta["training_testing_points_spatial_plot_metadata<br/>JSON"]:::output
-  valid --> meta("build_training_data_metadata<br/>Function"):::func
-  train --> meta
-  test --> meta
-  repmeta --> meta
-  mapmeta --> meta
-  params --> meta
-  meta --> out["training_data_metadata<br/>JSON"]:::output
-  classDef input fill:#ffffff,stroke:#333333,stroke-dasharray:5 5,color:#111111;
-  classDef output fill:#ffffff,stroke:#333333,stroke-dasharray:5 5,color:#111111;
-  classDef func fill:#b7dce8,stroke:#111111,color:#111111;
+  shp["Datos_Entrenamiento.shp"]:::data --> prep("limpiar y proyectar puntos"):::node
+  prep --> split("dividir train/test estratificado"):::node
+  split --> tr["480 puntos entrenamiento"]:::data
+  split --> te["120 puntos prueba"]:::data
+  prep --> plots("graficar distribuciones"):::node
+  plots --> rep["figuras de puntos"]:::data
+  classDef data fill:#ffffff,stroke:#333,stroke-dasharray:5 5;
+  classDef node fill:#b7dce8,stroke:#111;
 ```
-
-Codigo central: se conserva la proporcion de clases con particion
-estratificada. Esta decision reduce el riesgo de que la clase `Mineria` quede
-mal representada en el conjunto de prueba.
 
 ```python
-def split_training_testing_data(labeled_points: gpd.GeoDataFrame, params: dict) -> tuple[pd.DataFrame, pd.DataFrame]:
-    label_column = params["label_column"]
-    stratify = labeled_points[label_column] if params.get("stratify", True) else None
-    train, test = train_test_split(
-        labeled_points,
-        test_size=params.get("test_size", 0.2),
-        random_state=params.get("random_state", 42),
-        stratify=stratify,
-    )
-    return _to_table(train, label_column), _to_table(test, label_column)
+# Funcion para preparar puntos etiquetados y mantener solo columnas utiles.
+def prepare_labeled_points(labeled_points, config):
+    points = labeled_points.to_crs(config["target_crs"])
+    points = points.dropna(subset=[config["label_column"]])
+    points["x"] = points.to_crs("EPSG:4326").geometry.x
+    points["y"] = points.to_crs("EPSG:4326").geometry.y
+    return points
 ```
 
-### `extract_sentinel2_training_features`
-
-```{mermaid}
-flowchart LR
-  gee["params:gee<br/>Dict"]:::input --> v("validate_sentinel2_training_features_config<br/>Function"):::func
-  idx["params:sentinel2_spectral_indices<br/>Dict"]:::input --> v
-  feat["params:sentinel2_training_features<br/>Dict"]:::input --> v
-  v --> cfg["sentinel2_training_features_config<br/>Dict"]:::output
-  cfg --> img("build_sentinel2_training_features_image<br/>Function"):::func
-  img --> eeimg["sentinel2_training_features_image<br/>ee.Image"]:::output
-  train["training_labeled_points<br/>DataFrame"]:::input --> sample("extract_sentinel2_features<br/>Function"):::func
-  test["testing_labeled_points<br/>DataFrame"]:::input --> sample
-  eeimg --> sample
-  cfg --> sample
-  sample --> trainf["training_sentinel2_features<br/>CSV"]:::output
-  sample --> testf["testing_sentinel2_features<br/>CSV"]:::output
-  trainf --> meta("build_sentinel2_training_features_metadata<br/>Function"):::func
-  testf --> meta
-  cfg --> meta
-  meta --> out["sentinel2_training_features_metadata<br/>JSON"]:::output
-  classDef input fill:#ffffff,stroke:#333333,stroke-dasharray:5 5,color:#111111;
-  classDef output fill:#ffffff,stroke:#333333,stroke-dasharray:5 5,color:#111111;
-  classDef func fill:#b7dce8,stroke:#111111,color:#111111;
-```
-
-Codigo central: el mismo objeto imagen de Earth Engine se muestrea para puntos
-de entrenamiento y prueba. Asi se garantiza que las variables del modelo se
-calculen con las mismas bandas, indices y formulas.
-
-```python
-def extract_sentinel2_features(
-    training_labeled_points: pd.DataFrame,
-    testing_labeled_points: pd.DataFrame,
-    sentinel2_training_features_image: Any,
-    sentinel2_training_features_config: dict,
-) -> tuple[pd.DataFrame, pd.DataFrame]:
-    params = sentinel2_training_features_config["sentinel2_training_features"]
-    return (
-        sample_points_from_image(training_labeled_points, sentinel2_training_features_image, params, "training"),
-        sample_points_from_image(testing_labeled_points, sentinel2_training_features_image, params, "testing"),
-    )
-```
-
-### `analyze_sentinel2_pca`
-
-```{mermaid}
-flowchart LR
-  params["params:sentinel2_pca_analysis<br/>Dict"]:::input --> v("validate_sentinel2_pca_config<br/>Function"):::func
-  v --> cfg["sentinel2_pca_config<br/>Dict"]:::output
-  train["training_sentinel2_features<br/>DataFrame"]:::input --> dtrain("build_training_pca_dataset<br/>Function"):::func
-  test["testing_sentinel2_features<br/>DataFrame"]:::input --> dtest("build_testing_pca_dataset<br/>Function"):::func
-  cfg --> dtrain
-  cfg --> dtest
-  dtrain --> xtrain["sentinel2_pca_training_dataset<br/>Dict"]:::output
-  dtest --> xtest["sentinel2_pca_testing_dataset<br/>Dict"]:::output
-  xtrain --> fit("fit_sentinel2_pca_model<br/>Function"):::func
-  cfg --> fit
-  fit --> model["sentinel2_pca_model<br/>Pipeline"]:::output
-  model --> str("transform_training_pca_scores<br/>Function"):::func
-  xtrain --> str
-  model --> ste("transform_testing_pca_scores<br/>Function"):::func
-  xtest --> ste
-  str --> scoretr["sentinel2_pca_training_scores<br/>CSV"]:::output
-  ste --> scorete["sentinel2_pca_testing_scores<br/>CSV"]:::output
-  model --> var("build_sentinel2_pca_explained_variance<br/>Function"):::func
-  model --> load("build_sentinel2_pca_loadings<br/>Function"):::func
-  scoretr --> scatter("plot_sentinel2_pca_scatter<br/>Function"):::func
-  scorete --> scatter
-  var --> scree("plot_sentinel2_pca_scree<br/>Function"):::func
-  scatter --> meta("build_sentinel2_pca_metadata<br/>Function"):::func
-  scree --> meta
-  meta --> out["sentinel2_pca_metadata<br/>JSON"]:::output
-  classDef input fill:#ffffff,stroke:#333333,stroke-dasharray:5 5,color:#111111;
-  classDef output fill:#ffffff,stroke:#333333,stroke-dasharray:5 5,color:#111111;
-  classDef func fill:#b7dce8,stroke:#111111,color:#111111;
-```
-
-Codigo central: el PCA se ajusta solo con entrenamiento y despues se usa para
-proyectar entrenamiento y prueba. Esto evita fuga de informacion desde el
-conjunto de prueba.
-
-```python
-def fit_sentinel2_pca_model(
-    sentinel2_pca_training_dataset: dict,
-    sentinel2_pca_config: dict,
-) -> SklearnPipeline:
-    """Ajusta PCA con los datos de entrenamiento."""
-    return fit_pca_model(
-        training_dataset=sentinel2_pca_training_dataset,
-        params=sentinel2_pca_config,
-    )
-```
-
-### `train_mining_binary_rf`
-
-```{mermaid}
-flowchart LR
-  params["params:mining_binary_random_forest<br/>Dict"]:::input --> v("validate_mining_binary_random_forest_config<br/>Function"):::func
-  v --> cfg["mining_binary_random_forest_config<br/>Dict"]:::output
-  train["training_sentinel2_features<br/>DataFrame"]:::input --> ds("build_mining_binary_datasets<br/>Function"):::func
-  test["testing_sentinel2_features<br/>DataFrame"]:::input --> ds
-  cfg --> ds
-  ds --> dtrain["mining_binary_training_dataset<br/>Dict"]:::output
-  ds --> dtest["mining_binary_testing_dataset<br/>Dict"]:::output
-  dtrain --> fit("train_mining_binary_random_forest<br/>Function"):::func
-  cfg --> fit
-  fit --> model["mining_binary_random_forest_model<br/>RandomForest"]:::output
-  model --> pred("predict_mining_binary_random_forest<br/>Function"):::func
-  dtest --> pred
-  cfg --> pred
-  pred --> preds["mining_binary_predictions<br/>CSV"]:::output
-  preds --> eval("evaluate_mining_binary_random_forest<br/>Function"):::func
-  cfg --> eval
-  eval --> metrics["mining_binary_metrics<br/>JSON"]:::output
-  model --> imp("build_mining_binary_feature_importance<br/>Function"):::func
-  imp --> importance["mining_binary_feature_importance<br/>CSV"]:::output
-  metrics --> cm("plot_mining_binary_confusion_matrix<br/>Function"):::func
-  importance --> fig("plot_mining_binary_feature_importance<br/>Function"):::func
-  cm --> meta("build_mining_binary_random_forest_metadata<br/>Function"):::func
-  fig --> meta
-  meta --> out["mining_binary_random_forest_metadata<br/>JSON"]:::output
-  classDef input fill:#ffffff,stroke:#333333,stroke-dasharray:5 5,color:#111111;
-  classDef output fill:#ffffff,stroke:#333333,stroke-dasharray:5 5,color:#111111;
-  classDef func fill:#b7dce8,stroke:#111111,color:#111111;
-```
-
-Codigo central: el umbral se aplica sobre la probabilidad de la clase positiva.
-Esto permite ajustar la sensibilidad del modelo sin reentrenarlo.
-
-```python
-def predict_mining_binary_random_forest(model: RandomForestClassifier, testing_dataset: dict, params: dict) -> pd.DataFrame:
-    predictions = testing_dataset["source"].copy()
-    positive_index = list(model.classes_).index(params["positive_label"])
-    probability = np.asarray(model.predict_proba(testing_dataset["X"]))[:, positive_index]
-    predictions["probability_mineria"] = probability
-    predictions["predicted_target"] = np.where(
-        probability >= params.get("classification_threshold", 0.5),
-        params["positive_label"],
-        params["negative_label"],
-    )
-    return predictions
-```
-
-### `predict_mining_binary_map`
-
-```{mermaid}
-flowchart LR
-  params["params:mining_binary_map_prediction<br/>Dict"]:::input --> v("validate_mining_binary_map_prediction_config<br/>Function"):::func
-  v --> cfg["mining_binary_map_prediction_config<br/>Dict"]:::output
-  model["mining_binary_random_forest_model<br/>RandomForest"]:::input --> pred("predict_mining_binary_map_rasters<br/>Function"):::func
-  cfg --> pred
-  pred --> rasters["classification_map + probability_map<br/>GeoTIFF"]:::output
-  rasters --> plot("plot_mining_binary_map<br/>Function"):::func
-  cfg --> plot
-  plot --> png["mining_binary_map_plot_metadata<br/>JSON"]:::output
-  rasters --> meta("build_mining_binary_map_metadata<br/>Function"):::func
-  png --> meta
-  cfg --> meta
-  meta --> out["mining_binary_map_metadata<br/>JSON"]:::output
-  classDef input fill:#ffffff,stroke:#333333,stroke-dasharray:5 5,color:#111111;
-  classDef output fill:#ffffff,stroke:#333333,stroke-dasharray:5 5,color:#111111;
-  classDef func fill:#b7dce8,stroke:#111111,color:#111111;
-```
-
-Codigo central: la prediccion raster se hace por ventanas para no cargar toda
-la imagen en memoria. En cada ventana se recalculan los mismos indices usados
-en entrenamiento y se escriben dos rasters: clase y probabilidad.
-
-```python
-for window in _windows(reference.width, reference.height, params.get("window_size", 512)):
-    bands = _read_bands(sources, window, params)
-    features = _feature_stack(bands, params["feature_columns"])
-    predicted, probabilities, valid_mask = _predict_window(model, features, params)
-    class_writer.write(predicted, 1, window=window)
-    probability_writer.write(probabilities, 1, window=window)
-    _update_class_counts(class_counts, predicted, params)
-    probability_values.append(probabilities[valid_mask])
-```
-
-### `postprocess_mining_binary_map`
-
-```{mermaid}
-flowchart LR
-  params["params:mining_binary_map_postprocessing<br/>Dict"]:::input --> v("validate_mining_binary_postprocessing_config<br/>Function"):::func
-  v --> cfg["mining_binary_map_postprocessing_config<br/>Dict"]:::output
-  cfg --> pp("postprocess_mining_binary_map<br/>Function"):::func
-  pp --> outpp["mining_binary_map_postprocessing_output_metadata<br/>JSON"]:::output
-  outpp --> plot("plot_mining_binary_postprocessed_map<br/>Function"):::func
-  cfg --> plot
-  plot --> fig["mining_binary_postprocessed_map_plot_metadata<br/>JSON"]:::output
-  outpp --> meta("build_mining_binary_postprocessing_metadata<br/>Function"):::func
-  fig --> meta
-  cfg --> meta
-  meta --> out["mining_binary_map_postprocessing_metadata<br/>JSON"]:::output
-  classDef input fill:#ffffff,stroke:#333333,stroke-dasharray:5 5,color:#111111;
-  classDef output fill:#ffffff,stroke:#333333,stroke-dasharray:5 5,color:#111111;
-  classDef func fill:#b7dce8,stroke:#111111,color:#111111;
-```
-
-Codigo central: el mapa se convierte en parches, se filtra por area minima y
-se vuelve a rasterizar. Esto elimina ruido espacial y mejora la lectura
-cartografica.
-
-```python
-with rasterio.open(classification_path) as source:
-    class_map = source.read(1)
-    profile = source.profile.copy()
-    polygons, all_patches = extract_mining_polygons(class_map, source.transform, source.crs, params)
-    filtered = polygons[polygons["area_ha"] >= float(params["min_area_ha"])].copy()
-    postprocessed = rasterize_polygons(filtered, class_map, source.transform, params)
-    metadata = write_postprocessing_outputs(filtered, postprocessed, profile, source.bounds, source.crs, params)
-```
-
-### `validate_mining_binary_map`
-
-```{mermaid}
-flowchart LR
-  params["params:mining_binary_map_validation<br/>Dict"]:::input --> v("validate_mining_binary_map_validation_config<br/>Function"):::func
-  v --> cfg["mining_binary_map_validation_config<br/>Dict"]:::output
-  train["training_sentinel2_features<br/>DataFrame"]:::input --> classmap("plot_classification_points_overlay<br/>Function"):::func
-  preds["mining_binary_predictions<br/>DataFrame"]:::input --> classmap
-  mapmeta["mining_binary_map_metadata<br/>JSON"]:::input --> classmap
-  cfg --> classmap
-  preds --> prob("plot_probability_points_overlay<br/>Function"):::func
-  mapmeta --> prob
-  cfg --> prob
-  preds --> errors("plot_testing_errors_overlay<br/>Function"):::func
-  mapmeta --> errors
-  cfg --> errors
-  classmap --> classout["classification_points_plot_metadata<br/>JSON"]:::output
-  prob --> probout["probability_points_plot_metadata<br/>JSON"]:::output
-  errors --> errout["testing_errors_plot_metadata<br/>JSON"]:::output
-  classout --> meta("build_mining_binary_map_validation_metadata<br/>Function"):::func
-  probout --> meta
-  errout --> meta
-  preds --> meta
-  cfg --> meta
-  meta --> out["mining_binary_map_validation_metadata<br/>JSON"]:::output
-  classDef input fill:#ffffff,stroke:#333333,stroke-dasharray:5 5,color:#111111;
-  classDef output fill:#ffffff,stroke:#333333,stroke-dasharray:5 5,color:#111111;
-  classDef func fill:#b7dce8,stroke:#111111,color:#111111;
-```
-
-Codigo central: los falsos negativos y falsos positivos se calculan sobre los
-puntos de prueba y se dibujan sobre el mapa clasificado. Esto conecta la
-metrica tabular con una lectura espacial.
-
-```python
-def plot_testing_errors_overlay(predictions: pd.DataFrame, map_metadata: dict, params: dict) -> dict:
-    figure, axis = map_figure(params.get("errors_plot", {}))
-    _, _, crs = plot_classification_base(axis, map_metadata, params, params.get("errors_plot", {}))
-    testing = project_points(predictions, crs, params)
-    false_negatives, false_positives = error_groups(testing, params)
-    plot_error_group(axis, false_negatives, params["errors_plot"], "false_negative", "Mineria omitida")
-    plot_error_group(axis, false_positives, params["errors_plot"], "false_positive", "Falso positivo")
-    return {"false_negatives": len(false_negatives), "false_positives": len(false_positives)}
-```
-
-### `validate_postprocessed_mining_map`
-
-```{mermaid}
-flowchart LR
-  params["params:postprocessed_mining_map_validation<br/>Dict"]:::input --> v("validate_postprocessed_mining_map_validation_config<br/>Function"):::func
-  v --> cfg["postprocessed_mining_map_validation_config<br/>Dict"]:::output
-  train["training_sentinel2_features<br/>DataFrame"]:::input --> table("build_postprocessed_point_validation_table<br/>Function"):::func
-  test["testing_sentinel2_features<br/>DataFrame"]:::input --> table
-  ppmeta["mining_binary_map_postprocessing_metadata<br/>JSON"]:::input --> table
-  cfg --> table
-  table --> points["postprocessed_mining_point_validation<br/>CSV"]:::output
-  points --> summary("build_postprocessed_class_summary<br/>Function"):::func
-  cfg --> summary
-  summary --> rows["postprocessed_mining_class_summary<br/>CSV"]:::output
-  points --> plot("plot_postprocessed_validation_map<br/>Function"):::func
-  ppmeta --> plot
-  cfg --> plot
-  plot --> fig["postprocessed_mining_validation_plot_metadata<br/>JSON"]:::output
-  points --> meta("build_postprocessed_validation_metadata<br/>Function"):::func
-  rows --> meta
-  fig --> meta
-  ppmeta --> meta
-  cfg --> meta
-  meta --> out["postprocessed_mining_map_validation_metadata<br/>JSON"]:::output
-  classDef input fill:#ffffff,stroke:#333333,stroke-dasharray:5 5,color:#111111;
-  classDef output fill:#ffffff,stroke:#333333,stroke-dasharray:5 5,color:#111111;
-  classDef func fill:#b7dce8,stroke:#111111,color:#111111;
-```
-
-Codigo central: la validacion final cruza los puntos con los poligonos
-postprocesados y clasifica cada punto como verdadero positivo, verdadero
-negativo, falso positivo o falso negativo.
-
-```python
-def build_postprocessed_point_validation_table(training_points: pd.DataFrame, testing_points: pd.DataFrame, metadata: dict, params: dict) -> pd.DataFrame:
-    polygons = _read_mining_polygons(metadata)
-    points = _prepare_points(training_points, testing_points, polygons.crs, params)
-    mining_area = polygons.geometry.union_all()
-    inside = points.geometry.apply(mining_area.covers)
-    result = points.drop(columns="geometry").copy()
-    result["inside_mining_polygon"] = inside.astype(bool).values
-    result["observed_binary_label"] = np.where(result[params["label_column"]] == params["positive_label"], params["positive_label"], params["negative_label"])
-    result["postprocessed_prediction"] = np.where(result["inside_mining_polygon"], params["positive_label"], params["negative_label"])
-    result["validation_status"] = result.apply(lambda row: _validation_status(row, params), axis=1)
-    return result
-```
-
-## Procesamiento Sentinel-2
-
-### Composicion de imagenes
-
-La composicion se construye en
-`pipelines/helper/google_earth_engine/sentinel2_composite.py`. El codigo permite
-usar mediana, media o mosaico y aplicar, cuando corresponde, el factor de
-escala de reflectancia.
-
-```python
-def build_composite_image(sentinel2_image_collection: Any, params: dict) -> Any:
-    method = params.get("composite_method", "median")
-    composite_methods = {
-        "median": sentinel2_image_collection.median,
-        "mean": sentinel2_image_collection.mean,
-        "mosaic": sentinel2_image_collection.mosaic,
-    }
-    if method not in composite_methods:
-        raise ValueError(
-            "sentinel2_download.composite_method debe ser median, mean o mosaic."
-        )
-
-    image = composite_methods[method]()
-    image = _set_reference_projection(image, sentinel2_image_collection, params)
-    if params.get("apply_reflectance_scale", True):
-        return image.multiply(params.get("reflectance_scale_factor", 0.0001)).toFloat()
-    return image
-```
-
-Esta etapa es clave porque define la imagen base sobre la cual se calculan las
-variables del modelo. La composicion mediana reduce la influencia de valores
-atipicos y facilita obtener una representacion sintetica del periodo de
-interes.
-
-### Indices espectrales
-
-Los indices espectrales agregan informacion fisica al modelo y ayudan a
-separar respuestas asociadas a vegetacion, agua, humedad, suelo desnudo,
-residuos solidos y superficies alteradas.
-
-| Indice | Formula configurada | Uso esperado |
-|---|---|---|
-| NDVI | `(B8 - B4) / (B8 + B4)` | Contraste de vegetacion |
-| MSAVI | Expresion ajustada con NIR y rojo | Vegetacion con influencia de suelo |
-| NDWI | `(B3 - B8) / (B3 + B8)` | Humedad y cuerpos de agua |
-| BSI | `((B11 + B4) - (B8 + B2)) / ((B11 + B4) + (B8 + B2))` | Suelo desnudo |
-| MBSI | `(B11 - B4) / (B11 + B4)` | Suelo desnudo modificado |
-| NDSI | `(B11 - B3) / (B11 + B3)` | Contraste suelo/vegetacion |
-| MSWI | `(B12 - B4) / (B12 + B4)` | Residuos solidos mineros |
-| NDBI | `(B11 - B8) / (B11 + B8)` | Suelo expuesto o areas construidas |
-
-El calculo se controla desde YAML y se ejecuta con una funcion generica:
-
-```python
-def build_sentinel2_indices_image(sentinel2_composite_image: Any, params: dict[str, Any]) -> Any:
-    index_images = [
-        _calculate_index(sentinel2_composite_image, name, config)
-        for name, config in params["indices"].items()
-        if config.get("enabled", True)
-    ]
-    if not index_images:
-        raise ValueError("No hay indices activos para calcular.")
-
-    image = index_images[0]
-    for index_image in index_images[1:]:
-        image = image.addBands(index_image)
-    if params.get("include_original_bands", True):
-        image = sentinel2_composite_image.select(params["bands"]).addBands(image)
-    if params.get("output_band_order"):
-        image = image.select(params["output_band_order"])
-    return image.toFloat()
-
-
-def _calculate_index(image: Any, name: str, config: dict[str, Any]) -> Any:
-    formula = config["formula"]
-    bands = config["bands"]
-    if formula == "normalized_difference":
-        return image.normalizedDifference([bands["first"], bands["second"]]).rename(name)
-    return image.expression(
-        config["expression"],
-        {alias: image.select(band_name) for alias, band_name in bands.items()},
-    ).rename(name)
-```
-
-Esta organizacion permite agregar, desactivar o ajustar indices desde archivos
-de configuracion sin modificar el codigo de procesamiento.
-
-## Preparacion de datos de entrenamiento
-
-Los puntos etiquetados se almacenan como datos vectoriales locales y contienen
-la columna `Cobertura`. El flujo valida los campos, reproyecta cuando es
-necesario y separa los datos en entrenamiento y prueba.
-
-```yaml
-training_data:
-  labeled_points_path: data/01_raw/labeled_points/Datos_Entrenamiento.shp
-  label_column: Cobertura
-  target_crs: EPSG:9377
-  test_size: 0.2
-  random_state: 42
-  stratify: true
-```
-
-La particion estratificada ayuda a conservar la proporcion de clases en los
-conjuntos de entrenamiento y prueba. Ademas, el pipeline genera reportes de
-distribucion espacial y distribucion por clase, utiles para revisar sesgos de
-muestreo.
-
-### Extraccion de variables por punto
-
-Cada punto se cruza con la imagen Sentinel-2 y sus indices espectrales. El
-resultado son dos tablas: una de entrenamiento y otra de prueba.
-
-```python
-def create_pipeline(**kwargs) -> Pipeline:
-    return Pipeline(
-        [
-            node(
-                func=validate_sentinel2_training_features_config,
-                inputs=[
-                    "params:gee",
-                    "params:sentinel2_spectral_indices",
-                    "params:sentinel2_training_features",
-                ],
-                outputs="sentinel2_training_features_config",
-            ),
-            node(
-                func=build_sentinel2_training_features_image,
-                inputs="sentinel2_training_features_config",
-                outputs="sentinel2_training_features_image",
-            ),
-            node(
-                func=extract_sentinel2_features,
-                inputs=[
-                    "training_labeled_points",
-                    "testing_labeled_points",
-                    "sentinel2_training_features_image",
-                    "sentinel2_training_features_config",
-                ],
-                outputs=["training_sentinel2_features", "testing_sentinel2_features"],
-            ),
-        ]
-    )
-```
-
-El conjunto de variables usado por el modelo combina bandas originales e
-indices:
-
-```yaml
-feature_columns:
-  [B1, B2, B3, B4, B5, B6, B7, B8, B8A, B9, B11, B12,
-   NDVI, MSAVI, NDWI, BSI, MBSI, NDSI, MSWI, NDBI]
-```
-
-## Analisis exploratorio con PCA
-
-El analisis de componentes principales se incluye como una etapa exploratoria,
-no como sustituto del modelo de clasificacion. Su funcion es revisar
-redundancia entre bandas e indices, observar separacion entre coberturas y
-apoyar la interpretacion del espacio espectral.
-
-| Producto | Uso en el reporte |
-|---|---|
-| Varianza explicada | Evaluar cuantos componentes concentran informacion |
-| Cargas PCA | Identificar bandas e indices dominantes |
-| Grafico PC1 vs PC2 | Explorar separacion visual entre coberturas |
-
-## Clasificacion binaria con Random Forest
-
-El modelo se formula como una clasificacion binaria:
-
-| Etiqueta fuente | Etiqueta binaria |
-|---|---|
-| `Mineria` | `Mineria` |
-| `Bosque Natural`, `Cuerpos de Agua`, `Nubes`, `Suelo Desnudo`, `Vegetacion` | `No Mineria` |
-
-La configuracion del modelo esta en
-`conf/base/parameters/training_data/mining_binary_random_forest.yml`:
-
-```yaml
-mining_binary_random_forest:
-  positive_label: Mineria
-  negative_label: No Mineria
-  classification_threshold: 0.4
-  feature_columns:
-    [B1, B2, B3, B4, B5, B6, B7, B8, B8A, B9, B11, B12,
-     NDVI, MSAVI, NDWI, BSI, MBSI, NDSI, MSWI, NDBI]
-  random_forest:
-    n_estimators: 500
-    criterion: gini
-    max_features: sqrt
-    class_weight: balanced
-    random_state: 42
-```
-
-La logica de entrenamiento, prediccion y evaluacion esta centralizada en
-`pipelines/helper/modeling/binary_random_forest.py`:
-
-```python
-def train_random_forest(training_dataset: dict[str, Any], params: dict[str, Any]) -> RandomForestClassifier:
-    model = RandomForestClassifier(**params.get("random_forest", {}))
-    model.fit(training_dataset["X"], training_dataset["y"])
-    return model
-
-
-def predict_random_forest(
-    model: RandomForestClassifier,
-    testing_dataset: dict[str, Any],
-    params: dict[str, Any],
-) -> pd.DataFrame:
-    predictions = testing_dataset["source"].copy()
-    prediction_column = params.get("prediction_column", "predicted_target")
-    probability_column = params.get("probability_column", "probability_mineria")
-    positive_index = list(model.classes_).index(params["positive_label"])
-    probability = np.asarray(model.predict_proba(testing_dataset["X"]))[:, positive_index]
-    predictions[probability_column] = probability
-    predictions[prediction_column] = np.where(
-        probability >= params.get("classification_threshold", 0.5),
-        params["positive_label"],
-        params["negative_label"],
-    )
-    return predictions
-```
-
-El umbral de clasificacion se fija en `0.4`, lo que permite ajustar la
-sensibilidad del modelo hacia la clase Mineria. Esta decision debe discutirse
-con las metricas finales: si el interes es reducir omisiones, el recall de
-mineria es prioritario; si se busca disminuir falsas alarmas, la precision
-tiene mayor peso.
-
-### Metricas de evaluacion
-
-El pipeline calcula:
-
-| Metrica | Interpretacion |
-|---|---|
-| Accuracy | Proporcion total de aciertos |
-| Precision de Mineria | Que proporcion de pixeles/puntos predichos como mineria realmente lo son |
-| Recall de Mineria | Que proporcion de la mineria observada fue detectada |
-| F1 de Mineria | Balance entre precision y recall |
-| Matriz de confusion | Distribucion de aciertos y errores por clase |
-
-```python
-def evaluate_binary_predictions(predictions: pd.DataFrame, params: dict[str, Any]) -> dict[str, Any]:
-    target_column = params.get("target_column", "target")
-    prediction_column = params.get("prediction_column", "predicted_target")
-    labels = [params["negative_label"], params["positive_label"]]
-    y_true = predictions[target_column]
-    y_pred = predictions[prediction_column]
-    matrix = confusion_matrix(y_true, y_pred, labels=labels)
-    return {
-        "accuracy": float(accuracy_score(y_true, y_pred)),
-        "precision_mineria": float(precision_score(y_true, y_pred, pos_label=params["positive_label"], zero_division=0)),
-        "recall_mineria": float(recall_score(y_true, y_pred, pos_label=params["positive_label"], zero_division=0)),
-        "f1_mineria": float(f1_score(y_true, y_pred, pos_label=params["positive_label"], zero_division=0)),
-        "confusion_matrix": matrix.astype(int).tolist(),
-    }
-```
-
-## Prediccion espacial
-
-Luego del entrenamiento, el modelo se aplica sobre los raster Sentinel-2 para
-producir dos salidas: un mapa binario de clase y un mapa de probabilidad de
-mineria. Para evitar cargar toda la imagen en memoria, el proceso se ejecuta
-por ventanas.
-
-```python
-def predict_mining_map_rasters(model: Any, params: dict[str, Any]) -> dict[str, Any]:
-    raster_paths = _band_paths(params)
-    _ensure_rasters_exist(raster_paths)
-    class_path = Path(params["outputs"]["classification_map"])
-    probability_path = Path(params["outputs"]["probability_map"])
-
-    class_counts: dict[str, int] = {}
-    probability_values = []
-    with ExitStack() as stack:
-        sources = {band: stack.enter_context(rasterio.open(path)) for band, path in raster_paths.items()}
-        _validate_raster_grid(sources)
-        reference = sources[params.get("reference_band", params["bands"][0])]
-        class_writer = stack.enter_context(rasterio.open(class_path, "w", **_classification_profile(reference, params)))
-        probability_writer = stack.enter_context(rasterio.open(probability_path, "w", **_probability_profile(reference, params)))
-
-        for window in _windows(reference.width, reference.height, params.get("window_size", 512)):
-            bands = _read_bands(sources, window, params)
-            features = _feature_stack(bands, params["feature_columns"])
-            predicted, probabilities, valid_mask = _predict_window(model, features, params)
-            class_writer.write(predicted, 1, window=window)
-            probability_writer.write(probabilities, 1, window=window)
-            _update_class_counts(class_counts, predicted, params)
-            probability_values.append(probabilities[valid_mask])
-```
-
-Esta etapa mantiene consistencia entre entrenamiento y prediccion porque las
-variables raster se calculan con las mismas formulas usadas en las muestras
-puntuales.
-
-## Posprocesamiento espacial
-
-El resultado pixel a pixel puede contener parches muy pequenos o pixeles
-aislados. El posprocesamiento convierte los pixeles clasificados como mineria
-en poligonos, filtra por area minima y vuelve a rasterizar el resultado. En la
-configuracion actual, el umbral minimo es `1.0 ha` con conectividad de ocho
-vecinos.
-
-```python
-def postprocess_mining_binary_map(params: dict[str, Any]) -> dict[str, Any]:
-    classification_path = Path(params["classification_map"])
-    if not classification_path.exists():
-        raise FileNotFoundError(f"No existe el mapa clasificado: {classification_path.as_posix()}")
-
-    with rasterio.open(classification_path) as source:
-        class_map = source.read(1)
-        profile = source.profile.copy()
-        polygons, all_patches = _extract_mining_polygons(class_map, source.transform, source.crs, params)
-        filtered = polygons[polygons["area_ha"] >= float(params["min_area_ha"])].copy()
-        postprocessed = _rasterize_polygons(filtered, class_map, source.transform, params)
-        metadata = _write_outputs(filtered, postprocessed, profile, source.bounds, source.crs, params)
-
-    original_pixels = int(np.sum(class_map == int(params["class_value"])))
-    kept_pixels = int(np.sum(postprocessed == int(params["class_value"])))
-    pixel_area_ha = _pixel_area_ha(profile["transform"])
-    return {
-        "original_patches": int(len(all_patches)),
-        "kept_patches": int(len(filtered)),
-        "removed_patches": int(len(all_patches) - len(filtered)),
-        "original_mining_pixels": original_pixels,
-        "kept_mining_pixels": kept_pixels,
-        "kept_area_ha": float(kept_pixels * pixel_area_ha),
-        "raster": metadata["raster"],
-    }
-```
-
-Este filtro no reemplaza la validacion del modelo, pero ayuda a transformar una
-clasificacion raster en un producto cartografico mas interpretable.
-
-## Validacion tecnica e interpretacion
-
-La validacion se aborda en dos niveles. El primero es tabular y corresponde a
-las metricas del Random Forest sobre puntos de prueba. El segundo es espacial y
-consiste en superponer puntos de entrenamiento, puntos de prueba, mapa de
-probabilidad, mapa clasificado y errores.
-
-```python
-def _error_groups(points: pd.DataFrame, params: dict[str, Any]) -> tuple[pd.DataFrame, pd.DataFrame]:
-    target = params["target_column"]
-    prediction = params["prediction_column"]
-    positive = params["positive_label"]
-    false_negatives = points[(points[target] == positive) & (points[prediction] != positive)]
-    false_positives = points[(points[target] != positive) & (points[prediction] == positive)]
-    return false_negatives, false_positives
-```
-
-La interpretacion final debe revisar:
-
-| Aspecto | Pregunta de analisis |
-|---|---|
-| Omisiones | Donde hay mineria observada que el modelo no detecta? |
-| Falsas alarmas | Que coberturas se confunden con mineria? |
-| Probabilidad | Las zonas clasificadas como mineria tienen alta confianza? |
-| Importancia de variables | Que bandas o indices explican mas la decision del modelo? |
-| Posprocesamiento | Cuanta area se elimina por el filtro minimo de parches? |
-
-## Librerias usadas y rol en el proyecto
-
-| Grupo | Librerias | Rol |
-|---|---|---|
-| Acceso satelital | `earthengine-api`, `requests` | Consulta, exportacion y descarga de productos Sentinel-2 |
-| Raster | `rasterio`, `rioxarray`, `xarray`, `numpy` | Lectura, escritura, reproyeccion y procesamiento de imagenes |
-| Tabular | `pandas`, `numpy` | Preparacion de tablas de entrenamiento y resultados |
-| Vectorial | `geopandas`, `shapely`, `pyproj` | Manejo de puntos, poligonos y sistemas de referencia |
-| Aprendizaje automatico | `scikit-learn`, `joblib` | Entrenamiento, evaluacion y persistencia del Random Forest |
-| Visualizacion | `matplotlib`, `seaborn`, `contextily` | Figuras, mapas y graficos de reporte |
-| Reproducibilidad | `kedro`, `kedro-datasets`, `kedro-viz`, `pytest` | Pipelines, catalogos, visualizacion del flujo y pruebas |
-
-# Resultados y Discusion
-
-La ejecucion de los pipelines genero salidas cartograficas, metricas y
-metadatos en `data/08_reporting`. El resultado debe interpretarse como un
-ejercicio reproducible de clasificacion supervisada: mas que buscar un modelo
-definitivo, el objetivo es demostrar una cadena completa y verificable desde la
-imagen Sentinel-2 hasta la validacion espacial del mapa.
-
-## Datos de entrenamiento y variables espectrales
-
-El conjunto de entrenamiento quedo compuesto por 600 puntos etiquetados,
-divididos de forma estratificada en 480 puntos de entrenamiento y 120 puntos de
-prueba. La clase `Mineria` cuenta con 100 muestras, de las cuales 80 se usan
-para entrenar y 20 para validar.
+El conjunto final tiene 600 puntos: 480 para entrenamiento y 120 para prueba.
+La division es estratificada para conservar la proporcion de clases.
 
 | Clase | Total | Entrenamiento | Prueba |
 |---|---:|---:|---:|
@@ -1251,23 +466,80 @@ para entrenar y 20 para validar.
 | Suelo Desnudo | 100 | 80 | 20 |
 | Nubes | 50 | 40 | 10 |
 
-![Distribucion espacial de puntos etiquetados sobre imagen Sentinel-2 en color real.](../data/08_reporting/labeled_points_distribution.png){#fig-puntos fig-align="center" width="90%"}
+![Puntos etiquetados sobre imagen Sentinel-2 en color real.](../data/08_reporting/prepare_training_data/labeled_points_distribution.png){#fig-labeled-points fig-align="center" width="90%"}
 
-El panel de indices espectrales permite revisar visualmente el comportamiento
-espacial de las variables derivadas. Para este proyecto, los indices asociados
-a vegetacion, humedad y suelo expuesto son importantes porque la mineria de
-aluvion suele manifestarse como perdida de cobertura vegetal, superficies
-desnudas, cuerpos de agua intervenidos y acumulacion de sedimentos.
+![Distribucion de clases etiquetadas.](../data/08_reporting/prepare_training_data/labeled_points_class_distribution.png){#fig-class-distribution fig-align="center" width="80%"}
 
-![Panel de indices espectrales Sentinel-2 usados como variables explicativas.](../data/08_reporting/sentinel2_spectral_indices_maps/all_indices_map.png){#fig-indices fig-align="center" width="95%"}
+![Puntos de entrenamiento.](../data/08_reporting/prepare_training_data/training_labeled_points_distribution.png){#fig-training-points fig-align="center" width="90%"}
 
-## Analisis exploratorio PCA
+![Puntos de prueba.](../data/08_reporting/prepare_training_data/testing_labeled_points_distribution.png){#fig-testing-points fig-align="center" width="90%"}
 
-El PCA se uso como lectura exploratoria del espacio espectral. Los tres
-primeros componentes explicaron aproximadamente el 97.41 % de la varianza
-acumulada, lo cual indica una alta redundancia entre bandas e indices. Esto es
-esperable en sensores multiespectrales, donde varias bandas contienen
-informacion relacionada sobre vegetacion, humedad y suelo.
+## Pipeline 4: extraccion de variables por punto
+
+**Comando**
+
+```powershell
+kedro run --pipeline extract_sentinel2_training_features
+```
+
+```{mermaid}
+flowchart LR
+  pts["puntos train/test"]:::data --> ext("muestrear bandas e indices"):::node
+  ras["Sentinel-2 + indices"]:::data --> ext
+  ext --> train["training_sentinel2_features.csv"]:::data
+  ext --> test["testing_sentinel2_features.csv"]:::data
+  ext --> meta["metadata JSON"]:::data
+  classDef data fill:#ffffff,stroke:#333,stroke-dasharray:5 5;
+  classDef node fill:#b7dce8,stroke:#111;
+```
+
+```python
+# Funcion para extraer valores espectrales en coordenadas de puntos.
+def sample_sentinel2_features(points, image, params):
+    samples = image.sampleRegions(
+        collection=points,
+        properties=[params["label_column"]],
+        scale=params["sample_scale"],
+        geometries=True,
+    )
+    return ee_to_dataframe(samples)
+```
+
+El pipeline no elimino puntos por valores faltantes: salieron 480 filas de
+entrenamiento y 120 de prueba. Esto permite que la validacion sea consistente
+con la particion original.
+
+## Pipeline 5: analisis exploratorio PCA
+
+**Comando**
+
+```powershell
+kedro run --pipeline analyze_sentinel2_pca
+```
+
+```{mermaid}
+flowchart LR
+  train["features entrenamiento"]:::data --> fit("ajustar PCA"):::node
+  test["features prueba"]:::data --> trans("proyectar PCA"):::node
+  fit --> trans
+  fit --> scree("grafico de varianza"):::node
+  trans --> scatter("grafico PC1 vs PC2"):::node
+  scree --> o1["scree PNG"]:::data
+  scatter --> o2["scatter PNG"]:::data
+  classDef data fill:#ffffff,stroke:#333,stroke-dasharray:5 5;
+  classDef node fill:#b7dce8,stroke:#111;
+```
+
+```python
+# Funcion para ajustar PCA sobre variables escaladas.
+def fit_sentinel2_pca_model(training_dataset, config):
+    features = training_dataset[config["feature_columns"]]
+    scaler = StandardScaler()
+    scaled = scaler.fit_transform(features)
+    pca = PCA(n_components=config["n_components"], random_state=config["random_state"])
+    pca.fit(scaled)
+    return {"scaler": scaler, "pca": pca}
+```
 
 | Componente | Varianza explicada | Varianza acumulada |
 |---|---:|---:|
@@ -1276,15 +548,45 @@ informacion relacionada sobre vegetacion, humedad y suelo.
 | PC3 | 9.69 % | 97.41 % |
 | PC4 | 1.08 % | 98.49 % |
 
-![Dispersion PC1 vs PC2 de las muestras Sentinel-2.](../data/08_reporting/sentinel2_pca_scatter.png){#fig-pca-scatter fig-align="center" width="82%"}
+![Dispersion de puntos en el espacio PC1-PC2.](../data/08_reporting/analyze_sentinel2_pca/sentinel2_pca_scatter.png){#fig-pca-scatter fig-align="center" width="82%"}
 
-![Varianza explicada por componente principal.](../data/08_reporting/sentinel2_pca_scree.png){#fig-pca-scree fig-align="center" width="82%"}
+![Varianza explicada por componente principal.](../data/08_reporting/analyze_sentinel2_pca/sentinel2_pca_scree.png){#fig-pca-scree fig-align="center" width="82%"}
 
-## Desempeno del Random Forest
+El PCA muestra que gran parte de la informacion se concentra en pocos
+componentes. Esto es esperable porque varias bandas e indices capturan
+procesos relacionados: vegetacion, humedad y brillo del suelo.
 
-El modelo Random Forest obtuvo un desempeno alto sobre el conjunto de prueba.
-La matriz de confusion muestra 100 aciertos para `No Mineria`, 17 aciertos para
-`Mineria`, 3 falsos negativos y 0 falsos positivos.
+## Pipeline 6: entrenamiento Random Forest binario
+
+**Comando**
+
+```powershell
+kedro run --pipeline train_mining_binary_rf
+```
+
+```{mermaid}
+flowchart LR
+  train["features entrenamiento"]:::data --> data("crear variable binaria"):::node
+  data --> model("entrenar Random Forest"):::node
+  test["features prueba"]:::data --> pred("predecir prueba"):::node
+  model --> pred
+  pred --> eval("calcular metricas"):::node
+  model --> imp("importancia de variables"):::node
+  eval --> cm["matriz de confusion"]:::data
+  imp --> fi["feature importance"]:::data
+  classDef data fill:#ffffff,stroke:#333,stroke-dasharray:5 5;
+  classDef node fill:#b7dce8,stroke:#111;
+```
+
+```python
+# Funcion para entrenar un Random Forest binario.
+def train_mining_binary_random_forest(train_dataset, config):
+    x_train = train_dataset[config["feature_columns"]]
+    y_train = train_dataset[config["target_column"]]
+    model = RandomForestClassifier(**config["model_params"])
+    model.fit(x_train, y_train)
+    return model
+```
 
 | Metrica | Valor |
 |---|---:|
@@ -1292,140 +594,409 @@ La matriz de confusion muestra 100 aciertos para `No Mineria`, 17 aciertos para
 | Precision Mineria | 1.000 |
 | Recall Mineria | 0.850 |
 | F1 Mineria | 0.919 |
-| Falsos positivos | 0 |
-| Falsos negativos | 3 |
 
-![Matriz de confusion del modelo Random Forest binario.](../data/08_reporting/mining_binary_confusion_matrix.png){#fig-confusion fig-align="center" width="72%"}
+![Matriz de confusion del Random Forest binario.](../data/08_reporting/train_mining_binary_rf/mining_binary_confusion_matrix.png){#fig-binary-confusion fig-align="center" width="72%"}
 
-La precision de `Mineria` igual a 1.0 significa que, en los puntos de prueba,
-todo lo que el modelo clasifico como mineria correspondio a mineria observada.
-El recall de 0.85 muestra una limitacion mas relevante: algunas zonas mineras
-fueron omitidas. En monitoreo ambiental, estas omisiones son criticas porque
-pueden ocultar areas de intervencion real; por eso los mapas de errores son
-necesarios junto con las metricas tabulares.
+![Importancia de variables del modelo binario.](../data/08_reporting/train_mining_binary_rf/mining_binary_feature_importance.png){#fig-binary-importance fig-align="center" width="82%"}
 
-![Importancia de variables del Random Forest.](../data/08_reporting/mining_binary_feature_importance.png){#fig-importancia fig-align="center" width="82%"}
+El resultado binario es fuerte para un ejercicio academico: no hubo falsos
+positivos en el conjunto de prueba, pero si tres falsos negativos. Esto indica
+que el modelo es conservador: cuando marca mineria suele acertar, aunque puede
+omitir algunos puntos mineros.
 
-## Mapas de clasificacion y probabilidad
+## Pipeline 7: prediccion raster binaria
 
-El modelo entrenado se aplico pixel a pixel sobre las bandas e indices
-Sentinel-2. Para mantener el consumo de memoria controlado, la prediccion
-raster se ejecuta por ventanas. El pipeline genera dos productos centrales: el
-mapa binario de clase y el mapa de probabilidad de mineria.
+**Comando**
 
-![Mapa binario inicial de mineria y no mineria.](../data/08_reporting/mining_binary_classification_map.png){#fig-mapa-binario fig-align="center" width="90%"}
+```powershell
+kedro run --pipeline predict_mining_binary_map
+```
 
-![Mapa de probabilidad de mineria con puntos de prueba.](../data/08_reporting/mining_binary_probability_points_overlay.png){#fig-probabilidad fig-align="center" width="90%"}
+```{mermaid}
+flowchart LR
+  model["modelo RF binario"]:::data --> win("leer raster por ventanas"):::node
+  ras["bandas e indices"]:::data --> win
+  win --> pred("predecir clase y probabilidad"):::node
+  pred --> map["mapa binario TIFF"]:::data
+  pred --> prob["mapa probabilidad TIFF"]:::data
+  map --> png("graficar mapa"):::node
+  png --> out["PNG clasificacion"]:::data
+  classDef data fill:#ffffff,stroke:#333,stroke-dasharray:5 5;
+  classDef node fill:#b7dce8,stroke:#111;
+```
 
-El mapa de probabilidad es especialmente util porque evita leer la salida como
-una decision absoluta. Zonas con probabilidad intermedia pueden indicar
-transiciones, mezcla espectral o coberturas que se parecen a mineria, como
-suelo desnudo, playas aluviales o sedimentos recientes.
+```python
+# Funcion para predecir por ventanas y no cargar todo el raster en memoria.
+for window in windows(reference.width, reference.height, window_size):
+    bands = read_bands(sources, window)
+    features = build_feature_stack(bands, feature_columns)
+    predicted, probability = predict_window(model, features)
+    class_writer.write(predicted, 1, window=window)
+    probability_writer.write(probability, 1, window=window)
+```
 
-## Posprocesamiento y validacion espacial
+![Mapa binario de mineria y no mineria.](../data/08_reporting/predict_mining_binary_map/mining_binary_classification_map.png){#fig-binary-map fig-align="center" width="90%"}
 
-El mapa binario inicial contenia 5464 parches clasificados como mineria. Tras
-aplicar el filtro de area minima de 1.0 ha, se conservaron 348 parches y se
-removieron 5116 objetos pequenos. El area minera conservada fue de
-aproximadamente 5731.67 ha.
+![Mapa binario con simbologia categorica.](../data/08_reporting/predict_mining_binary_map/mining_binary_classification_categorical_map.png){#fig-binary-cat fig-align="center" width="90%"}
+
+## Pipeline 8: validacion espacial binaria
+
+**Comando**
+
+```powershell
+kedro run --pipeline validate_mining_binary_map
+```
+
+```{mermaid}
+flowchart LR
+  points["puntos de prueba"]:::data --> sample("extraer clase raster"):::node
+  raster["mapa binario + probabilidad"]:::data --> sample
+  sample --> plots("graficar aciertos, errores y probabilidad"):::node
+  plots --> out["mapas de validacion"]:::data
+  classDef data fill:#ffffff,stroke:#333,stroke-dasharray:5 5;
+  classDef node fill:#b7dce8,stroke:#111;
+```
+
+![Puntos de prueba sobre mapa de probabilidad.](../data/08_reporting/validate_mining_binary_map/mining_binary_probability_points_overlay.png){#fig-binary-prob-points fig-align="center" width="90%"}
+
+![Errores sobre el mapa binario.](../data/08_reporting/validate_mining_binary_map/mining_binary_testing_errors_overlay.png){#fig-binary-errors fig-align="center" width="90%"}
+
+La probabilidad ayuda a interpretar incertidumbre. Zonas con probabilidad
+intermedia pueden corresponder a bordes de parches, mezcla espectral o
+coberturas parecidas a mineria, como suelo desnudo y sedimentos.
+
+## Pipeline 9: postprocesamiento binario
+
+**Comando**
+
+```powershell
+kedro run --pipeline postprocess_mining_binary_map
+```
+
+```{mermaid}
+flowchart LR
+  m["mapa binario"]:::data --> pol("extraer poligonos mineros"):::node
+  pol --> filt("filtrar por area minima 1 ha"):::node
+  filt --> ras("rasterizar poligonos conservados"):::node
+  ras --> out["mapa postprocesado"]:::data
+  filt --> vec["poligonos y CSV"]:::data
+  classDef data fill:#ffffff,stroke:#333,stroke-dasharray:5 5;
+  classDef node fill:#b7dce8,stroke:#111;
+```
+
+```python
+# Funcion para filtrar parches mineros pequenos.
+polygons, all_patches = extract_mining_polygons(class_map, transform, crs, params)
+filtered = polygons[polygons["area_ha"] >= float(params["min_area_ha"])]
+postprocessed = rasterize_polygons(filtered, class_map, transform, params)
+```
 
 | Indicador | Valor |
 |---|---:|
-| Parches originales | 5464 |
-| Parches conservados | 348 |
-| Parches removidos | 5116 |
-| Pixeles mineros originales | 620095 |
-| Pixeles mineros conservados | 573077 |
-| Area conservada | 5731.67 ha |
+| Parches originales | 403 |
+| Parches conservados | 10 |
+| Parches removidos | 393 |
+| Pixeles mineros originales | 10070 |
+| Pixeles mineros conservados | 7228 |
+| Area conservada | 72.29 ha |
 
-![Mapa de mineria despues del posprocesamiento por area minima.](../data/08_reporting/mining_binary_postprocessed_map.png){#fig-postprocesado fig-align="center" width="90%"}
+![Mapa binario postprocesado por area minima.](../data/08_reporting/postprocess_mining_binary_map/mining_binary_postprocessed_map.png){#fig-binary-postprocessed fig-align="center" width="90%"}
 
-La validacion espacial final confirma que el modelo no produjo falsos positivos
-en los puntos evaluados, pero si mantuvo falsos negativos. En el conjunto de
-prueba se identificaron 3 falsos negativos y 0 falsos positivos; considerando
-todos los puntos disponibles, se registraron 9 falsos negativos y 0 falsos
-positivos.
+## Pipeline 10: validacion del binario postprocesado
 
-![Errores de clasificacion sobre el mapa binario.](../data/08_reporting/mining_binary_testing_errors_overlay.png){#fig-errores fig-align="center" width="90%"}
+**Comando**
 
-![Validacion del mapa posprocesado con puntos de referencia.](../data/08_reporting/postprocessed_mining_map_validation.png){#fig-validacion-final fig-align="center" width="90%"}
+```powershell
+kedro run --pipeline validate_postprocessed_mining_map
+```
+
+```{mermaid}
+flowchart LR
+  points["puntos train/test"]:::data --> sample("muestrear mapa postprocesado"):::node
+  post["mapa binario postprocesado"]:::data --> sample
+  sample --> summary("resumir aciertos y errores"):::node
+  summary --> plot("graficar validacion"):::node
+  plot --> out["PNG de validacion final"]:::data
+  classDef data fill:#ffffff,stroke:#333,stroke-dasharray:5 5;
+  classDef node fill:#b7dce8,stroke:#111;
+```
+
+![Validacion espacial del mapa binario postprocesado.](../data/08_reporting/validate_postprocessed_mining_map/postprocessed_mining_map_validation.png){#fig-binary-post-val fig-align="center" width="90%"}
+
+El postprocesamiento limpia la lectura cartografica al remover parches muy
+pequenos. La decision de usar 1 ha es una decision de escala: mejora el mapa,
+pero puede eliminar frentes mineros pequenos.
+
+## Pipeline 11: entrenamiento Random Forest multiclase
+
+**Comando**
+
+```powershell
+kedro run --pipeline train_mining_multiclass_rf
+```
+
+```{mermaid}
+flowchart LR
+  train["features entrenamiento"]:::data --> model("entrenar RF multiclase"):::node
+  model --> pred("predecir puntos prueba"):::node
+  test["features prueba"]:::data --> pred
+  pred --> eval("metricas multiclase"):::node
+  model --> imp("importancia de variables"):::node
+  eval --> cm["matriz multiclase"]:::data
+  imp --> fi["importancia"]:::data
+  classDef data fill:#ffffff,stroke:#333,stroke-dasharray:5 5;
+  classDef node fill:#b7dce8,stroke:#111;
+```
+
+```python
+# Funcion para entrenar Random Forest usando la etiqueta original de cobertura.
+def train_mining_multiclass_random_forest(training_dataset, config):
+    x_train = training_dataset[config["feature_columns"]]
+    y_train = training_dataset[config["label_column"]]
+    model = RandomForestClassifier(**config["model_params"])
+    model.fit(x_train, y_train)
+    return model
+```
+
+| Metrica | Valor |
+|---|---:|
+| Accuracy | 0.717 |
+| Precision macro | 0.782 |
+| Recall macro | 0.747 |
+| F1 macro | 0.759 |
+
+![Matriz de confusion del Random Forest multiclase.](../data/08_reporting/train_mining_multiclass_rf/mining_multiclass_confusion_matrix.png){#fig-multiclass-confusion fig-align="center" width="82%"}
+
+![Importancia de variables del modelo multiclase.](../data/08_reporting/train_mining_multiclass_rf/mining_multiclass_feature_importance.png){#fig-multiclass-importance fig-align="center" width="82%"}
+
+La confusion mas evidente ocurre entre `Suelo Desnudo` y `Vegetacion`, y en
+menor medida con clases de borde o mezcla espectral. Esto es razonable para
+zonas aluviales donde hay transiciones entre vegetacion degradada, sedimentos,
+suelo expuesto y frentes mineros.
+
+## Pipeline 12: prediccion raster multiclase
+
+**Comando**
+
+```powershell
+kedro run --pipeline predict_mining_multiclass_map
+```
+
+```{mermaid}
+flowchart LR
+  model["modelo RF multiclase"]:::data --> win("procesar raster por ventanas"):::node
+  ras["bandas e indices"]:::data --> win
+  win --> pred("predecir cobertura"):::node
+  pred --> map["mapa multiclase TIFF"]:::data
+  pred --> prob["probabilidad maxima TIFF"]:::data
+  map --> png("graficar mapa multiclase"):::node
+  png --> out["PNG multiclase"]:::data
+  classDef data fill:#ffffff,stroke:#333,stroke-dasharray:5 5;
+  classDef node fill:#b7dce8,stroke:#111;
+```
+
+```python
+# Funcion para convertir etiquetas del modelo en valores raster.
+labels = model.predict(matrix)
+class_array[valid_mask] = np.array(
+    [params["class_values"][label] for label in labels],
+    dtype="uint8",
+)
+```
+
+![Mapa multiclase de coberturas.](../data/08_reporting/predict_mining_multiclass_map/mining_multiclass_classification_map.png){#fig-multiclass-map fig-align="center" width="90%"}
+
+## Pipeline 13: validacion espacial multiclase
+
+**Comando**
+
+```powershell
+kedro run --pipeline validate_mining_multiclass_map
+```
+
+```{mermaid}
+flowchart LR
+  p["puntos de prueba"]:::data --> s("extraer clase raster"):::node
+  m["mapa multiclase"]:::data --> s
+  s --> e("calcular matriz y metricas"):::node
+  e --> cm["matriz de confusion"]:::data
+  s --> plot("mapa de aciertos y errores"):::node
+  plot --> out["validacion espacial"]:::data
+  classDef data fill:#ffffff,stroke:#333,stroke-dasharray:5 5;
+  classDef node fill:#b7dce8,stroke:#111;
+```
+
+| Metrica espacial | Valor |
+|---|---:|
+| Accuracy | 0.725 |
+| Precision macro | 0.796 |
+| Recall macro | 0.753 |
+| F1 macro | 0.767 |
+| Puntos validos | 120 |
+
+![Matriz de confusion espacial del mapa multiclase.](../data/08_reporting/validate_mining_multiclass_map/mining_multiclass_validation_confusion_matrix.png){#fig-multiclass-val-cm fig-align="center" width="82%"}
+
+![Validacion espacial del mapa multiclase.](../data/08_reporting/validate_mining_multiclass_map/mining_multiclass_validation_map.png){#fig-multiclass-val-map fig-align="center" width="90%"}
+
+## Pipeline 14: postprocesamiento multiclase
+
+**Comando**
+
+```powershell
+kedro run --pipeline postprocess_mining_multiclass_map
+```
+
+```{mermaid}
+flowchart LR
+  m["mapa multiclase"]:::data --> f("filtro de mayoria 3x3"):::node
+  f --> out["mapa multiclase postprocesado"]:::data
+  f --> sum["resumen por clase"]:::data
+  out --> png("graficar postproceso"):::node
+  png --> rep["PNG postprocesado"]:::data
+  classDef data fill:#ffffff,stroke:#333,stroke-dasharray:5 5;
+  classDef node fill:#b7dce8,stroke:#111;
+```
+
+```python
+# Funcion para suavizar sal y pimienta preservando NoData.
+for _ in range(iterations):
+    counts = np.stack([
+        convolve((result == value).astype("uint8"), kernel, mode="constant", cval=0)
+        for value in class_values
+    ])
+    winners = np.array(class_values, dtype="uint8")[counts.argmax(axis=0)]
+    smoothed = np.where(counts.max(axis=0) > 0, winners, nodata).astype("uint8")
+    smoothed[result == nodata] = nodata
+    result = smoothed
+```
+
+El postprocesamiento multiclase modifico 1,008,764 pixeles mediante un filtro
+de mayoria `3x3`. No inventa valores en zonas NoData, lo cual conserva la
+honestidad espacial del producto.
+
+![Mapa multiclase despues del filtro de mayoria.](../data/08_reporting/postprocess_mining_multiclass_map/mining_multiclass_postprocessed_map.png){#fig-multiclass-post fig-align="center" width="90%"}
+
+## Pipeline 15: validacion del multiclase postprocesado
+
+**Comando**
+
+```powershell
+kedro run --pipeline validate_postprocessed_mining_multiclass_map
+```
+
+```{mermaid}
+flowchart LR
+  p["puntos de prueba"]:::data --> s("muestrear mapa postprocesado"):::node
+  m["mapa multiclase postprocesado"]:::data --> s
+  s --> e("metricas y matriz"):::node
+  e --> cm["matriz postprocesada"]:::data
+  s --> plot("mapa de errores"):::node
+  plot --> out["validacion postprocesada"]:::data
+  classDef data fill:#ffffff,stroke:#333,stroke-dasharray:5 5;
+  classDef node fill:#b7dce8,stroke:#111;
+```
+
+| Metrica | Mapa original | Mapa postprocesado |
+|---|---:|---:|
+| Accuracy | 0.725 | 0.733 |
+| Precision macro | 0.796 | 0.806 |
+| Recall macro | 0.753 | 0.761 |
+| F1 macro | 0.767 | 0.776 |
+
+![Matriz de confusion del mapa multiclase postprocesado.](../data/08_reporting/validate_postprocessed_mining_multiclass_map/postprocessed_mining_multiclass_validation_confusion_matrix.png){#fig-multiclass-post-cm fig-align="center" width="82%"}
+
+![Validacion espacial del mapa multiclase postprocesado.](../data/08_reporting/validate_postprocessed_mining_multiclass_map/postprocessed_mining_multiclass_validation_map.png){#fig-multiclass-post-val fig-align="center" width="90%"}
+
+El postprocesamiento mejora ligeramente las metricas, pero no resuelve por
+completo la confusion entre `Suelo Desnudo` y `Vegetacion`. La mejora es
+moderada, lo cual es positivo: limpia ruido espacial sin cambiar de forma
+agresiva la estructura del mapa.
+
+# Resultados y Discusion
+
+## Lectura de los resultados principales
+
+El flujo confirma que Sentinel-2 y Random Forest permiten construir un sistema
+funcional para mapeo exploratorio de mineria de aluvion. El modelo binario
+ofrece una respuesta clara para presencia/ausencia de mineria y alcanza
+`accuracy = 0.975`. El modelo multiclase es mas exigente porque debe separar
+seis coberturas; por eso su exactitud es menor, pero aporta una lectura mas
+rica del paisaje y de las confusiones espectrales.
+
+| Producto | Resultado clave |
+|---|---|
+| Descarga Sentinel-2 | Bandas locales en `EPSG:9377` y visualizaciones RGB/falso color |
+| Indices espectrales | NDVI, MSAVI, NDWI, BSI, MBSI, NDSI, MSWI y NDBI |
+| Datos de entrenamiento | 600 puntos, 480 entrenamiento y 120 prueba |
+| PCA | PC1-PC3 explican 97.41 % de la varianza |
+| Modelo binario | Accuracy 0.975, F1 Mineria 0.919 |
+| Mapa binario postprocesado | 10 parches mineros conservados, 72.29 ha |
+| Modelo multiclase | Accuracy 0.717, F1 macro 0.759 |
+| Validacion multiclase espacial | Accuracy 0.725, F1 macro 0.767 |
+| Multiclase postprocesado | Accuracy 0.733, F1 macro 0.776 |
 
 ## Discusion critica
 
-El resultado sugiere que Sentinel-2 y Random Forest son suficientes para una
-primera aproximacion reproducible al mapeo de mineria de aluvion en el area de
-estudio. La ausencia de falsos positivos en la prueba es positiva porque evita
-sobreestimar la mineria; sin embargo, los falsos negativos indican que algunas
-zonas mineras no fueron detectadas. Esto puede ocurrir por mezcla espectral,
-tamano reducido de frentes mineros, presencia de agua o sedimentos, sombras,
-nubes residuales o similitud con otras superficies expuestas.
+El modelo binario tiene un comportamiento conservador: evita falsos positivos
+en los puntos de prueba, pero omite algunos puntos mineros. Para monitoreo
+ambiental, esto tiene implicaciones distintas. Un falso positivo puede generar
+alertas innecesarias, mientras que un falso negativo puede ocultar zonas de
+intervencion real. Por eso el mapa de probabilidad es tan importante como el
+mapa de clase.
 
-La alta varianza explicada por pocos componentes PCA muestra que muchas
-variables estan correlacionadas. Esto no es necesariamente un problema para
-Random Forest, que puede manejar variables redundantes, pero si sugiere que en
-trabajos futuros se podria evaluar un conjunto de variables mas compacto. Para
-un proyecto de clase, mantener las bandas originales y los indices principales
-es una decision razonable: mejora la interpretabilidad fisica y evita depender
-de una seleccion automatica dificil de explicar.
+El modelo multiclase muestra una dificultad esperada: separar `Suelo Desnudo`
+y `Vegetacion` en un contexto de transicion. En imagenes Sentinel-2, las zonas
+de vegetacion degradada, sedimentos, playas aluviales y suelos expuestos
+pueden tener respuestas espectrales similares. Esta confusion no invalida el
+flujo; al contrario, ayuda a explicar donde estan las limitaciones fisicas del
+sensor y del conjunto de entrenamiento.
 
-El posprocesamiento por area minima mejora la lectura cartografica al remover
-pixeles aislados, pero tambien introduce una decision de escala. El umbral de
-1.0 ha ayuda a producir un mapa mas limpio, aunque puede eliminar frentes
-mineros reales de menor tamano. Por eso, el producto final debe leerse como un
-mapa de apoyo para analisis espacial, no como una delimitacion oficial.
+El postprocesamiento tiene dos comportamientos. En el binario, el filtro por
+area minima produce un mapa mas legible y elimina objetos aislados. En el
+multiclase, el filtro de mayoria reduce ruido local y mejora levemente las
+metricas. En ambos casos, el postprocesamiento debe interpretarse como una
+decision cartografica de escala, no como una correccion absoluta.
 
 # Limitaciones
 
-El flujo depende de la calidad, cantidad y representatividad de los puntos
-etiquetados. La clase Mineria puede confundirse con suelo desnudo, zonas
-construidas, sedimentos, nubes o areas con vegetacion degradada. Aunque
-Sentinel-2 permite una aproximacion abierta y replicable, su resolucion espacial
-limita la deteccion de frentes mineros pequenos o estrechos.
+La primera limitacion es la resolucion espacial. Sentinel-2 es adecuado para
+analisis regional, pero puede no detectar frentes mineros pequenos, estrechos o
+mezclados con vegetacion, agua y sedimentos. La segunda limitacion es la
+representatividad de los puntos etiquetados: el modelo aprende lo que aparece
+en las muestras y puede fallar en patrones que no esten bien representados.
 
-El uso de una unica fecha o ventana temporal tambien puede afectar la capacidad
-de generalizacion. Cambios en humedad, nubosidad, fenologia o condiciones de
-iluminacion pueden modificar la respuesta espectral. Por ello, la extension
-natural del trabajo seria evaluar varias fechas Sentinel-2 y analizar la
-estabilidad del modelo.
+La tercera limitacion es temporal. El proyecto trabaja con una ventana de
+imagen concreta; cambios de humedad, nubosidad, fenologia o actividad minera
+pueden modificar la respuesta espectral. Una extension natural seria evaluar
+varias fechas y comparar estabilidad temporal.
 
-Finalmente, el posprocesamiento por area minima mejora la lectura cartografica,
-pero puede eliminar objetos pequenos reales. El umbral de `1.0 ha` debe
-interpretarse como una decision de escala y no como una verdad absoluta del
-fenomeno.
+Finalmente, el uso de Google Earth Engine y Drive requiere autenticacion del
+usuario. Esto no impide la reproducibilidad, pero si obliga a documentar el
+entorno y los pasos de configuracion.
 
 # Conclusiones
 
-El proyecto propone una metodologia reproducible para clasificar mineria de oro
-de aluvion usando imagenes Sentinel-2, variables espectrales y Random Forest.
-La decision de excluir PlanetScope y otros sensores comerciales fortalece la
-replicabilidad, pues el flujo puede ejecutarse con datos abiertos y parametros
-documentados.
+El proyecto logro construir un flujo completo, ordenado y reproducible para
+clasificar mineria de oro de aluvion con Sentinel-2 y Random Forest. Kedro
+facilito separar responsabilidades, mantener parametros explicitos y generar
+salidas trazables por pipeline.
 
-Kedro aporta una estructura clara para organizar el proceso completo: descarga
-y preparacion de imagenes, extraccion de variables, entrenamiento, prediccion,
-posprocesamiento y validacion. Esta arquitectura facilita explicar el proyecto
-en una presentacion final, pero tambien deja una base extensible para futuras
-comparaciones con otros algoritmos, periodos de analisis o regiones de estudio.
+El enfoque binario obtuvo resultados altos para una practica academica:
+`accuracy = 0.975`, `precision_mineria = 1.0`, `recall_mineria = 0.85` y
+`F1_mineria = 0.919`. El enfoque multiclase fue mas dificil, pero permitio
+analizar confusiones entre coberturas y alcanzo `accuracy = 0.733` despues del
+postprocesamiento espacial.
 
-En la corrida documentada, el modelo alcanzo un `accuracy` de 0.975, precision
-de mineria de 1.0, recall de 0.85 y F1 de mineria de 0.919. Estos resultados
-son favorables para un ejercicio academico, aunque la presencia de falsos
-negativos confirma que el mapa no debe interpretarse como producto oficial sino
-como una aproximacion automatizada y verificable.
-
-Los elementos mas importantes para defender el proyecto son:
-
-- El uso de Sentinel-2 como fuente abierta y replicable.
-- La trazabilidad del flujo mediante pipelines Kedro.
-- La interpretacion fisica de las bandas e indices espectrales.
-- La evaluacion del Random Forest con metricas de clasificacion.
-- La generacion de mapas de clase, probabilidad, parches y errores.
+Los resultados deben leerse como un producto metodologico reproducible y no
+como una delimitacion oficial de mineria. El principal aporte es demostrar una
+cadena automatizada desde la imagen satelital hasta la validacion espacial,
+incluyendo codigo, parametros, mapas, metricas y pruebas.
 
 # Referencias
 
 Las referencias se gestionan en `docs/referencias.bib` y se citan en el texto
 mediante el sistema autor-fecha de Quarto/Pandoc. El archivo `docs/apa.csl`
-define el formato APA para el listado bibliografico.
+define el formato APA del listado bibliografico.
 
 ::: {#refs}
 :::
@@ -1434,30 +1005,21 @@ define el formato APA para el listado bibliografico.
 
 ## Anexo A. Configuracion de entorno reproducible y virtualizacion
 
-Este anexo cumple la condicion de reproducibilidad del proyecto. El contenedor
-Docker base de la clase no fue modificado dentro del repositorio y no se
-incluye un `Dockerfile` propio. La razon tecnica es que el flujo depende de
-paquetes geoespaciales de Python, autenticacion interactiva con Google Earth
-Engine y acceso local a Google Drive, por lo que se opto por una virtualizacion
-alternativa con entorno nativo `venv`.
-
-La definicion reproducible del entorno se encuentra en `requirements.txt`.
-Adicionalmente, `pyproject.toml` declara la metadata del paquete, la version de
-Python esperada y la configuracion base de Kedro y Pytest. Con estos archivos,
-otro investigador puede reconstruir el laboratorio de analisis sin depender de
-la carpeta local `.env`, que no debe versionarse.
+El contenedor Docker base de la clase no fue modificado dentro del repositorio.
+Para este proyecto se uso una alternativa local con `venv`, porque el flujo
+requiere autenticacion interactiva con Google Earth Engine, acceso local a
+Google Drive y librerias geoespaciales de Python. La definicion del entorno se
+encuentra en `requirements.txt` y la configuracion del paquete en
+`pyproject.toml`.
 
 | Archivo | Funcion |
 |---|---|
-| `requirements.txt` | Lista de librerias necesarias para ejecutar pipelines, pruebas y visualizaciones |
-| `pyproject.toml` | Metadata del paquete `centromonitoreo-mineria`, version de Python y configuracion de Kedro |
-| `conf/base/parameters/` | Parametros reproducibles de ROI, fechas, bandas, indices, modelo y salidas |
-| `conf/base/catalog/` | Definicion de entradas y salidas administradas por Kedro |
+| `requirements.txt` | Dependencias necesarias para ejecutar pipelines, pruebas y visualizaciones |
+| `pyproject.toml` | Metadata del paquete, version de Python y configuracion de Kedro/Pytest |
+| `conf/base/parameters/` | Parametros de ROI, fechas, bandas, indices, modelos y salidas |
+| `conf/base/catalog/` | Definicion de entradas y salidas usadas por Kedro |
 
-### Instalacion paso a paso en Windows
-
-El entorno usado por el proyecto requiere Python `>=3.12,<3.13`. Desde la raiz
-del repositorio, la instalacion se reproduce con:
+### Instalacion en Windows
 
 ```powershell
 python -m venv .env
@@ -1466,20 +1028,7 @@ python -m pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
-Despues de instalar dependencias, se valida que el paquete local sea visible
-para Python y que los pipelines tengan sus entradas declaradas:
-
-```powershell
-pytest
-kedro registry list
-```
-
-### Instalacion equivalente en Linux o contenedor Docker
-
-Si se desea ejecutar el proyecto dentro de un contenedor de la clase, los
-cambios necesarios son instalar las dependencias del proyecto sobre la imagen
-base y asegurar que exista Python 3.12. Como no se modifico un Dockerfile en el
-repositorio, el procedimiento manual equivalente es:
+### Instalacion equivalente en Linux o Docker
 
 ```bash
 python -m venv .env
@@ -1488,62 +1037,33 @@ python -m pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
-En Linux, `rasterio`, `geopandas` y `pyproj` pueden requerir librerias de
-sistema asociadas a GDAL, PROJ y GEOS si la imagen base no trae ruedas binarias
-compatibles. En ese caso, antes de `pip install -r requirements.txt` se deben
-instalar los paquetes de sistema equivalentes a `gdal-bin`, `libgdal-dev`,
-`proj-bin` y `libgeos-dev`.
+En Linux, si no existen ruedas binarias compatibles, `rasterio`, `geopandas` y
+`pyproj` pueden requerir librerias de sistema asociadas a GDAL, PROJ y GEOS.
+En ese caso se deben instalar paquetes equivalentes a `gdal-bin`,
+`libgdal-dev`, `proj-bin` y `libgeos-dev` antes de instalar `requirements.txt`.
 
-Las dependencias principales son:
+## Anexo B. Autenticacion de Google Earth Engine
 
-| Grupo | Paquetes |
-|---|---|
-| Flujo reproducible | `kedro`, `kedro-datasets`, `kedro-viz` |
-| Sensores remotos y raster | `earthengine-api`, `rasterio`, `rioxarray`, `xarray` |
-| SIG vectorial | `geopandas`, `shapely`, `pyproj` |
-| Analisis y modelado | `numpy`, `pandas`, `scikit-learn`, `joblib` |
-| Visualizacion | `matplotlib`, `seaborn`, `contextily` |
-| Pruebas | `pytest` |
-
-### Evidencia de reproducibilidad
-
-La ejecucion local usada para cerrar el proyecto verifico la suite de pruebas
-con `pytest`, obteniendo 41 pruebas exitosas. Ademas, los pipelines principales
-fueron ejecutados en orden y produjeron salidas en `data/08_reporting`. Los
-archivos pesados generados, como GeoTIFF en `data/04_feature/sentinel2_bands`,
-se excluyen de Git cuando corresponde para evitar subir imagenes satelitales al
-repositorio.
-
-## Anexo B. Autenticacion y configuracion de Google Earth Engine
-
-Para ejecutar las etapas que consultan Sentinel-2 se requiere una cuenta con
-Google Earth Engine habilitado. El metodo de autenticacion se configura en
-`conf/base/parameters/google_earth_engine/google_earth_engine.yml`. Para trabajo
-local, la opcion mas directa es autenticar una vez desde la consola:
+Antes de correr los pipelines que consultan Sentinel-2, se debe autenticar
+Google Earth Engine:
 
 ```powershell
 earthengine authenticate --auth_mode localhost:0
 ```
 
-Luego se debe revisar:
+Luego se revisa el archivo:
 
-| Parametro | Archivo | Descripcion |
-|---|---|---|
-| `gee.project` | `google_earth_engine.yml` | Proyecto de Google Cloud asociado a Earth Engine |
-| `sentinel2_download.roi` | `sentinel2_download.yml` | Rectangulo o poligono del area de estudio |
-| `sentinel2_download.start_date` / `end_date` | `sentinel2_download.yml` | Ventana temporal de consulta |
-| `sentinel2_download.cloud_cover_max` | `sentinel2_download.yml` | Filtro maximo de nubosidad |
-| `sentinel2_download.drive_export` | `sentinel2_download.yml` | Opciones de exportacion a Google Drive |
+```text
+conf/base/parameters/google_earth_engine/google_earth_engine.yml
+```
 
-Las credenciales personales, llaves JSON y configuraciones sensibles deben
-mantenerse fuera del control de versiones, preferiblemente en `conf/local/` o
-en rutas externas al repositorio.
+Los parametros sensibles, credenciales personales y llaves JSON no deben
+subirse al repositorio. Si se requieren, deben mantenerse en `conf/local/` o
+en rutas externas.
 
-## Anexo C. Ejecucion de pipelines Kedro
+## Anexo C. Orden de ejecucion de pipelines
 
-Los pipelines se ejecutan desde la raiz del repositorio. Para reproducir el
-flujo completo de forma controlada, se recomienda ejecutar las etapas en el
-siguiente orden:
+Desde la raiz del proyecto, el flujo completo se reproduce con:
 
 ```powershell
 kedro run --pipeline download_sentinel2
@@ -1553,74 +1073,80 @@ kedro run --pipeline extract_sentinel2_training_features
 kedro run --pipeline analyze_sentinel2_pca
 kedro run --pipeline train_mining_binary_rf
 kedro run --pipeline predict_mining_binary_map
-kedro run --pipeline postprocess_mining_binary_map
 kedro run --pipeline validate_mining_binary_map
+kedro run --pipeline postprocess_mining_binary_map
 kedro run --pipeline validate_postprocessed_mining_map
+kedro run --pipeline train_mining_multiclass_rf
+kedro run --pipeline predict_mining_multiclass_map
+kedro run --pipeline validate_mining_multiclass_map
+kedro run --pipeline postprocess_mining_multiclass_map
+kedro run --pipeline validate_postprocessed_mining_multiclass_map
 ```
 
-Para verificar que la estructura basica de los pipelines no se rompa al hacer
-cambios de codigo, se pueden ejecutar las pruebas:
+Para verificar que la estructura del proyecto no se rompa:
 
 ```powershell
 pytest
 ```
 
-Para inspeccionar visualmente el grafo de pipelines:
+La ultima verificacion local del repositorio reporto:
 
-```powershell
-kedro viz
+```text
+48 passed, 1 warning
 ```
 
 ## Anexo D. Renderizado del informe
 
-El informe esta escrito en Quarto. La version HTML se genera con:
+El informe esta escrito en Quarto. Para generar HTML:
 
 ```powershell
 quarto render docs/proyecto_final.qmd --to html
 ```
 
-La version PDF se puede generar con:
+Para generar PDF:
 
 ```powershell
 quarto render docs/proyecto_final.qmd --to pdf
 ```
 
-La salida PDF puede requerir una instalacion local de LaTeX. Para revision y
-entrega digital, la salida HTML autocontenida es la opcion mas directa porque
-incluye estilos, referencias y figuras dentro de `docs/proyecto_final.html`.
+La salida PDF puede requerir una instalacion local de LaTeX. Para revision
+rapida y entrega digital, HTML es la opcion mas directa.
 
-## Anexo E. Detalles tecnicos adicionales
+## Anexo E. Carpeta de resultados
 
-Las salidas esperadas se almacenan en carpetas separadas segun su funcion:
+Las salidas se organizan por pipeline dentro de `data/08_reporting`:
 
-| Carpeta | Contenido esperado |
+| Carpeta | Contenido |
 |---|---|
-| `data/04_feature/sentinel2_bands` | Bandas Sentinel-2 e indices exportados como GeoTIFF |
-| `data/05_model_input` | Tablas de entrenamiento y prueba |
-| `data/06_models` | Modelo Random Forest entrenado |
-| `data/07_model_output` | Mapas clasificados, probabilidades y poligonos |
-| `data/08_reporting` | Figuras, metricas y metadatos para el informe |
-
-La reproducibilidad depende de conservar tres elementos: el codigo fuente, los
-parametros YAML y los archivos de definicion de entorno. Si otro usuario desea
-replicar el proyecto, debe clonar el repositorio, instalar `requirements.txt`,
-autenticar Earth Engine, revisar los parametros de ROI/fechas y ejecutar los
-pipelines en el orden indicado.
+| `sentinel2_download_visualizations` | RGB, falso color y grilla de bandas |
+| `sentinel2_spectral_indices_maps` | Mapas de indices espectrales |
+| `prepare_training_data` | Distribucion espacial y por clase de puntos |
+| `extract_sentinel2_training_features` | Metadatos de extraccion de variables |
+| `analyze_sentinel2_pca` | Graficos PCA |
+| `train_mining_binary_rf` | Metricas, matriz e importancia binaria |
+| `predict_mining_binary_map` | Mapas binarios |
+| `validate_mining_binary_map` | Mapas de probabilidad y errores |
+| `postprocess_mining_binary_map` | Mapa binario postprocesado |
+| `validate_postprocessed_mining_map` | Validacion final binaria |
+| `train_mining_multiclass_rf` | Metricas, matriz e importancia multiclase |
+| `predict_mining_multiclass_map` | Mapa multiclase |
+| `validate_mining_multiclass_map` | Matriz y mapa de validacion multiclase |
+| `postprocess_mining_multiclass_map` | Mapa multiclase filtrado |
+| `validate_postprocessed_mining_multiclass_map` | Validacion final multiclase |
 
 ## Anexo F. Checklist de Open Science
 
-| Criterio | Implementacion en el proyecto |
+| Criterio | Implementacion |
 |---|---|
-| Codigo versionado | El codigo fuente vive en `src/centromonitoreo_mineria` y se organiza por pipelines Kedro |
-| Parametros explicitos | La configuracion esta en archivos YAML dentro de `conf/base/parameters` |
-| Catalogo de datos | Las entradas y salidas estan declaradas en `conf/base/catalog` |
-| Entorno reproducible | Las dependencias estan en `requirements.txt` y la version de Python en `pyproject.toml` |
-| Pruebas automatizadas | La carpeta `tests/` valida la estructura y funciones principales de los pipelines |
-| Salidas regenerables | Los mapas y metricas de `data/08_reporting` se recrean al ejecutar los pipelines |
-| Datos pesados controlados | Los GeoTIFF generados se mantienen fuera del repositorio cuando su tamano no es apto para Git |
-| Documentacion tecnica | Este QMD explica decisiones metodologicas, codigo central, resultados y limitaciones |
+| Codigo versionado | Fuente en `src/centromonitoreo_mineria` |
+| Parametros explicitos | YAML en `conf/base/parameters` |
+| Catalogo de datos | YAML en `conf/base/catalog` |
+| Entorno reproducible | `requirements.txt` y `pyproject.toml` |
+| Pruebas automatizadas | Carpeta `tests/` |
+| Salidas regenerables | Figuras y JSON en `data/08_reporting` |
+| Datos pesados controlados | GeoTIFF generados excluidos de Git cuando corresponde |
+| Informe didactico | QMD con comandos, diagramas, codigo y resultados |
 
-La regla practica del proyecto es que una persona externa pueda leer el
-informe, instalar el entorno, autenticar Earth Engine y ejecutar los comandos
-Kedro sin tener que reconstruir decisiones ocultas. Esa trazabilidad es el
-principal aporte tecnico del trabajo.
+La regla practica del proyecto es que una persona externa pueda clonar el
+repositorio, instalar dependencias, autenticar Earth Engine, ejecutar los
+pipelines y reconstruir las figuras principales sin decisiones ocultas.

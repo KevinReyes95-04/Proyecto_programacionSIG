@@ -1,0 +1,41 @@
+mining_multiclass_random_forest_config:
+  type: MemoryDataset
+
+mining_multiclass_training_dataset:
+  type: MemoryDataset
+
+mining_multiclass_testing_dataset:
+  type: MemoryDataset
+
+mining_multiclass_random_forest_model:
+  type: pickle.PickleDataset
+  filepath: data/06_models/mining_multiclass_random_forest.pkl
+
+mining_multiclass_predictions:
+  type: pandas.CSVDataset
+  filepath: data/07_model_output/mining_multiclass_predictions.csv
+  save_args:
+    index: false
+
+mining_multiclass_metrics:
+  type: json.JSONDataset
+  filepath: data/08_reporting/train_mining_multiclass_rf/mining_multiclass_metrics.json
+
+mining_multiclass_feature_importance:
+  type: pandas.CSVDataset
+  filepath: data/07_model_output/mining_multiclass_feature_importance.csv
+  save_args:
+    index: false
+
+mining_multiclass_confusion_matrix_plot_metadata:
+  type: json.JSONDataset
+  filepath: data/08_reporting/train_mining_multiclass_rf/mining_multiclass_confusion_matrix_plot_metadata.json
+
+mining_multiclass_feature_importance_plot_metadata:
+  type: json.JSONDataset
+  filepath: data/08_reporting/train_mining_multiclass_rf/mining_multiclass_feature_importance_plot_metadata.json
+
+mining_multiclass_random_forest_metadata:
+  type: json.JSONDataset
+  filepath: data/08_reporting/train_mining_multiclass_rf/mining_multiclass_random_forest_metadata.json
+

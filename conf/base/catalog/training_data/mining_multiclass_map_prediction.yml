@@ -1,0 +1,15 @@
+mining_multiclass_map_prediction_config:
+  type: MemoryDataset
+
+mining_multiclass_map_prediction_metadata:
+  type: json.JSONDataset
+  filepath: data/08_reporting/predict_mining_multiclass_map/mining_multiclass_map_prediction_metadata.json
+
+mining_multiclass_map_plot_metadata:
+  type: json.JSONDataset
+  filepath: data/08_reporting/predict_mining_multiclass_map/mining_multiclass_map_plot_metadata.json
+
+mining_multiclass_map_metadata:
+  type: json.JSONDataset
+  filepath: data/08_reporting/predict_mining_multiclass_map/mining_multiclass_map_metadata.json
+

@@ -1,0 +1,21 @@
+mining_multiclass_map_postprocessing:
+  classification_map: data/07_model_output/mining_multiclass_classification_map.tif
+  class_values: {Bosque Natural: 1, Cuerpos de Agua: 2, Mineria: 3, Nubes: 4, Suelo Desnudo: 5, Vegetacion: 6}
+  class_nodata: 255
+  majority_filter: {enabled: true, size: 3, iterations: 1}
+  outputs:
+    postprocessed_classification_map: data/07_model_output/mining_multiclass_classification_map_postprocessed.tif
+    class_summary_csv: data/07_model_output/mining_multiclass_postprocessed_class_summary.csv
+  visualization:
+    output_path: data/08_reporting/postprocess_mining_multiclass_map/mining_multiclass_postprocessed_map.png
+    title: Mapa multiclase postprocesado
+    figure_size: [9, 9]
+    dpi: 160
+    colors:
+      Bosque Natural: "#0CB354"
+      Cuerpos de Agua: "#1379B9"
+      Mineria: "#E31A1C"
+      Nubes: "#18A8D8"
+      Suelo Desnudo: "#FFC107"
+      Vegetacion: "#8DD34F"
+
