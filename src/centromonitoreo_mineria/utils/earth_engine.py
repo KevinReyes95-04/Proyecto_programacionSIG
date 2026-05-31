@@ -11,3 +11,4 @@ def load_ee() -> Any:
         ) from exc
 
     return ee
+ 

@@ -1,10 +1,10 @@
 from typing import Any
 
 
+# Funcion para validar parametros de superposicion de puntos sobre el mapa.
 def validate_mining_binary_map_validation_config(
     params_mining_binary_map_validation: dict[str, Any],
 ) -> dict[str, Any]:
-    """Valida los parametros para superponer puntos sobre el mapa binario."""
     if not isinstance(params_mining_binary_map_validation, dict):
         raise ValueError("mining_binary_map_validation debe ser un diccionario.")
 
@@ -21,6 +21,7 @@ def validate_mining_binary_map_validation_config(
     return dict(params)
 
 
+# Funcion para validar campos de texto.
 def _require_text(value: Any, name: str) -> None:
     if not isinstance(value, str) or not value.strip():
         raise ValueError(f"{name} debe ser texto no vacio.")
