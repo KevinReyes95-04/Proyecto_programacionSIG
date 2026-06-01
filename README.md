@@ -1,95 +1,197 @@
-# sat-mining-kedro
+# Centro Monitoreo Mineria
 
-Proyecto de clasificacion de imagenes satelitales (Sentinel-2 y PlanetScope) para:
+Proyecto reproducible para identificar zonas asociadas a mineria de oro de
+aluvion usando imagenes Sentinel-2, indices espectrales y modelos Random
+Forest. El flujo esta implementado con Kedro para separar cada etapa en
+pipelines, nodos, parametros y catalogos de datos.
 
-- Mineria vs no mineria (binario)
-- Coberturas de suelo (multiclase)
+El proyecto incluye dos enfoques:
 
-## Stack
+- Clasificacion binaria: `Mineria` vs `No Mineria`.
+- Clasificacion multiclase: `Bosque Natural`, `Cuerpos de Agua`, `Mineria`,
+  `Nubes`, `Suelo Desnudo` y `Vegetacion`.
 
-- Kedro
-- Random Forest (scikit-learn)
-- Geoespacial: rasterio, geopandas, rioxarray, xarray
+## Contenido principal
 
-## Estructura de pipelines
+```text
+conf/
+  base/
+    catalog/        # Entradas y salidas declaradas para Kedro
+    parameters/     # Parametros de GEE, Sentinel-2, modelos y mapas
+data/
+  01_raw/           # Insumos fuente
+  04_feature/       # Bandas Sentinel-2 e indices generados
+  05_model_input/   # Tablas para entrenamiento y prueba
+  06_models/        # Modelos entrenados
+  07_model_output/  # Mapas raster, CSV y vectores derivados
+  08_reporting/     # Figuras, metricas y metadatos
+docs/
+  proyecto_final.qmd
+src/
+  centromonitoreo_mineria/
+    pipeline_registry.py
+    pipelines/
+tests/
+```
 
-- `data_engineering`: ingesta, limpieza, armonizacion de sensores
-- `features`: construccion de variables espectrales y texturales
-- `train_binary_rf`: entrenamiento mineria/no mineria
-- `train_multiclass_rf`: entrenamiento coberturas de suelo
-- `evaluate`: metricas y analisis de errores
-- `predict`: inferencia y salida para mapas
+## Instalacion
 
-## Configuracion inicial (Windows PowerShell)
+El proyecto fue trabajado con Python `>=3.12,<3.13`.
+
+En Windows PowerShell:
 
 ```powershell
 python -m venv .env
 .\.env\Scripts\Activate.ps1
-pip install -r requirements.txt
-kedro run
-```
-
-## Descarga de Sentinel-2 desde Google Earth Engine
-
-El pipeline `download_sentinel2` queda separado del flujo por defecto para que el
-proyecto siga corriendo aunque el usuario no tenga Earth Engine autenticado.
-
-1. Instalar dependencias:
-
-```powershell
+python -m pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
-2. Elegir el metodo de autenticacion en
-   `conf/base/parameters/google_earth_engine/google_earth_engine.yml`:
+En Linux o entorno Docker:
 
-- `gee.auth_method: oauth`: recomendado para desarrollo local. Requiere
-  autenticar una vez con navegador.
-- `gee.auth_method: service_account`: recomendado para ejecucion reproducible
-  sin navegador. Configura `gee.service_account_email` y
-  `gee.service_account_key_path` en `conf/local/` o en un archivo no versionado.
-- `gee.auth_method: adc`: usa Application Default Credentials, util en Google
-  Cloud o con `gcloud`.
+```bash
+python -m venv .env
+source .env/bin/activate
+python -m pip install --upgrade pip
+pip install -r requirements.txt
+```
 
-3. Para `oauth`, autenticar Earth Engine una vez:
+En Linux, paquetes como `rasterio`, `geopandas` y `pyproj` pueden requerir
+dependencias de sistema asociadas a GDAL, PROJ y GEOS si la imagen base no trae
+ruedas binarias compatibles.
+
+## Autenticacion de Google Earth Engine
+
+Los dos primeros pipelines consultan Sentinel-2 desde Google Earth Engine. Para
+usar autenticacion local por navegador:
 
 ```powershell
 earthengine authenticate --auth_mode localhost:0
 ```
 
-4. Configurar la descarga en
-   `conf/base/parameters/google_earth_engine/sentinel2_download.yml`:
+Luego revisar:
 
-- `gee.project`: id del proyecto de Google Cloud con Earth Engine habilitado.
-- `sentinel2_download.roi.source`: `bbox`, `inline_geojson` o `geojson_path`.
-- `sentinel2_download.roi.bbox`: area rectangular definida con `min_lon`,
-  `min_lat`, `max_lon` y `max_lat`.
-- `sentinel2_download.drive_export`: carpeta de Drive, prefijo de archivo,
-  `max_pixels`, formato y opciones de espera de la tarea. Este pipeline exporta
-  siempre a Google Drive.
-- `sentinel2_download.start_date` y `sentinel2_download.end_date`.
-- `sentinel2_download.bands`, `scale`, `crs`, filtro de nubosidad y metodo de composicion.
+```text
+conf/base/parameters/google_earth_engine/google_earth_engine.yml
+conf/base/parameters/google_earth_engine/sentinel2_download.yml
+conf/base/parameters/google_earth_engine/sentinel2_spectral_indices.yml
+```
 
-5. Ejecutar solo ese pipeline:
+Las credenciales personales, llaves JSON y configuraciones sensibles deben
+quedar fuera de Git, preferiblemente en `conf/local/`.
+
+## Orden de ejecucion de pipelines
+
+Ejecutar desde la raiz del repositorio:
 
 ```powershell
 kedro run --pipeline download_sentinel2
+kedro run --pipeline sentinel2_spectral_indices
+kedro run --pipeline prepare_training_data
+kedro run --pipeline extract_sentinel2_training_features
+kedro run --pipeline train_mining_binary_rf
+kedro run --pipeline predict_mining_binary_map
+kedro run --pipeline validate_mining_binary_map
+kedro run --pipeline postprocess_mining_binary_map
+kedro run --pipeline validate_postprocessed_mining_map
+kedro run --pipeline train_mining_multiclass_rf
+kedro run --pipeline predict_mining_multiclass_map
+kedro run --pipeline validate_mining_multiclass_map
+kedro run --pipeline postprocess_mining_multiclass_map
+kedro run --pipeline validate_postprocessed_mining_multiclass_map
 ```
 
-Las credenciales y llaves JSON no deben subirse al repositorio. Usa
-`conf/local/` o rutas fuera del proyecto para datos sensibles.
+Si no se activa el entorno virtual, tambien se puede usar:
 
-Kedro inicia una tarea de Earth Engine y la imagen queda en la carpeta
-configurada de Google Drive cuando la tarea termina. Los metadatos de la
-descarga/exportacion quedan en
-`data/08_reporting/sentinel2_download_metadata.json`.
+```powershell
+.\.env\Scripts\python.exe -m kedro run --pipeline download_sentinel2
+```
 
-Nota: este flujo usa Google Drive porque los ROIs reales superan con facilidad
-los limites de descarga directa de Earth Engine.
+## Salidas principales
 
-## Siguientes pasos
+Las salidas generadas se organizan por carpeta dentro de `data/08_reporting`:
 
-1. Ajustar rutas y catologo en `conf/base/catalog.yml`
-2. Cargar datos reales en `data/01_raw`
-3. Completar nodos placeholder en `src/centromonitoreo_mineria/pipelines`
-4. Agregar pruebas unitarias y de integracion
+| Carpeta | Contenido |
+|---|---|
+| `sentinel2_download_visualizations` | RGB, falso color y grilla de bandas |
+| `sentinel2_spectral_indices_maps` | Mapas de indices espectrales |
+| `prepare_training_data` | Distribucion espacial y por clase de puntos |
+| `extract_sentinel2_training_features` | Metadatos de extraccion |
+| `train_mining_binary_rf` | Metricas, matriz e importancia binaria |
+| `predict_mining_binary_map` | Mapas binarios |
+| `validate_mining_binary_map` | Mapas de probabilidad y errores |
+| `postprocess_mining_binary_map` | Mapa binario postprocesado |
+| `validate_postprocessed_mining_map` | Validacion final binaria |
+| `train_mining_multiclass_rf` | Metricas, matriz e importancia multiclase |
+| `predict_mining_multiclass_map` | Mapa multiclase |
+| `validate_mining_multiclass_map` | Matriz y mapa de validacion multiclase |
+| `postprocess_mining_multiclass_map` | Mapa multiclase filtrado |
+| `validate_postprocessed_mining_multiclass_map` | Validacion final multiclase |
+
+Los GeoTIFF y salidas pesadas se regeneran al correr los pipelines y estan
+excluidos del repositorio mediante `.gitignore`.
+
+## Informe final
+
+El informe esta en:
+
+```text
+docs/proyecto_final.qmd
+```
+
+Renderizar HTML:
+
+```powershell
+quarto render docs\proyecto_final.qmd --to html
+```
+
+Renderizar PDF:
+
+```powershell
+quarto render docs\proyecto_final.qmd --to pdf
+```
+
+El HTML generado queda ignorado por Git para evitar subir archivos pesados:
+
+```text
+docs/proyecto_final.html
+```
+
+## Pruebas
+
+Para verificar que los pipelines y funciones principales siguen consistentes:
+
+```powershell
+pytest
+```
+
+La ultima verificacion local reporto:
+
+```text
+44 passed, 1 warning
+```
+
+## Integracion continua
+
+El repositorio incluye un workflow de GitHub Actions en:
+
+```text
+.github/workflows/ci.yml
+```
+
+Este workflow se ejecuta en `push`, `pull_request` y manualmente desde
+`workflow_dispatch`. La accion instala Python 3.12, carga las dependencias de
+`requirements.txt` y ejecuta:
+
+```bash
+python -m pytest
+```
+
+## Notas de reproducibilidad
+
+- El codigo vive en `src/centromonitoreo_mineria`.
+- Los parametros reproducibles viven en `conf/base/parameters`.
+- Las entradas y salidas Kedro viven en `conf/base/catalog`.
+- Las salidas de datos pesadas no se suben a Git.
+- Las credenciales de Google Earth Engine y Drive no deben versionarse.
+- Para inspeccionar el grafo visualmente se puede usar `kedro viz`.

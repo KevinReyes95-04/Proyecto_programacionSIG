@@ -294,7 +294,6 @@ def register_pipelines() -> dict[str, Pipeline]:
         "sentinel2_spectral_indices": sentinel2_spectral_indices_pipeline(),
         "prepare_training_data": prepare_training_data_pipeline(),
         "extract_sentinel2_training_features": extract_sentinel2_training_features_pipeline(),
-        "analyze_sentinel2_pca": analyze_sentinel2_pca_pipeline(),
         "train_mining_binary_rf": train_mining_binary_rf_pipeline(),
         "predict_mining_binary_map": predict_mining_binary_map_pipeline(),
         "postprocess_mining_binary_map": postprocess_mining_binary_map_pipeline(),
@@ -317,7 +316,6 @@ flowchart TD
   D[Puntos etiquetados] --> E[prepare_training_data]
   C --> F[extract_sentinel2_training_features]
   E --> F
-  F --> G[analyze_sentinel2_pca]
   F --> H[train_mining_binary_rf]
   H --> I[predict_mining_binary_map]
   I --> J[postprocess_mining_binary_map]
@@ -509,54 +507,7 @@ El pipeline no elimino puntos por valores faltantes: salieron 480 filas de
 entrenamiento y 120 de prueba. Esto permite que la validacion sea consistente
 con la particion original.
 
-## Pipeline 5: analisis exploratorio PCA
-
-**Comando**
-
-```powershell
-kedro run --pipeline analyze_sentinel2_pca
-```
-
-```{mermaid}
-flowchart LR
-  train["features entrenamiento"]:::data --> fit("ajustar PCA"):::node
-  test["features prueba"]:::data --> trans("proyectar PCA"):::node
-  fit --> trans
-  fit --> scree("grafico de varianza"):::node
-  trans --> scatter("grafico PC1 vs PC2"):::node
-  scree --> o1["scree PNG"]:::data
-  scatter --> o2["scatter PNG"]:::data
-  classDef data fill:#ffffff,stroke:#333,stroke-dasharray:5 5;
-  classDef node fill:#b7dce8,stroke:#111;
-```
-
-```python
-# Funcion para ajustar PCA sobre variables escaladas.
-def fit_sentinel2_pca_model(training_dataset, config):
-    features = training_dataset[config["feature_columns"]]
-    scaler = StandardScaler()
-    scaled = scaler.fit_transform(features)
-    pca = PCA(n_components=config["n_components"], random_state=config["random_state"])
-    pca.fit(scaled)
-    return {"scaler": scaler, "pca": pca}
-```
-
-| Componente | Varianza explicada | Varianza acumulada |
-|---|---:|---:|
-| PC1 | 53.28 % | 53.28 % |
-| PC2 | 34.44 % | 87.72 % |
-| PC3 | 9.69 % | 97.41 % |
-| PC4 | 1.08 % | 98.49 % |
-
-![Dispersion de puntos en el espacio PC1-PC2.](../data/08_reporting/analyze_sentinel2_pca/sentinel2_pca_scatter.png){#fig-pca-scatter fig-align="center" width="82%"}
-
-![Varianza explicada por componente principal.](../data/08_reporting/analyze_sentinel2_pca/sentinel2_pca_scree.png){#fig-pca-scree fig-align="center" width="82%"}
-
-El PCA muestra que gran parte de la informacion se concentra en pocos
-componentes. Esto es esperable porque varias bandas e indices capturan
-procesos relacionados: vegetacion, humedad y brillo del suelo.
-
-## Pipeline 6: entrenamiento Random Forest binario
+## Pipeline 5: entrenamiento Random Forest binario
 
 **Comando**
 
@@ -604,7 +555,7 @@ positivos en el conjunto de prueba, pero si tres falsos negativos. Esto indica
 que el modelo es conservador: cuando marca mineria suele acertar, aunque puede
 omitir algunos puntos mineros.
 
-## Pipeline 7: prediccion raster binaria
+## Pipeline 6: prediccion raster binaria
 
 **Comando**
 
@@ -639,7 +590,7 @@ for window in windows(reference.width, reference.height, window_size):
 
 ![Mapa binario con simbologia categorica.](../data/08_reporting/predict_mining_binary_map/mining_binary_classification_categorical_map.png){#fig-binary-cat fig-align="center" width="90%"}
 
-## Pipeline 8: validacion espacial binaria
+## Pipeline 7: validacion espacial binaria
 
 **Comando**
 
@@ -665,7 +616,7 @@ La probabilidad ayuda a interpretar incertidumbre. Zonas con probabilidad
 intermedia pueden corresponder a bordes de parches, mezcla espectral o
 coberturas parecidas a mineria, como suelo desnudo y sedimentos.
 
-## Pipeline 9: postprocesamiento binario
+## Pipeline 8: postprocesamiento binario
 
 **Comando**
 
@@ -702,7 +653,7 @@ postprocessed = rasterize_polygons(filtered, class_map, transform, params)
 
 ![Mapa binario postprocesado por area minima.](../data/08_reporting/postprocess_mining_binary_map/mining_binary_postprocessed_map.png){#fig-binary-postprocessed fig-align="center" width="90%"}
 
-## Pipeline 10: validacion del binario postprocesado
+## Pipeline 9: validacion del binario postprocesado
 
 **Comando**
 
@@ -727,7 +678,7 @@ El postprocesamiento limpia la lectura cartografica al remover parches muy
 pequenos. La decision de usar 1 ha es una decision de escala: mejora el mapa,
 pero puede eliminar frentes mineros pequenos.
 
-## Pipeline 11: entrenamiento Random Forest multiclase
+## Pipeline 10: entrenamiento Random Forest multiclase
 
 **Comando**
 
@@ -774,7 +725,7 @@ menor medida con clases de borde o mezcla espectral. Esto es razonable para
 zonas aluviales donde hay transiciones entre vegetacion degradada, sedimentos,
 suelo expuesto y frentes mineros.
 
-## Pipeline 12: prediccion raster multiclase
+## Pipeline 11: prediccion raster multiclase
 
 **Comando**
 
@@ -806,7 +757,7 @@ class_array[valid_mask] = np.array(
 
 ![Mapa multiclase de coberturas.](../data/08_reporting/predict_mining_multiclass_map/mining_multiclass_classification_map.png){#fig-multiclass-map fig-align="center" width="90%"}
 
-## Pipeline 13: validacion espacial multiclase
+## Pipeline 12: validacion espacial multiclase
 
 **Comando**
 
@@ -838,7 +789,7 @@ flowchart LR
 
 ![Validacion espacial del mapa multiclase.](../data/08_reporting/validate_mining_multiclass_map/mining_multiclass_validation_map.png){#fig-multiclass-val-map fig-align="center" width="90%"}
 
-## Pipeline 14: postprocesamiento multiclase
+## Pipeline 13: postprocesamiento multiclase
 
 **Comando**
 
@@ -876,7 +827,7 @@ honestidad espacial del producto.
 
 ![Mapa multiclase despues del filtro de mayoria.](../data/08_reporting/postprocess_mining_multiclass_map/mining_multiclass_postprocessed_map.png){#fig-multiclass-post fig-align="center" width="90%"}
 
-## Pipeline 15: validacion del multiclase postprocesado
+## Pipeline 14: validacion del multiclase postprocesado
 
 **Comando**
 
@@ -928,7 +879,6 @@ rica del paisaje y de las confusiones espectrales.
 | Descarga Sentinel-2 | Bandas locales en `EPSG:9377` y visualizaciones RGB/falso color |
 | Indices espectrales | NDVI, MSAVI, NDWI, BSI, MBSI, NDSI, MSWI y NDBI |
 | Datos de entrenamiento | 600 puntos, 480 entrenamiento y 120 prueba |
-| PCA | PC1-PC3 explican 97.41 % de la varianza |
 | Modelo binario | Accuracy 0.975, F1 Mineria 0.919 |
 | Mapa binario postprocesado | 10 parches mineros conservados, 72.29 ha |
 | Modelo multiclase | Accuracy 0.717, F1 macro 0.759 |
@@ -1070,7 +1020,6 @@ kedro run --pipeline download_sentinel2
 kedro run --pipeline sentinel2_spectral_indices
 kedro run --pipeline prepare_training_data
 kedro run --pipeline extract_sentinel2_training_features
-kedro run --pipeline analyze_sentinel2_pca
 kedro run --pipeline train_mining_binary_rf
 kedro run --pipeline predict_mining_binary_map
 kedro run --pipeline validate_mining_binary_map
@@ -1092,7 +1041,7 @@ pytest
 La ultima verificacion local del repositorio reporto:
 
 ```text
-48 passed, 1 warning
+44 passed, 1 warning
 ```
 
 ## Anexo D. Renderizado del informe
@@ -1122,7 +1071,6 @@ Las salidas se organizan por pipeline dentro de `data/08_reporting`:
 | `sentinel2_spectral_indices_maps` | Mapas de indices espectrales |
 | `prepare_training_data` | Distribucion espacial y por clase de puntos |
 | `extract_sentinel2_training_features` | Metadatos de extraccion de variables |
-| `analyze_sentinel2_pca` | Graficos PCA |
 | `train_mining_binary_rf` | Metricas, matriz e importancia binaria |
 | `predict_mining_binary_map` | Mapas binarios |
 | `validate_mining_binary_map` | Mapas de probabilidad y errores |

@@ -1,6 +1,5 @@
 from kedro.pipeline import Pipeline
 
-from centromonitoreo_mineria.pipelines.analyze_sentinel2_pca.pipeline import (create_pipeline as analyze_sentinel2_pca_pipeline)
 from centromonitoreo_mineria.pipelines.download_sentinel2.pipeline import (create_pipeline as download_sentinel2_pipeline)
 from centromonitoreo_mineria.pipelines.extract_sentinel2_training_features.pipeline import (create_pipeline as extract_sentinel2_training_features_pipeline)
 from centromonitoreo_mineria.pipelines.prepare_training_data.pipeline import (create_pipeline as prepare_training_data_pipeline)
@@ -19,7 +18,6 @@ from centromonitoreo_mineria.pipelines.validate_postprocessed_mining_map.pipelin
 
 def register_pipelines() -> dict[str, Pipeline]:
     return {
-        "analyze_sentinel2_pca": analyze_sentinel2_pca_pipeline(),
         "download_sentinel2": download_sentinel2_pipeline(),
         "extract_sentinel2_training_features": extract_sentinel2_training_features_pipeline(),
         "prepare_training_data": prepare_training_data_pipeline(),
