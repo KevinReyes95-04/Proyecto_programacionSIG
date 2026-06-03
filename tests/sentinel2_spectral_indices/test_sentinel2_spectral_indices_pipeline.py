@@ -35,10 +35,10 @@ def _spectral_indices_params(**overrides):
         "cloud_mask_method": "qa60",
         "cloud_mask_scl_classes": [3, 8, 9, 10],
         "composite_method": "median",
-        "bands": ["B2", "B3", "B4", "B8", "B11", "B12"],
+        "bands": ["B2", "B3", "B4", "B8", "B11"],
         "scale": 10,
         "include_original_bands": True,
-        "output_band_order": ["B2", "B3", "B4", "B8", "B11", "B12", "NDVI", "BSI"],
+        "output_band_order": ["B2", "B3", "B4", "B8", "B11", "NDVI", "BSI"],
         "indices": {
             "NDVI": {
                 "enabled": True,
@@ -85,7 +85,7 @@ def test_sentinel2_spectral_indices_config_is_validated_and_grouped():
     params = config["sentinel2_spectral_indices"]
     assert config["gee"]["project"] == "programacionsig"
     assert params["indices"]["NDVI"]["formula"] == "normalized_difference"
-    assert output_bands(params) == ["B2", "B3", "B4", "B8", "B11", "B12", "NDVI", "BSI"]
+    assert output_bands(params) == ["B2", "B3", "B4", "B8", "B11", "NDVI", "BSI"]
 
 
 def test_sentinel2_spectral_indices_config_rejects_unknown_band():

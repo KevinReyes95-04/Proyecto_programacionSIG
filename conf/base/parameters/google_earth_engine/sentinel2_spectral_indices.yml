@@ -20,13 +20,13 @@ sentinel2_spectral_indices:
   composite_method: median
   sort_by: system:time_start
   sort_ascending: true
-  bands: [B1, B2, B3, B4, B5, B6, B7, B8, B8A, B9, B11, B12]
+  bands: [B1, B2, B3, B4, B5, B6, B7, B8, B8A, B9, B11]
   scale: 10
   crs: null
   apply_reflectance_scale: true
   reflectance_scale_factor: 0.0001
   include_original_bands: true
-  output_band_order: [B1, B2, B3, B4, B5, B6, B7, B8, B8A, B9, B11, B12, NDVI, MSAVI, NDWI, BSI, MBSI, NDSI, MSWI, NDBI]
+  output_band_order: [B1, B2, B3, B4, B5, B6, B7, B8, B8A, B9, B11, NDVI, MSAVI, NDWI, BSI, MBSI, NDSI, NDBI]
   indices:
     NDVI:
       enabled: true
@@ -78,14 +78,6 @@ sentinel2_spectral_indices:
       expression_label: "(B11 - B3) / (B11 + B3)"
       rationale: Aumentar el contraste entre la vegetacion y las areas con mineria.
 
-    MSWI:
-      enabled: true
-      name: Indice de Residuos Solidos Mineros
-      formula: normalized_difference
-      bands: {first: B12, second: B4}
-      expression_label: "(B12 - B4) / (B12 + B4)"
-      rationale: Resalta residuos solidos generados por actividades mineras. Ajusta second si tu metodologia usa otra banda.
-
     NDBI:
       enabled: true
       name: Indice de estructura construida
@@ -134,10 +126,6 @@ sentinel2_spectral_indices:
         min: -1
         max: 1
         palette: ["#1a9850", "#ffffbf", "#fdae61", "#d73027"]
-      MSWI:
-        min: -1
-        max: 1
-        palette: ["#2c7bb6", "#ffffbf", "#fdae61", "#d7191c"]
       NDBI:
         min: -1
         max: 1

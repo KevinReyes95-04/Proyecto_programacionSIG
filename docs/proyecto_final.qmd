@@ -236,6 +236,7 @@ Engine, aproximadamente dentro de los siguientes limites:
 | Fuente | Tipo | Uso | Reproducibilidad |
 |---|---|---|---|
 | `COPERNICUS/S2_SR_HARMONIZED` | API Google Earth Engine | Bandas Sentinel-2 Surface Reflectance | Requiere cuenta GEE |
+| `USGS/SRTMGL1_003` | API Google Earth Engine | Elevacion y pendiente derivada | Requiere cuenta GEE |
 | `Datos_Entrenamiento.shp` | Vector local | Puntos etiquetados para entrenamiento y prueba | Versionado como insumo |
 | Google Drive | Servicio intermedio | Recepcion de GeoTIFF exportados desde GEE | Requiere credenciales del usuario |
 | YAML de parametros | Configuracion | Fechas, ROI, bandas, indices, modelos y salidas | Versionado en `conf/base/parameters` |
@@ -247,8 +248,9 @@ La configuracion base de Sentinel-2 trabaja con bandas originales, escala de
 el modelo son:
 
 ```yaml
-bands: [B1, B2, B3, B4, B5, B6, B7, B8, B8A, B9, B11, B12]
-indices: [NDVI, MSAVI, NDWI, BSI, MBSI, NDSI, MSWI, NDBI]
+model_features: [B1, B2, B3, B4, B5, B6, B7, B8, B8A, B9, B11,
+                 NDVI, MSAVI, NDWI, BSI, MBSI, NDSI, NDBI, DEM, SLOPE]
+excluded_after_quality_control: [B12, MSWI]
 target_crs: EPSG:9377
 ```
 
@@ -290,6 +292,7 @@ que pipelines existen y con que nombre se ejecutan:
 ```python
 def register_pipelines() -> dict[str, Pipeline]:
     return {
+        "build_topographic_features": build_topographic_features_pipeline(),
         "download_sentinel2": download_sentinel2_pipeline(),
         "sentinel2_spectral_indices": sentinel2_spectral_indices_pipeline(),
         "prepare_training_data": prepare_training_data_pipeline(),
@@ -312,17 +315,21 @@ def register_pipelines() -> dict[str, Pipeline]:
 ```{mermaid}
 flowchart TD
   A[Sentinel-2 en GEE] --> B[download_sentinel2]
+  B --> T[build_topographic_features]
   B --> C[sentinel2_spectral_indices]
   D[Puntos etiquetados] --> E[prepare_training_data]
   C --> F[extract_sentinel2_training_features]
+  T --> F
   E --> F
   F --> H[train_mining_binary_rf]
   H --> I[predict_mining_binary_map]
+  T --> I
   I --> J[postprocess_mining_binary_map]
   I --> K[validate_mining_binary_map]
   J --> L[validate_postprocessed_mining_map]
   F --> M[train_mining_multiclass_rf]
   M --> N[predict_mining_multiclass_map]
+  T --> N
   N --> O[validate_mining_multiclass_map]
   N --> P[postprocess_mining_multiclass_map]
   P --> Q[validate_postprocessed_mining_multiclass_map]
@@ -380,7 +387,46 @@ estudio, si el CRS quedo consistente y si existen zonas NoData. La reproyeccion
 a `EPSG:9377` se usa porque el proyecto trabaja en Colombia y requiere medir
 areas en metros.
 
-## Pipeline 2: indices espectrales Sentinel-2
+## Pipeline 2: variables topograficas
+
+**Comando**
+
+```powershell
+kedro run --pipeline build_topographic_features
+```
+
+```{mermaid}
+flowchart LR
+  p["params:topographic_features"]:::data --> v("validar configuracion"):::node
+  v --> d("descargar DEM y pendiente"):::node
+  b["Sentinel2_B2_Masked.tif"]:::data --> a("alinear a grilla Sentinel-2"):::node
+  d --> a
+  a --> dem["Topography_DEM.tif"]:::data
+  a --> slope["Topography_SLOPE.tif"]:::data
+  a --> meta["metadata JSON"]:::data
+  classDef data fill:#ffffff,stroke:#333,stroke-dasharray:5 5;
+  classDef node fill:#b7dce8,stroke:#111;
+```
+
+Este paso agrega dos variables sencillas: elevacion (`DEM`) y pendiente
+(`SLOPE`). No reemplazan la informacion espectral; aportan contexto del
+relieve. En mineria aluvial, la forma del terreno puede ayudar a separar
+cauces, planicies, laderas y superficies alteradas que a veces se parecen en
+las bandas Sentinel-2.
+
+```python
+# Funcion para construir una imagen Earth Engine con elevacion y pendiente.
+def build_topographic_image(params):
+    dem = ee.Image(params["dem_asset"]).select("elevation").rename("DEM")
+    slope = ee.Terrain.slope(dem).rename("SLOPE")
+    return dem.addBands(slope)
+```
+
+Los GeoTIFF resultantes quedan en `data/04_feature/sentinel2_bands` para que
+las predicciones raster usen la misma grilla, el mismo CRS y la misma extension
+que las bandas Sentinel-2.
+
+## Pipeline 3: indices espectrales Sentinel-2
 
 **Comando**
 
@@ -422,7 +468,7 @@ def add_sentinel2_spectral_indices(image):
 
 ![BSI: zonas de suelo desnudo o superficies expuestas.](../data/08_reporting/sentinel2_spectral_indices_maps/bsi_map.png){#fig-bsi fig-align="center" width="80%"}
 
-## Pipeline 3: preparacion de puntos etiquetados
+## Pipeline 4: preparacion de puntos etiquetados
 
 **Comando**
 
@@ -472,7 +518,7 @@ La division es estratificada para conservar la proporcion de clases.
 
 ![Puntos de prueba.](../data/08_reporting/prepare_training_data/testing_labeled_points_distribution.png){#fig-testing-points fig-align="center" width="90%"}
 
-## Pipeline 4: extraccion de variables por punto
+## Pipeline 5: extraccion de variables por punto
 
 **Comando**
 
@@ -482,8 +528,9 @@ kedro run --pipeline extract_sentinel2_training_features
 
 ```{mermaid}
 flowchart LR
-  pts["puntos train/test"]:::data --> ext("muestrear bandas e indices"):::node
+  pts["puntos train/test"]:::data --> ext("muestrear variables"):::node
   ras["Sentinel-2 + indices"]:::data --> ext
+  topo["DEM + SLOPE"]:::data --> ext
   ext --> train["training_sentinel2_features.csv"]:::data
   ext --> test["testing_sentinel2_features.csv"]:::data
   ext --> meta["metadata JSON"]:::data
@@ -507,7 +554,7 @@ El pipeline no elimino puntos por valores faltantes: salieron 480 filas de
 entrenamiento y 120 de prueba. Esto permite que la validacion sea consistente
 con la particion original.
 
-## Pipeline 5: entrenamiento Random Forest binario
+## Pipeline 6: entrenamiento Random Forest binario
 
 **Comando**
 
@@ -555,7 +602,7 @@ positivos en el conjunto de prueba, pero si tres falsos negativos. Esto indica
 que el modelo es conservador: cuando marca mineria suele acertar, aunque puede
 omitir algunos puntos mineros.
 
-## Pipeline 6: prediccion raster binaria
+## Pipeline 7: prediccion raster binaria
 
 **Comando**
 
@@ -590,7 +637,7 @@ for window in windows(reference.width, reference.height, window_size):
 
 ![Mapa binario con simbologia categorica.](../data/08_reporting/predict_mining_binary_map/mining_binary_classification_categorical_map.png){#fig-binary-cat fig-align="center" width="90%"}
 
-## Pipeline 7: validacion espacial binaria
+## Pipeline 8: validacion espacial binaria
 
 **Comando**
 
@@ -616,7 +663,7 @@ La probabilidad ayuda a interpretar incertidumbre. Zonas con probabilidad
 intermedia pueden corresponder a bordes de parches, mezcla espectral o
 coberturas parecidas a mineria, como suelo desnudo y sedimentos.
 
-## Pipeline 8: postprocesamiento binario
+## Pipeline 9: postprocesamiento binario
 
 **Comando**
 
@@ -653,7 +700,7 @@ postprocessed = rasterize_polygons(filtered, class_map, transform, params)
 
 ![Mapa binario postprocesado por area minima.](../data/08_reporting/postprocess_mining_binary_map/mining_binary_postprocessed_map.png){#fig-binary-postprocessed fig-align="center" width="90%"}
 
-## Pipeline 9: validacion del binario postprocesado
+## Pipeline 10: validacion del binario postprocesado
 
 **Comando**
 
@@ -678,7 +725,7 @@ El postprocesamiento limpia la lectura cartografica al remover parches muy
 pequenos. La decision de usar 1 ha es una decision de escala: mejora el mapa,
 pero puede eliminar frentes mineros pequenos.
 
-## Pipeline 10: entrenamiento Random Forest multiclase
+## Pipeline 11: entrenamiento Random Forest multiclase
 
 **Comando**
 
@@ -725,7 +772,7 @@ menor medida con clases de borde o mezcla espectral. Esto es razonable para
 zonas aluviales donde hay transiciones entre vegetacion degradada, sedimentos,
 suelo expuesto y frentes mineros.
 
-## Pipeline 11: prediccion raster multiclase
+## Pipeline 12: prediccion raster multiclase
 
 **Comando**
 
@@ -757,7 +804,7 @@ class_array[valid_mask] = np.array(
 
 ![Mapa multiclase de coberturas.](../data/08_reporting/predict_mining_multiclass_map/mining_multiclass_classification_map.png){#fig-multiclass-map fig-align="center" width="90%"}
 
-## Pipeline 12: validacion espacial multiclase
+## Pipeline 13: validacion espacial multiclase
 
 **Comando**
 
@@ -789,7 +836,7 @@ flowchart LR
 
 ![Validacion espacial del mapa multiclase.](../data/08_reporting/validate_mining_multiclass_map/mining_multiclass_validation_map.png){#fig-multiclass-val-map fig-align="center" width="90%"}
 
-## Pipeline 13: postprocesamiento multiclase
+## Pipeline 14: postprocesamiento multiclase
 
 **Comando**
 
@@ -827,7 +874,7 @@ honestidad espacial del producto.
 
 ![Mapa multiclase despues del filtro de mayoria.](../data/08_reporting/postprocess_mining_multiclass_map/mining_multiclass_postprocessed_map.png){#fig-multiclass-post fig-align="center" width="90%"}
 
-## Pipeline 14: validacion del multiclase postprocesado
+## Pipeline 15: validacion del multiclase postprocesado
 
 **Comando**
 
@@ -877,7 +924,8 @@ rica del paisaje y de las confusiones espectrales.
 | Producto | Resultado clave |
 |---|---|
 | Descarga Sentinel-2 | Bandas locales en `EPSG:9377` y visualizaciones RGB/falso color |
-| Indices espectrales | NDVI, MSAVI, NDWI, BSI, MBSI, NDSI, MSWI y NDBI |
+| Variables topograficas | DEM y pendiente alineados a la grilla Sentinel-2 |
+| Indices espectrales | NDVI, MSAVI, NDWI, BSI, MBSI, NDSI y NDBI |
 | Datos de entrenamiento | 600 puntos, 480 entrenamiento y 120 prueba |
 | Modelo binario | Accuracy 0.975, F1 Mineria 0.919 |
 | Mapa binario postprocesado | 10 parches mineros conservados, 72.29 ha |
@@ -994,8 +1042,8 @@ En ese caso se deben instalar paquetes equivalentes a `gdal-bin`,
 
 ## Anexo B. Autenticacion de Google Earth Engine
 
-Antes de correr los pipelines que consultan Sentinel-2, se debe autenticar
-Google Earth Engine:
+Antes de correr los pipelines que consultan Google Earth Engine, se debe
+autenticar la cuenta:
 
 ```powershell
 earthengine authenticate --auth_mode localhost:0
@@ -1017,6 +1065,7 @@ Desde la raiz del proyecto, el flujo completo se reproduce con:
 
 ```powershell
 kedro run --pipeline download_sentinel2
+kedro run --pipeline build_topographic_features
 kedro run --pipeline sentinel2_spectral_indices
 kedro run --pipeline prepare_training_data
 kedro run --pipeline extract_sentinel2_training_features
@@ -1041,7 +1090,7 @@ pytest
 La ultima verificacion local del repositorio reporto:
 
 ```text
-44 passed, 1 warning
+47 passed, 1 warning
 ```
 
 ## Anexo D. Renderizado del informe
@@ -1068,6 +1117,7 @@ Las salidas se organizan por pipeline dentro de `data/08_reporting`:
 | Carpeta | Contenido |
 |---|---|
 | `sentinel2_download_visualizations` | RGB, falso color y grilla de bandas |
+| `topographic_features` | Metadatos de DEM y pendiente alineados a Sentinel-2 |
 | `sentinel2_spectral_indices_maps` | Mapas de indices espectrales |
 | `prepare_training_data` | Distribucion espacial y por clase de puntos |
 | `extract_sentinel2_training_features` | Metadatos de extraccion de variables |

@@ -62,7 +62,7 @@ ruedas binarias compatibles.
 
 ## Autenticacion de Google Earth Engine
 
-Los dos primeros pipelines consultan Sentinel-2 desde Google Earth Engine. Para
+Los primeros pipelines consultan datos desde Google Earth Engine. Para
 usar autenticacion local por navegador:
 
 ```powershell
@@ -86,6 +86,7 @@ Ejecutar desde la raiz del repositorio:
 
 ```powershell
 kedro run --pipeline download_sentinel2
+kedro run --pipeline build_topographic_features
 kedro run --pipeline sentinel2_spectral_indices
 kedro run --pipeline prepare_training_data
 kedro run --pipeline extract_sentinel2_training_features
@@ -114,6 +115,7 @@ Las salidas generadas se organizan por carpeta dentro de `data/08_reporting`:
 | Carpeta | Contenido |
 |---|---|
 | `sentinel2_download_visualizations` | RGB, falso color y grilla de bandas |
+| `topographic_features` | Metadatos de DEM y pendiente alineados a Sentinel-2 |
 | `sentinel2_spectral_indices_maps` | Mapas de indices espectrales |
 | `prepare_training_data` | Distribucion espacial y por clase de puntos |
 | `extract_sentinel2_training_features` | Metadatos de extraccion |
@@ -168,7 +170,7 @@ pytest
 La ultima verificacion local reporto:
 
 ```text
-44 passed, 1 warning
+47 passed, 1 warning
 ```
 
 ## Integracion continua

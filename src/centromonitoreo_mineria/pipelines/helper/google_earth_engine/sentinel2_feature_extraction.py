@@ -7,6 +7,9 @@ import pandas as pd
 from centromonitoreo_mineria.pipelines.helper.google_earth_engine.sentinel2_spectral_indices import (
     output_bands,
 )
+from centromonitoreo_mineria.pipelines.helper.google_earth_engine.topographic_features import (
+    topographic_feature_columns,
+)
 from centromonitoreo_mineria.utils.earth_engine import load_ee
 
 
@@ -31,9 +34,13 @@ def validate_sentinel2_training_features_params(
     if not isinstance(params, dict):
         raise ValueError("sentinel2_training_features debe ser un diccionario.")
 
-    feature_columns = params.get("feature_columns") or output_bands(spectral_indices_params)
+    available_features = [
+        *output_bands(spectral_indices_params),
+        *topographic_feature_columns(params.get("topographic_features", {})),
+    ]
+    feature_columns = params.get("feature_columns") or available_features
     _require_text_list(feature_columns, "sentinel2_training_features.feature_columns")
-    unknown_features = set(feature_columns) - set(output_bands(spectral_indices_params))
+    unknown_features = set(feature_columns) - set(available_features)
     if unknown_features:
         raise ValueError(
             "sentinel2_training_features.feature_columns incluye columnas no disponibles: "
@@ -115,6 +122,7 @@ def build_sentinel2_training_features_metadata(
             "cloud_mask": config["sentinel2_spectral_indices"].get("cloud_mask"),
             "cloud_mask_method": config["sentinel2_spectral_indices"].get("cloud_mask_method"),
         },
+        "topographic_features": params.get("topographic_features", {}),
     }
 
 

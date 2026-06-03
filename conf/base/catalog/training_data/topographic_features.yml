@@ -1,0 +1,7 @@
+topographic_features_config:
+  type: MemoryDataset
+
+topographic_features_metadata:
+  type: json.JSONDataset
+  filepath: data/08_reporting/topographic_features/topographic_features_metadata.json
+

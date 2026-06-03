@@ -1,0 +1,19 @@
+topographic_features:
+  dem_asset: USGS/SRTMGL1_003
+  elevation_band: elevation
+  output_bands: {elevation: DEM, slope: SLOPE}
+  target_crs: EPSG:9377
+  download:
+    enabled: true
+    output_dir: data/04_feature/sentinel2_bands
+    source_file: Topography_DEM_SLOPE_raw.tif
+    scale: 30
+    # Earth Engine descarga SRTM en CRS geografico; luego rasterio lo alinea a EPSG:9377.
+    crs: EPSG:4326
+    format: GEO_TIFF
+    timeout_seconds: 300
+  alignment:
+    reference_raster: data/04_feature/sentinel2_bands/Sentinel2_B2_Masked.tif
+    output_file_template: Topography_{band}.tif
+    resampling: bilinear
+    nodata_value: -9999.0

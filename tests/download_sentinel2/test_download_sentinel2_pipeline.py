@@ -54,7 +54,6 @@ def _sentinel2_params(**overrides):
             "B8A",
             "B9",
             "B11",
-            "B12",
         ],
         "scale": 10,
         "drive_export": {
@@ -97,7 +96,6 @@ def test_sentinel2_download_config_is_validated_and_grouped():
         "B8A",
         "B9",
         "B11",
-        "B12",
     ]
 
 

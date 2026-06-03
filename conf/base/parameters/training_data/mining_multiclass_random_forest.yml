@@ -5,7 +5,7 @@ mining_multiclass_random_forest:
   probability_prefix: probability
   class_labels: [Bosque Natural, Cuerpos de Agua, Mineria, Nubes, Suelo Desnudo, Vegetacion]
   class_values: {Bosque Natural: 1, Cuerpos de Agua: 2, Mineria: 3, Nubes: 4, Suelo Desnudo: 5, Vegetacion: 6}
-  feature_columns: [B1, B2, B3, B4, B5, B6, B7, B8, B8A, B9, B11, NDVI, MSAVI, NDWI, BSI, MBSI, NDSI, NDBI]
+  feature_columns: [B1, B2, B3, B4, B5, B6, B7, B8, B8A, B9, B11, NDVI, MSAVI, NDWI, BSI, MBSI, NDSI, NDBI, DEM, SLOPE]
   random_forest:
     n_estimators: 500
     criterion: gini

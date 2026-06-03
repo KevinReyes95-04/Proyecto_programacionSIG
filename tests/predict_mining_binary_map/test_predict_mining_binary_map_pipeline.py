@@ -22,7 +22,7 @@ class FakeMiningModel:
         return np.where(matrix.iloc[:, 0] > 0.3, "Mineria", "No Mineria")
 
     def predict_proba(self, matrix):
-        assert list(matrix.columns) == ["B1", "B2", "B3", "B4", "B8", "B11", "B12", "NDVI", "BSI"]
+        assert list(matrix.columns) == ["B1", "B2", "B3", "B4", "B8", "B11", "NDVI", "BSI"]
         positive = np.where(matrix.iloc[:, 0] > 0.3, 0.8, 0.2)
         return np.column_stack([1 - positive, positive])
 
@@ -32,8 +32,8 @@ def _params(tmp_path: Path, **overrides):
         "raster_dir": tmp_path.as_posix(),
         "band_file_template": "Sentinel2_{band}_Masked.tif",
         "reference_band": "B2",
-        "bands": ["B1", "B2", "B3", "B4", "B5", "B6", "B7", "B8", "B8A", "B9", "B11", "B12"],
-        "feature_columns": ["B1", "B2", "B3", "B4", "B8", "B11", "B12", "NDVI", "BSI"],
+        "bands": ["B1", "B2", "B3", "B4", "B5", "B6", "B7", "B8", "B8A", "B9", "B11"],
+        "feature_columns": ["B1", "B2", "B3", "B4", "B8", "B11", "NDVI", "BSI"],
         "positive_label": "Mineria",
         "negative_label": "No Mineria",
         "class_values": {"No Mineria": 0, "Mineria": 1},
@@ -93,7 +93,7 @@ def _write_test_bands(tmp_path: Path) -> None:
         "transform": from_origin(-75, 8, 0.01, 0.01),
     }
     values = np.array([[0.1, 0.4], [0.2, 0.5]], dtype="float32")
-    for band in ["B1", "B2", "B3", "B4", "B5", "B6", "B7", "B8", "B8A", "B9", "B11", "B12"]:
+    for band in ["B1", "B2", "B3", "B4", "B5", "B6", "B7", "B8", "B8A", "B9", "B11"]:
         with rasterio.open(tmp_path / f"Sentinel2_{band}_Masked.tif", "w", **profile) as dataset:
             dataset.write(values, 1)
 

@@ -9,7 +9,12 @@ sentinel2_training_features:
     latitude: y
     crs: EPSG:4326
   properties_to_keep: [Codigo, Cobertura, x, y, longitude, latitude, geometry_wkt]
-  feature_columns: [B1, B2, B3, B4, B5, B6, B7, B8, B8A, B9, B11, B12, NDVI, MSAVI, NDWI, BSI, MBSI, NDSI, MSWI, NDBI]
+  feature_columns: [B1, B2, B3, B4, B5, B6, B7, B8, B8A, B9, B11, NDVI, MSAVI, NDWI, BSI, MBSI, NDSI, NDBI, DEM, SLOPE]
+  topographic_features:
+    enabled: true
+    dem_asset: USGS/SRTMGL1_003
+    elevation_band: elevation
+    output_bands: {elevation: DEM, slope: SLOPE}
   sample_scale: 10
   tile_scale: 4
   geometries: false

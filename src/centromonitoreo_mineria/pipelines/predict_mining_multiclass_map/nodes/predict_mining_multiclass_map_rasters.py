@@ -65,7 +65,11 @@ def predict_mining_multiclass_map_rasters(
 def _band_paths(params: dict[str, Any]) -> dict[str, Path]:
     raster_dir = Path(params["raster_dir"])
     template = params["band_file_template"]
-    return {band: raster_dir / template.format(band=band) for band in params["bands"]}
+    paths = {band: raster_dir / template.format(band=band) for band in params["bands"]}
+    for feature, file_name in params.get("topographic_rasters", {}).items():
+        path = Path(file_name)
+        paths[feature] = path if path.is_absolute() else raster_dir / path
+    return paths
 
 
 # Funcion para validar que existan las bandas requeridas.
@@ -85,26 +89,34 @@ def _validate_raster_grid(sources: dict[str, Any]) -> None:
 
 # Funcion para leer bandas de una ventana raster.
 def _read_bands(sources: dict[str, Any], window: Window, params: dict[str, Any]) -> dict[str, np.ndarray]:
-    scale = params.get("reflectance_scale_factor", 0.0001) if params.get("apply_reflectance_scale", True) else 1.0
+    spectral_bands = set(params.get("bands", []))
+    spectral_scale = params.get("reflectance_scale_factor", 0.0001) if params.get("apply_reflectance_scale", True) else 1.0
     return {
-        band: source.read(1, window=window, masked=True).astype("float32").filled(np.nan) * scale
+        band: source.read(1, window=window, masked=True).astype("float32").filled(np.nan)
+        * (spectral_scale if band in spectral_bands else 1.0)
         for band, source in sources.items()
     }
 
 
 # Funcion para construir las variables espectrales requeridas por el modelo.
 def _feature_stack(bands: dict[str, np.ndarray], feature_columns: list[str]) -> dict[str, np.ndarray]:
-    features = {
-        **bands,
-        "NDVI": _normalized_difference(bands["B8"], bands["B4"]),
-        "MSAVI": _msavi(bands["B8"], bands["B4"]),
-        "NDWI": _normalized_difference(bands["B3"], bands["B8"]),
-        "BSI": _safe_divide((bands["B11"] + bands["B4"]) - (bands["B8"] + bands["B2"]), (bands["B11"] + bands["B4"]) + (bands["B8"] + bands["B2"])),
-        "MBSI": _normalized_difference(bands["B11"], bands["B4"]),
-        "NDSI": _normalized_difference(bands["B11"], bands["B3"]),
-        "MSWI": _normalized_difference(bands["B12"], bands["B4"]),
-        "NDBI": _normalized_difference(bands["B11"], bands["B8"]),
-    }
+    features = {**bands}
+    if "NDVI" in feature_columns:
+        features["NDVI"] = _normalized_difference(bands["B8"], bands["B4"])
+    if "MSAVI" in feature_columns:
+        features["MSAVI"] = _msavi(bands["B8"], bands["B4"])
+    if "NDWI" in feature_columns:
+        features["NDWI"] = _normalized_difference(bands["B3"], bands["B8"])
+    if "BSI" in feature_columns:
+        features["BSI"] = _safe_divide((bands["B11"] + bands["B4"]) - (bands["B8"] + bands["B2"]), (bands["B11"] + bands["B4"]) + (bands["B8"] + bands["B2"]))
+    if "MBSI" in feature_columns:
+        features["MBSI"] = _normalized_difference(bands["B11"], bands["B4"])
+    if "NDSI" in feature_columns:
+        features["NDSI"] = _normalized_difference(bands["B11"], bands["B3"])
+    if "MSWI" in feature_columns:
+        features["MSWI"] = _normalized_difference(bands["B12"], bands["B4"])
+    if "NDBI" in feature_columns:
+        features["NDBI"] = _normalized_difference(bands["B11"], bands["B8"])
     return {feature: features[feature] for feature in feature_columns}
 
 
@@ -181,4 +193,3 @@ def _probability_summary(values: np.ndarray) -> dict[str, float | int | None]:
     if values.size == 0:
         return {"count": 0, "min": None, "max": None, "mean": None}
     return {"count": int(values.size), "min": float(values.min()), "max": float(values.max()), "mean": float(values.mean())}
-
