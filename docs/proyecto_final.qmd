@@ -141,51 +141,44 @@ reproducible en un contexto academico.
 
 # Introduccion y Justificacion
 
-La mineria de oro de aluvion genera transformaciones espaciales visibles sobre
-cauces, planicies de inundacion, suelos desnudos y coberturas vegetales. En
-territorios tropicales, estas intervenciones pueden relacionarse con perdida de
-vegetacion, cambios en la dinamica sedimentaria, alteracion de cuerpos de agua
-y fragmentacion del paisaje [@perez2016impactos; @bansah2022guns;
-@cardona2022highly].
+La minería de oro de aluvión es una de las formas de extracción de minerales más controvertidas en el mundo, debido a sus significativos impactos sociales y medioambientales. Esta actividad, que se desarrolla principalmente en los cauces de los ríos, ha generado una preocupación histórica por la pérdida de ecosistemas, la degradación de las quebradas y los ríos, así como por las tensiones sociales derivadas del uso inapropiado de los recursos naturales.
 
-Desde la geomatica, el problema es espacial por naturaleza: la pregunta no es
-solo si existe mineria, sino donde se localiza, que tan extensa es, que tan
-cerca esta de rios y que coberturas se confunden con ella. Las imagenes
-Sentinel-2 ofrecen una entrada adecuada para una primera aproximacion porque
-son abiertas, multiespectrales, frecuentes y suficientemente detalladas para
-observar patrones regionales.
+En este contexto, la geomática, como disciplina que integra los Sistemas de Información Geográfica (SIG), la programación, la teledetección y el análisis de información geoespacial, se ha consolidado como un campo fundamental para la gestión y monitoreo de los recursos naturales.
 
-La programacion aporta el componente de trazabilidad. En lugar de producir un
-mapa aislado, el repositorio documenta como se descargan las imagenes, como se
-calculan indices espectrales, como se preparan los datos de entrenamiento,
-como se entrena el modelo y como se validan las salidas. Este enfoque es clave
-para Open Science: otra persona puede leer la configuracion, ejecutar los
-pipelines y revisar los productos generados.
+En el caso de la minería de oro de aluvión, su identificación mediante imágenes satelitales presenta múltiples desafíos técnicos, entre los que destacan la variabilidad espectral de los materiales, la heterogeneidad del paisaje intervenido y la dinámica espacio-temporal de las áreas afectadas. Desde una perspectiva geoespacial, esta actividad se caracteriza por una distribución dispersa y altamente dinámica, asociada principalmente a redes hidrográficas y zonas aluviales, lo que dificulta su delimitación precisa y su monitoreo continuo en el territorio. Estas características hacen necesario el uso de metodologías avanzadas que permitan automatizar su detección con mayor precisión y rapidez.
+
+Diversos estudios han evidenciado que esta actividad genera impactos severos, como la contaminación por mercurio y cianuro, la pérdida de cobertura vegetal y la degradación de suelos [@perez2016impactos; @bansah2022guns; @cardona2022highly]. Estas afectaciones comprometen no solo los ecosistemas, sino también las condiciones de vida de las comunidades locales [@velez2014extractivism].
+
+A nivel institucional, entidades como la UNODC han incorporado el uso de imágenes satelitales para el monitoreo de esta actividad [@unodc2022evidencias]. No obstante, estos análisis presentan limitaciones en términos de actualización temporal, ya que los reportes se publican con desfases significativos, lo que reduce la capacidad de respuesta oportuna frente a la dinámica de expansión de la minería.
+
+Ahora bien, pese al evidente potencial de las herramientas de observación de la Tierra para detectar, mapear y monitorear los impactos de esta actividad extractiva, su aplicación sigue siendo limitada en Colombia [@ibrahim2020small]. En este contexto, la ausencia de sistemas automatizados de vigilancia limita la generación de alertas tempranas y dificulta la intervención oportuna en zonas afectadas [@rincon2024fracaso].
+
+En este sentido, los modelos de inteligencia artificial y aprendizaje automático emergen como una alternativa prometedora, al permitir la identificación y el monitoreo de patrones espaciales y temporales asociados a la minería de oro de aluvión con mayor precisión y escalabilidad [@nursamsi2024feasibility].
+
+Por tanto, este proyecto propone integrar técnicas de teledetección y aprendizaje automático para la identificación de minería de oro de aluvión mediante imágenes satelitales, a través del desarrollo de un flujo de trabajo reproducible basado en Kedro. Este enfoque permitirá estructurar de manera sistemática las etapas de adquisición, procesamiento y análisis de datos, garantizando la trazabilidad, escalabilidad y reproducibilidad del proceso, así como el análisis de su distribución espacial y evolución temporal en la zona de estudio.
 
 # Estado del Arte / Revision Bibliografica
 
-La deteccion de mineria mediante sensores remotos ha evolucionado desde
-metodos visuales y clasificaciones tradicionales hacia flujos automatizados con
-indices espectrales, aprendizaje automatico y plataformas en la nube. En
-contextos internacionales, [@ngom2022recent] usaron Sentinel-2 y algoritmos de
-aprendizaje automatico para cuantificar mineria en Costa de Marfil. Otros
-trabajos han evaluado fusion multiespectral y radar para mineria artesanal
-[@nursamsi2024feasibility; @vanrensburg2022sar], o aproximaciones de
-aprendizaje profundo para segmentar huellas mineras [@saputra2025multimodal].
+El estudio de la minería de oro de aluvión desde una perspectiva geoespacial ha cobrado creciente interés en la comunidad científica, particularmente con el avance de las tecnologías de observación de la Tierra, los Sistemas de Información Geográfica (SIG) y el desarrollo de herramientas de programación orientadas al análisis de datos espaciales. En este contexto, la literatura reciente ha abordado la identificación, monitoreo y análisis de esta actividad mediante el uso de imágenes satelitales, integrando enfoques que combinan el procesamiento digital de imágenes, el análisis multitemporal y la implementación de algoritmos de aprendizaje automático en entornos computacionales. Estas aproximaciones han permitido no solo mejorar la comprensión de la dinámica espacial de la minería, sino también avanzar hacia metodologías automatizadas, reproducibles y escalables para su detección en diferentes contextos geográficos.
 
-En Colombia, el monitoreo institucional de explotacion de oro de aluvion ha
-sido trabajado por UNODC [@unodc2022evidencias]. A nivel academico,
-Castellanos [@castellanos2016tesis] y Castellanos et al.
-[@castellanos2017detection] exploraron imagenes, indices espectrales y
-clasificacion orientada a objetos para mineria a cielo abierto. En el Choco,
-[@sandoval2022metodologia] resaltan la importancia de considerar condiciones
-de nubosidad y sensores alternativos.
+En el estudio de [@nursamsi2024feasibility] se destaca la utilización de imágenes SAR (Radar de Apertura Sintética), combinadas con imágenes multiespectrales y modelos de aprendizaje automatizado en el aplicativo de Google Earth Engine, para identificar y mapear minería artesanal en la región minera de Kalimantan, Indonesia. Por su parte, [@ngom2022recent] identificaron y cuantificaron la tasa de expansión de las áreas afectadas por la minería en el río Bandama, Costa de Marfil, durante el período 2018-2021, mediante la aplicación de algoritmos de aprendizaje automático sobre imágenes Sentinel-2. Ambos estudios evidencian el potencial de la integración entre sensores remotos y algoritmos como Máquinas de Vectores de Soporte (SVM) y Random Forest (RF) para el monitoreo eficiente de la minería en distintos contextos geográficos.
 
-El aporte de este proyecto no es proponer el modelo mas complejo, sino
-documentar una cadena completa y reproducible. La metodologia prioriza
-decisiones comprensibles: Sentinel-2 como insumo abierto, indices espectrales
-con interpretacion fisica y Random Forest como clasificador robusto para un
-proyecto de clase.
+Por otro lado, [@kumar2023comparative] abordaron el monitoreo continuo de áreas con actividad minera mediante el uso de imágenes satelitales y técnicas avanzadas de procesamiento. En su estudio, destacan la aplicación de algoritmos de aprendizaje profundo para clasificar coberturas del suelo en zonas mineras, utilizando imágenes fusionadas provenientes de sensores LISS-IV, Landsat-8 y Sentinel-2A. Esta integración multifuente permitió mejorar la resolución espacial y espectral, incrementando la exactitud en la detección y seguimiento de los cambios inducidos por la actividad minera.
+
+De manera complementaria, [@saputra2025multimodal] exploraron la aplicación de técnicas de segmentación semántica empleando imágenes multiespectrales para identificar zonas mineras en diferentes regiones del mundo. Estos enfoques evidencian un avance hacia metodologías más automatizadas, basadas en modelos de aprendizaje profundo como redes neuronales convolucionales, que permiten mejorar la clasificación y el monitoreo de coberturas asociadas a la minería.
+
+En esta misma línea, [@vanrensburg2022sar] integraron imágenes Sentinel-1 con datos ópticos mediante análisis multitemporal y la implementación de algoritmos como k-vecinos más cercanos (KNN), árboles de decisión (DT), Random Forest (RF) y SVM, para identificar actividades de minería artesanal en zonas tropicales de Ghana. Este tipo de aproximaciones permite analizar la expansión progresiva de la minería, facilitando el seguimiento de los cambios espaciales en el territorio.
+
+A nivel nacional, se han logrado avances importantes en la identificación y clasificación de la minería de oro de aluvión mediante el uso de imágenes satelitales y diferentes enfoques metodológicos. Un estudio destacado es el realizado por la UNODC [@unodc2022evidencias], el cual empleó propiedades pictoricomorfológicas como la forma, el tamaño, la textura y la asociación espacial para detectar explotación de oro de aluvión en Colombia.
+
+Por su parte, Castellanos [@castellanos2016tesis] y Castellanos et al. [@castellanos2017detection] desarrollaron una metodología aplicada al Bajo Cauca antioqueño, basada en la fusión de imágenes satelitales, el uso de índices espectrales y la clasificación orientada a objetos, con el fin de discriminar áreas mineras y no mineras. Su propuesta incluye etapas como la selección de muestras representativas, el análisis del índice de Fisher y la evaluación del error, logrando resultados robustos en la identificación de zonas mineras a cielo abierto.
+
+Si bien estos estudios no incorporan de manera explícita algoritmos avanzados de aprendizaje automatizado, constituyen un referente metodológico fundamental en el país y un punto de partida para la implementación de enfoques más robustos. Además, aportan al entendimiento de las propiedades espectrales y espaciales asociadas a la minería de oro de aluvión.
+
+En la misma línea, otros estudios nacionales aportan enfoques complementarios [@ibrahim2020small] aplicaron técnicas de detección de cambios mediante imágenes Sentinel-2 en los municipios de El Bagre y Zaragoza, empleando métodos de clasificación supervisada para identificar transformaciones del paisaje asociadas a la minería. Por su parte, [@sandoval2022metodologia] utilizaron imágenes radar Sentinel-1 en la región del Chocó para detectar minería en condiciones de alta nubosidad, mientras que [@herrera2025temporal] analizaron cambios de cobertura del suelo entre 1985 y 2020 mediante imágenes Landsat y clasificación no supervisada en el municipio de Ayapel.
+
+A pesar de los avances identificados, gran parte de los estudios se han enfocado en la aplicación de técnicas específicas de clasificación o en análisis multitemporales, sin integrar de manera estructurada y reproducible todo el flujo de trabajo, desde la adquisición de datos hasta la implementación de modelos. En este sentido, se identifica una oportunidad de investigación en la integración de técnicas de teledetección y aprendizaje automático dentro de entornos reproducibles que permitan automatizar y sistematizar el proceso de identificación de minería de oro de aluvión en contextos como el colombiano.
+
 
 # Objetivos
 
@@ -233,26 +226,149 @@ Engine, aproximadamente dentro de los siguientes limites:
 
 # Fuentes de Datos
 
-| Fuente | Tipo | Uso | Reproducibilidad |
-|---|---|---|---|
-| `COPERNICUS/S2_SR_HARMONIZED` | API Google Earth Engine | Bandas Sentinel-2 Surface Reflectance | Requiere cuenta GEE |
-| `USGS/SRTMGL1_003` | API Google Earth Engine | Elevacion y pendiente derivada | Requiere cuenta GEE |
-| `Datos_Entrenamiento.shp` | Vector local | Puntos etiquetados para entrenamiento y prueba | Versionado como insumo |
-| Google Drive | Servicio intermedio | Recepcion de GeoTIFF exportados desde GEE | Requiere credenciales del usuario |
-| YAML de parametros | Configuracion | Fechas, ROI, bandas, indices, modelos y salidas | Versionado en `conf/base/parameters` |
-| Catalogos Kedro | Metadatos de datos | Declaracion de entradas y salidas | Versionado en `conf/base/catalog` |
-| `data/08_reporting` | Figuras y JSON | Evidencia grafica y metrica del flujo | Regenerable al correr pipelines |
+Las fuentes de datos del proyecto se organizaron para que cada insumo tuviera
+una funcion clara dentro del flujo: imagen satelital, variable topografica,
+puntos de entrenamiento, parametros de ejecucion y productos de salida. No se
+usaron datasets de Kaggle ni catalogos comerciales; la prioridad fue trabajar
+con fuentes abiertas, APIs reproducibles y datos locales versionables.
 
-La configuracion base de Sentinel-2 trabaja con bandas originales, escala de
-10 m y una ventana temporal corta. Las bandas y variables derivadas usadas por
-el modelo son:
+## Datasets, APIs y catalogos usados
+
+| Fuente | Tipo | Uso en el proyecto | Forma de acceso | Reproducibilidad |
+|---|---|---|---|---|
+| `COPERNICUS/S2_SR_HARMONIZED` | Coleccion satelital en Google Earth Engine | Imagen Sentinel-2 Surface Reflectance para bandas espectrales e indices | API de Google Earth Engine | Requiere cuenta GEE y parametros versionados |
+| `USGS/SRTMGL1_003` | Modelo digital de elevacion en Google Earth Engine | Elevacion (`DEM`) y pendiente (`SLOPE`) como variables topograficas | API de Google Earth Engine | Requiere cuenta GEE; se descarga y alinea localmente |
+| `Datos_Entrenamiento.shp` | Vector local | Puntos etiquetados para entrenamiento, prueba y validacion espacial | Archivo local en `data/01_raw` | Insumo versionable dentro del repositorio |
+| Google Drive | Servicio intermedio | Recepcion del GeoTIFF exportado desde Earth Engine | API de Drive mediante credenciales del usuario | Regenerable, pero depende de autenticacion |
+| YAML de parametros | Configuracion reproducible | Fechas, ROI, bandas, modelos, umbrales, colores y rutas | `conf/base/parameters` | Versionado y editable sin cambiar codigo |
+| Catalogos Kedro | Declaracion de datasets | Entradas, salidas, tipos de archivo y rutas usadas por los pipelines | `conf/base/catalog` | Versionado como parte del proyecto |
+| `data/08_reporting` | Carpeta de resultados | Figuras, metricas y metadatos JSON por pipeline | Salidas locales generadas por Kedro | Regenerable al correr los pipelines |
+
+Google Earth Engine se uso como plataforma de consulta y preparacion inicial
+porque permite acceder a colecciones satelitales y productos topograficos sin
+descargar manualmente escenas individuales. En este proyecto, Earth Engine no
+se uso como una caja negra: las fechas, la geometria de interes, las bandas,
+las mascaras de nubes y el CRS de trabajo se definieron en archivos YAML. De
+esta forma, el flujo puede repetirse modificando parametros y no reescribiendo
+codigo.
+
+La seleccion final de bandas se concentro en las longitudes de onda mas utiles
+para diferenciar vegetacion, agua, suelo desnudo, superficies alteradas y
+respuesta SWIR. La tabla resume las bandas Sentinel-2 que entran al flujo de
+clasificacion.
+
+| Banda usada | Longitud de onda (nm) | Resolucion espacial (m) |
+|---|---:|---:|
+| Banda 2 - azul | 445 - 520 | 10 |
+| Banda 3 - verde | 540 - 570 | 10 |
+| Banda 4 - rojo | 650 - 680 | 10 |
+| Banda 5 - borde rojo de vegetacion (Red Edge) | 690 - 710 | 20 |
+| Banda 6 - borde rojo de vegetacion (Red Edge) | 730 - 750 | 20 |
+| Banda 7 - borde rojo de vegetacion (Red Edge) | 770 - 790 | 20 |
+| Banda 8 - infrarrojo cercano (NIR) | 780 - 900 | 10 |
+| Banda 8A - borde rojo de vegetacion (Red Edge) | 850 - 870 | 20 |
+| Banda 11 - SWIR | 1560 - 1650 | 20 |
+
+Fuente: adaptado de NASA [@nasa_sentinel2_msi2025].
+
+El uso de Google Drive fue una decision practica. La descarga directa de
+imagenes grandes desde Earth Engine tiene limites de tamano; por eso, el
+pipeline exporta primero el compuesto Sentinel-2 a Drive y luego lo descarga
+localmente. Una vez en disco, las bandas se separan como GeoTIFF individuales
+en `data/04_feature/sentinel2_bands`, lo que permite que los siguientes
+pipelines trabajen con archivos locales y no dependan continuamente de la nube.
+
+## Variables derivadas de los datos
+
+La configuracion base trabaja con Sentinel-2, indices espectrales y dos
+variables topograficas. Las bandas `B1` y `B9` se excluyeron porque tienen una
+funcion atmosferica y resolucion nativa de 60 m; para este analisis aportaban
+menos informacion tematica que las bandas visibles, NIR, Red Edge y SWIR. La
+banda `B12` se excluyo despues del control de calidad porque presentaba una
+proporcion alta de valores sin datos en la zona de estudio; por la misma razon
+tambien se excluyo `MSWI`, ya que depende de esa banda. Esta decision evita que
+la prediccion raster quede reducida a una franja pequena del area de estudio.
 
 ```yaml
-model_features: [B1, B2, B3, B4, B5, B6, B7, B8, B8A, B9, B11,
+model_features: [B2, B3, B4, B5, B6, B7, B8, B8A, B11,
                  NDVI, MSAVI, NDWI, BSI, MBSI, NDSI, NDBI, DEM, SLOPE]
-excluded_after_quality_control: [B12, MSWI]
+excluded_after_quality_control: [B1, B9, B12, MSWI]
 target_crs: EPSG:9377
 ```
+
+Los indices espectrales se incluyeron porque resumen procesos fisicos
+relevantes para la clasificacion: vigor de vegetacion, humedad, suelo desnudo,
+superficies alteradas y contraste entre coberturas. Las variables topograficas
+se incluyeron como apoyo contextual, especialmente para diferenciar zonas
+aluviales, planicies, laderas y superficies intervenidas.
+
+La seleccion de indices se hizo buscando variables interpretables y coherentes
+con las bandas conservadas en el proyecto. El cuadro muestra que se calcula,
+como se calcula y por que se incluye dentro del flujo. No se incluye `MSWI`,
+aunque aparece en algunas propuestas para residuos mineros, porque depende de
+`B12` y esa banda fue excluida despues del control de calidad.
+
+| Nombre | Acronimo | Formula | Fuente | Razon fundamental |
+|---|---|---|---|---|
+| Indice de vegetacion de diferencia normalizada | NDVI | $\frac{B8 - B4}{B8 + B4}$ | [@ngom2022recent; @ngom2020mapping; @ibrahim2020small; @ayiwouo2023assessment] | Detectar perdida o reduccion de cobertura vegetal presente en zonas mineras. |
+| Indice de Vegetacion Ajustado al Suelo Modificado | MSAVI | $\frac{2B8 + 1 - \sqrt{(2B8 + 1)^2 - 8(B8 - B4)}}{2}$ | [@nyamekye2021mapping] | Aumentar el contraste entre vegetacion y areas mineras a cielo abierto. |
+| Indice de agua de diferencia normalizada | NDWI | $\frac{B3 - B8}{B3 + B8}$ | [@nursamsi2024feasibility; @ngom2020mapping; @ngom2022recent] | Manejar la humedad del suelo y cuerpos de agua presentes en zonas mineras. |
+| Indice de suelo desnudo | BSI | $\frac{(B11 + B4) - (B8 + B2)}{(B11 + B4) + (B8 + B2)}$ | [@ngom2020mapping; @ayiwouo2023assessment; @nursamsi2024feasibility; @ayouba2025assessment] | Identificar zonas de suelo desnudo como proceso previo a la aparicion de zonas mineras. |
+| Indice de Suelo Desnudo Modificado | MBSI | $\frac{B11 - B4}{B11 + B4}$ | [@ngom2020mapping; @ayiwouo2023assessment; @nursamsi2024feasibility; @ayouba2025assessment] | Reforzar la separacion entre superficies expuestas, vegetacion y zonas intervenidas. |
+| Indice de Suelo de Diferencia Normalizada | NDSI | $\frac{B11 - B3}{B11 + B3}$ | [@nursamsi2024feasibility] | Aumentar el contraste entre la vegetacion y las areas con mineria. |
+| Indice de estructura construida | NDBI | $\frac{B11 - B8}{B11 + B8}$ | [@ngom2022recent] | Ayudar a distinguir entre zonas urbanas, suelo desnudo y mineria. |
+
+## Librerias principales usadas
+
+El proyecto se implemento en Python y se apoyo en librerias geoespaciales,
+estadisticas y de aprendizaje automatico. La tabla resume su papel dentro del
+flujo:
+
+| Grupo | Librerias | Funcion en el proyecto |
+|---|---|---|
+| Orquestacion y reproducibilidad | `kedro`, `kedro-datasets`, `kedro-viz`, `PyYAML` | Organizar pipelines, nodos, catalogos, parametros y visualizacion del flujo |
+| Google Earth Engine y web | `earthengine-api`, `requests` | Autenticacion, consulta de colecciones, exportacion y descarga de productos |
+| Datos tabulares y numericos | `pandas`, `numpy` | Limpieza de tablas, manejo de matrices, calculo de metricas y organizacion de features |
+| SIG y raster | `rasterio`, `rioxarray`, `xarray`, `geopandas`, `shapely`, `pyproj` | Lectura/escritura de GeoTIFF, reproyeccion, geometria vectorial y manejo de CRS |
+| Modelado | `scikit-learn`, `joblib` | Entrenamiento Random Forest, prediccion, metricas y serializacion de modelos |
+| Visualizacion | `matplotlib`, `seaborn`, `contextily` | Mapas, matrices de confusion, importancia de variables y graficas exploratorias |
+| Pruebas | `pytest` | Verificacion automatica de nodos, pipelines y funciones principales |
+
+## Que es Kedro y como se uso
+
+Kedro es un framework open source de Python para construir pipelines de datos
+y ciencia de datos con buenas practicas de ingenieria de software. Su enfoque
+propone organizar el codigo en funciones pequenas, conectarlas mediante
+pipelines, declarar entradas y salidas en un catalogo de datos y mantener los
+parametros separados del codigo fuente. La pagina oficial de Kedro lo describe
+como una caja de herramientas para pipelines reproducibles y listos para
+produccion, con conceptos como Data Catalog, abstraccion de pipelines,
+plantilla de proyecto y visualizacion del flujo [@kedro2026].
+
+En este proyecto, Kedro cumplio cuatro funciones metodologicas:
+
+1. **Separar responsabilidades.** Cada pipeline resuelve una etapa concreta:
+descarga Sentinel-2, topografia, indices, preparacion de puntos, extraccion de
+features, entrenamiento, prediccion, validacion y postprocesamiento.
+
+2. **Declarar entradas y salidas.** Los catalogos YAML indican donde vive cada
+dataset, que tipo de archivo es y que nodo lo produce o consume. Esto evita
+rutas ocultas dentro del codigo.
+
+3. **Controlar parametros.** Las fechas, bandas, ROI, umbrales, colores,
+salidas y configuraciones de modelo estan en `conf/base/parameters`. Cambiar
+un experimento no exige modificar la logica del programa.
+
+4. **Facilitar reproducibilidad.** Cualquier persona puede ejecutar el mismo
+flujo con comandos `kedro run --pipeline ...`, revisar el orden de ejecucion y
+regenerar las salidas desde los insumos declarados.
+
+El flujo completo se interpreta entonces como una cadena reproducible de
+geoprocesamiento: los nodos son funciones de Python, los pipelines son la
+secuencia logica de esas funciones, los catalogos definen los datasets y los
+parametros documentan las decisiones tecnicas. Esta estructura es especialmente
+util para un proyecto de geomatica, porque permite auditar como se paso de la
+imagen satelital original a los mapas tematicos finales.
 
 # Metodologia y Codigo
 
@@ -444,8 +560,10 @@ flowchart LR
   classDef node fill:#b7dce8,stroke:#111;
 ```
 
-Los indices se calculan para representar procesos fisicos utiles: vigor de
-vegetacion, humedad, suelo desnudo y superficies alteradas.
+Los indices se calculan para representar los procesos descritos en la seccion
+de variables derivadas: vigor de vegetacion, humedad, suelo desnudo y
+superficies alteradas. En esta etapa, el pipeline convierte esas formulas en
+GeoTIFF locales y mapas PNG para revisar su comportamiento espacial.
 
 ```python
 # Funcion para calcular indices espectrales con operaciones seguras.

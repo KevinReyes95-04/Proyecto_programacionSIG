@@ -1,7 +1,7 @@
 sentinel2_spectral_indices:
   collection: COPERNICUS/S2_SR_HARMONIZED
   roi:
-    name: roi_planet_quick_search_polygon
+    name: roi_bajo_cauca
     source: inline_geojson
     bbox: null
     inline_geojson:
@@ -20,13 +20,13 @@ sentinel2_spectral_indices:
   composite_method: median
   sort_by: system:time_start
   sort_ascending: true
-  bands: [B1, B2, B3, B4, B5, B6, B7, B8, B8A, B9, B11]
+  bands: [B2, B3, B4, B5, B6, B7, B8, B8A, B11]
   scale: 10
   crs: null
   apply_reflectance_scale: true
   reflectance_scale_factor: 0.0001
   include_original_bands: true
-  output_band_order: [B1, B2, B3, B4, B5, B6, B7, B8, B8A, B9, B11, NDVI, MSAVI, NDWI, BSI, MBSI, NDSI, NDBI]
+  output_band_order: [B2, B3, B4, B5, B6, B7, B8, B8A, B11, NDVI, MSAVI, NDWI, BSI, MBSI, NDSI, NDBI]
   indices:
     NDVI:
       enabled: true

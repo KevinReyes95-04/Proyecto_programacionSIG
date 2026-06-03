@@ -7,7 +7,7 @@ mining_binary_random_forest:
   prediction_column: predicted_target
   probability_column: probability_mineria
   classification_threshold: 0.4
-  feature_columns: [B1, B2, B3, B4, B5, B6, B7, B8, B8A, B9, B11, NDVI, MSAVI, NDWI, BSI, MBSI, NDSI, NDBI, DEM, SLOPE]
+  feature_columns: [B2, B3, B4, B5, B6, B7, B8, B8A, B11, NDVI, MSAVI, NDWI, BSI, MBSI, NDSI, NDBI, DEM, SLOPE]
   random_forest:
     n_estimators: 500
     criterion: gini

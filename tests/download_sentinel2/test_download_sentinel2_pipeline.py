@@ -43,7 +43,6 @@ def _sentinel2_params(**overrides):
         "cloud_mask_scl_classes": [3, 8, 9, 10],
         "composite_method": "median",
         "bands": [
-            "B1",
             "B2",
             "B3",
             "B4",
@@ -52,7 +51,6 @@ def _sentinel2_params(**overrides):
             "B7",
             "B8",
             "B8A",
-            "B9",
             "B11",
         ],
         "scale": 10,
@@ -85,7 +83,6 @@ def test_sentinel2_download_config_is_validated_and_grouped():
     assert config["sentinel2_download"]["cloud_mask"] is True
     assert config["sentinel2_download"]["cloud_mask_method"] == "qa60"
     assert config["sentinel2_download"]["bands"] == [
-        "B1",
         "B2",
         "B3",
         "B4",
@@ -94,7 +91,6 @@ def test_sentinel2_download_config_is_validated_and_grouped():
         "B7",
         "B8",
         "B8A",
-        "B9",
         "B11",
     ]
 

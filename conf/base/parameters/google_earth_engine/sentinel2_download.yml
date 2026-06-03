@@ -3,7 +3,7 @@ sentinel2_download:
   roi:
     # Options: bbox, inline_geojson, geojson_path.
     # Use bbox for simple rectangular areas fully defined in parameters.
-    name: roi_planet_quick_search_polygon
+    name: roi_bajo_cauca
     source: inline_geojson
     bbox: null
     # Use inline_geojson for polygons fully defined in parameters.
@@ -24,7 +24,7 @@ sentinel2_download:
   composite_method: median
   sort_by: system:time_start
   sort_ascending: true
-  bands: [B1, B2, B3, B4, B5, B6, B7, B8, B8A, B9, B11]
+  bands: [B2, B3, B4, B5, B6, B7, B8, B8A, B11]
   scale: 10
   crs: null
   drive_export:
