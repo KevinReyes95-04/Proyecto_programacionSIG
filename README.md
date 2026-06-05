@@ -1,4 +1,4 @@
-# Centro Monitoreo Mineria
+# Identificación de Mineria
 
 Proyecto reproducible para identificar zonas asociadas a mineria de oro de
 aluvion usando imagenes Sentinel-2, indices espectrales y modelos Random
