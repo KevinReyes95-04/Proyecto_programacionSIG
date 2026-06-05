@@ -5,16 +5,32 @@ training_data:
   test_size: 0.2
   random_state: 42
   stratify: true
+  class_order:
+    - Bosque Natural
+    - Cuerpos de Agua
+    - Mineria
+    - Nubes
+    - Suelo Desnudo
+    - Vegetacion
+  class_colors:
+    Bosque Natural: "#1B5E20"
+    Cuerpos de Agua: "#1565C0"
+    Mineria: "#D32F2F"
+    Nubes: "#616161"
+    Suelo Desnudo: "#F28E2B"
+    Vegetacion: "#43A047"
   
   spatial_plot:
     output_path: data/08_reporting/prepare_training_data/labeled_points_distribution.png
     title: Distribucion espacial de puntos etiquetados
     figure_size: [8, 8]
     dpi: 160
-    point_size: 12
-    alpha: 0.8
+    point_size: 30
+    alpha: 0.92
     point_edgecolor: black
-    point_linewidth: 0.4
+    point_linewidth: 0.55
+    legend_marker_size: 9
+    legend_location: lower left
     use_basemap: false
     basemap_source: Esri.WorldImagery
     basemap_zoom: auto
@@ -37,13 +53,12 @@ training_data:
     testing_title: Distribucion espacial - prueba
     figure_size: [8, 8]
     dpi: 160
-    point_size: 12
-    alpha: 0.8
-    use_basemap: true
+    point_size: 30
+    alpha: 0.92
+    use_basemap: false
     basemap_source: Esri.WorldImagery
     basemap_zoom: auto
     basemap_strict: false
-    sentinel2_background: {enabled: false}
 
   class_distribution_plot:
     output_path: data/08_reporting/prepare_training_data/labeled_points_class_distribution.png
@@ -54,5 +69,3 @@ training_data:
     dpi: 160
     value_font_size: 9
     label_wrap_width: 16
-    class_order: null
-    colors: ["#8DD34F", "#0CB354", "#1379B9", "#FFC107", "#F5F500", "#18A8D8"]

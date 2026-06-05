@@ -14,7 +14,6 @@ from centromonitoreo_mineria.pipelines.helper.google_earth_engine.drive_export i
 
 
 BBOX = [-74.2, 4.5, -74.0, 4.8]
-SERVICE_ACCOUNT_KEY = Path(__file__).with_name("service-account.json")
 
 
 def _gee_params(**overrides):
@@ -95,18 +94,21 @@ def test_sentinel2_download_config_is_validated_and_grouped():
     ]
 
 
-def test_sentinel2_download_config_accepts_service_account():
+def test_sentinel2_download_config_accepts_service_account(tmp_path):
+    service_account_key = tmp_path / "service-account.json"
+    service_account_key.write_text("{}", encoding="utf-8")
+
     config = validate_sentinel2_download_config(
         params_gee=_gee_params(
             auth_method="service_account",
             service_account_email="gee-runner@programacionsig.iam.gserviceaccount.com",
-            service_account_key_path=str(SERVICE_ACCOUNT_KEY),
+            service_account_key_path=str(service_account_key),
         ),
         params_sentinel2_download=_sentinel2_params(),
     )
 
     assert config["gee"]["auth_method"] == "service_account"
-    assert config["gee"]["service_account_key_path"] == str(SERVICE_ACCOUNT_KEY)
+    assert config["gee"]["service_account_key_path"] == str(service_account_key)
 
 
 @pytest.mark.parametrize(

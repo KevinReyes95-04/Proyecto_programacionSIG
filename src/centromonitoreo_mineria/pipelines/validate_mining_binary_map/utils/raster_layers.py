@@ -6,6 +6,8 @@ import rasterio
 from matplotlib.colors import ListedColormap
 from rasterio.enums import Resampling
 
+from centromonitoreo_mineria.pipelines.helper.class_colors import CLASS_COLORS
+
 
 def classification_path(map_metadata: dict[str, Any]) -> str:
     """Obtiene la ruta del raster clasificado desde los metadatos."""
@@ -66,7 +68,7 @@ def plot_mining_overlay(
     axis.imshow(
         overlay,
         extent=extent,
-        cmap=ListedColormap([plot_params.get("mining_color", "#E31A1C")]),
+        cmap=ListedColormap([plot_params.get("mining_color", CLASS_COLORS["Mineria"])]),
         alpha=plot_params.get("mining_alpha", 0.5),
         interpolation="nearest",
     )

@@ -12,6 +12,11 @@ from matplotlib.patches import Patch
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
+from centromonitoreo_mineria.pipelines.helper.class_colors import (
+    CLASS_COLORS,
+    NO_MINING_COLOR,
+)
+
 
 # Funcion para dibujar y guardar el mapa de validacion postprocesado.
 def save_postprocessed_validation_map(
@@ -67,7 +72,12 @@ def _draw_class_map(axis: Any, class_map: np.ndarray, extent: list[float], param
     map_params = params.get("map", {})
     nodata = params.get("class_nodata", 255)
     plot_data = np.ma.masked_where(class_map == nodata, class_map)
-    cmap = ListedColormap([map_params.get("no_mining_color", "#1A9850"), map_params.get("mining_color", "#E31A1C")])
+    cmap = ListedColormap(
+        [
+            map_params.get("no_mining_color", NO_MINING_COLOR),
+            map_params.get("mining_color", CLASS_COLORS["Mineria"]),
+        ]
+    )
     norm = BoundaryNorm([-0.5, 0.5, 1.5], cmap.N)
     axis.imshow(plot_data, cmap=cmap, norm=norm, extent=extent, interpolation="nearest")
 
@@ -93,8 +103,8 @@ def _draw_validation_points(axis: Any, points: gpd.GeoDataFrame, plot_params: di
             label=labels[status],
         )
     legend_items = [
-        Patch(facecolor=plot_params.get("no_mining_color", "#1A9850"), edgecolor="black", label="No Mineria"),
-        Patch(facecolor=plot_params.get("mining_color", "#E31A1C"), edgecolor="black", label="Mineria"),
+        Patch(facecolor=plot_params.get("no_mining_color", NO_MINING_COLOR), edgecolor="black", label="No Mineria"),
+        Patch(facecolor=plot_params.get("mining_color", CLASS_COLORS["Mineria"]), edgecolor="black", label="Mineria"),
     ]
     point_legend = axis.legend(loc=plot_params.get("points_legend_location", "lower left"), fontsize=plot_params.get("legend_font_size", 8))
     axis.add_artist(point_legend)

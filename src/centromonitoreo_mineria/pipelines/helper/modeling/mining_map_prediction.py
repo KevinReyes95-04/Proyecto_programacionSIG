@@ -13,6 +13,11 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from matplotlib.colors import ListedColormap
 
+from centromonitoreo_mineria.pipelines.helper.class_colors import (
+    CLASS_COLORS,
+    NO_MINING_COLOR,
+)
+
 
 def validate_mining_binary_map_prediction_params(params: dict[str, Any]) -> dict[str, Any]:
     if not isinstance(params, dict):
@@ -282,7 +287,7 @@ def _plot_background(axis: Any, params: dict[str, Any], extent: list[float]) -> 
 def _plot_class_overlay(axis: Any, class_map: np.ndarray, params: dict[str, Any], plot_params: dict[str, Any], extent: list[float]) -> None:
     positive_value = _class_value(params["positive_label"], params)
     overlay = np.where(class_map == positive_value, 1, np.nan)
-    cmap = ListedColormap([plot_params.get("mining_color", "#E31A1C")])
+    cmap = ListedColormap([plot_params.get("mining_color", CLASS_COLORS["Mineria"])])
     axis.imshow(overlay, cmap=cmap, extent=extent, alpha=plot_params.get("mining_alpha", 0.55), interpolation="nearest")
 
 
@@ -294,8 +299,8 @@ def _plot_categorical_map(class_map: np.ndarray, extent: list[float], params: di
     positive_value = _class_value(params["positive_label"], params)
     categorical = np.where(class_map == positive_value, 1, np.where(class_map == negative_value, 0, np.nan))
     colors = [
-        plot_params.get("negative_color", "#1A9850"),
-        plot_params.get("positive_color", "#E31A1C"),
+        plot_params.get("negative_color", NO_MINING_COLOR),
+        plot_params.get("positive_color", CLASS_COLORS["Mineria"]),
     ]
     figure, axis = plt.subplots(figsize=tuple(plot_params.get("figure_size", [8, 8])))
     image = axis.imshow(categorical, cmap=ListedColormap(colors), extent=extent, vmin=0, vmax=1, interpolation="nearest")

@@ -17,3 +17,21 @@ topographic_features:
     output_file_template: Topography_{band}.tif
     resampling: bilinear
     nodata_value: -9999.0
+  map_plots:
+    output_dir: data/08_reporting/topographic_features
+    figure_size: [10, 8]
+    dpi: 220
+    percentile_clip: [2, 98]
+    x_label: Coordenada X (EPSG:9377)
+    y_label: Coordenada Y (EPSG:9377)
+    layers:
+      - band: DEM
+        output_path: data/08_reporting/topographic_features/topography_dem_map.png
+        title: Modelo digital de elevacion (DEM)
+        colorbar_label: Elevacion (m s. n. m.)
+        cmap: terrain
+      - band: SLOPE
+        output_path: data/08_reporting/topographic_features/topography_slope_map.png
+        title: Pendiente derivada del DEM
+        colorbar_label: Pendiente (grados)
+        cmap: magma

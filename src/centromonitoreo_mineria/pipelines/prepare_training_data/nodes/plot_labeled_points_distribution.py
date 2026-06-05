@@ -9,7 +9,11 @@ def plot_labeled_points_distribution(
     labeled_points: gpd.GeoDataFrame, params: dict[str, Any]
 ) -> dict[str, Any]:
     label_column = params["label_column"]
-    plot_params = params.get("spatial_plot", {})
+    plot_params = {
+        "class_order": params.get("class_order"),
+        "class_colors": params.get("class_colors", {}),
+        **params.get("spatial_plot", {}),
+    }
     output_path = Path(
         plot_params.get(
             "output_path",

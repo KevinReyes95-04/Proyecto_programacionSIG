@@ -2,6 +2,7 @@ from kedro.pipeline import Pipeline, node
 
 from centromonitoreo_mineria.pipelines.build_topographic_features.nodes import (
     build_topographic_features,
+    plot_topographic_feature_maps,
     validate_topographic_features_config,
 )
 
@@ -21,6 +22,12 @@ def create_pipeline(**kwargs) -> Pipeline:
                 inputs="topographic_features_config",
                 outputs="topographic_features_metadata",
                 name="build_topographic_features_node",
+            ),
+            node(
+                func=plot_topographic_feature_maps,
+                inputs=["topographic_features_metadata", "topographic_features_config"],
+                outputs="topographic_feature_maps_metadata",
+                name="plot_topographic_feature_maps_node",
             ),
         ]
     )

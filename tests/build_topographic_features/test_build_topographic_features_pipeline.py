@@ -15,6 +15,7 @@ from rasterio.transform import from_origin
 
 from centromonitoreo_mineria.pipelines.build_topographic_features.nodes import (
     build_topographic_features,
+    plot_topographic_feature_maps,
     validate_topographic_features_config,
 )
 from centromonitoreo_mineria.pipelines.build_topographic_features.pipeline import create_pipeline
@@ -55,11 +56,33 @@ def _topographic_params(workdir: Path):
             "resampling": "bilinear",
             "nodata_value": -9999.0,
         },
+        "map_plots": {
+            "output_dir": (workdir / "reporting" / "topographic_features").as_posix(),
+            "figure_size": [4, 3],
+            "dpi": 80,
+            "percentile_clip": [0, 100],
+            "layers": [
+                {
+                    "band": "DEM",
+                    "output_path": (workdir / "reporting" / "topographic_features" / "topography_dem_map.png").as_posix(),
+                    "title": "DEM",
+                    "colorbar_label": "Elevacion",
+                    "cmap": "terrain",
+                },
+                {
+                    "band": "SLOPE",
+                    "output_path": (workdir / "reporting" / "topographic_features" / "topography_slope_map.png").as_posix(),
+                    "title": "Pendiente",
+                    "colorbar_label": "Pendiente",
+                    "cmap": "magma",
+                },
+            ],
+        },
     }
 
 
 def test_build_topographic_features_pipeline_has_expected_node_count():
-    assert len(create_pipeline().nodes) == 2
+    assert len(create_pipeline().nodes) == 3
 
 
 def test_topographic_features_config_is_validated():
@@ -72,6 +95,7 @@ def test_topographic_features_config_is_validated():
 
     assert config["topographic_features"]["output_bands"] == {"elevation": "DEM", "slope": "SLOPE"}
     assert config["topographic_features"]["download"]["enabled"] is False
+    assert len(config["topographic_features"]["map_plots"]["layers"]) == 2
 
 
 def test_build_topographic_features_aligns_local_rasters():
@@ -90,6 +114,24 @@ def test_build_topographic_features_aligns_local_rasters():
     assert len(metadata["aligned_rasters"]) == 2
     assert (workdir / "Topography_DEM.tif").exists()
     assert (workdir / "Topography_SLOPE.tif").exists()
+
+
+def test_plot_topographic_feature_maps_writes_png_outputs():
+    workdir = _workspace_tmp()
+    _write_reference_raster(workdir / "Sentinel2_B2_Masked.tif")
+    _write_topographic_source(workdir / "Topography_DEM_SLOPE_raw.tif")
+    config = {
+        "gee": _gee_params(),
+        "sentinel2_download": _sentinel2_download_params(),
+        "topographic_features": _topographic_params(workdir),
+    }
+    topographic_metadata = build_topographic_features(config)
+
+    plot_metadata = plot_topographic_feature_maps(topographic_metadata, config)
+
+    assert len(plot_metadata["plots"]) == 2
+    assert (workdir / "reporting" / "topographic_features" / "topography_dem_map.png").exists()
+    assert (workdir / "reporting" / "topographic_features" / "topography_slope_map.png").exists()
 
 
 def _write_reference_raster(path: Path) -> None:

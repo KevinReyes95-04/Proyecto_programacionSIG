@@ -34,4 +34,4 @@ mining_binary_random_forest:
     figure_size: [8, 7]
     dpi: 160
     top_n: 20
-    color: "#1379B9"
+    color: "#616161"

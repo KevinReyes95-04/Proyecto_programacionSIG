@@ -24,6 +24,7 @@ def validate_topographic_features_config(
     _require_text(params["output_bands"].get("slope"), "topographic_features.output_bands.slope")
     _validate_download(params.get("download", {}))
     _validate_alignment(params.get("alignment", {}))
+    _validate_map_plots(params.get("map_plots", {}))
     return {"gee": gee, "sentinel2_download": sentinel2_download, "topographic_features": params}
 
 
@@ -46,6 +47,35 @@ def _validate_alignment(params: dict[str, Any]) -> None:
     _require_text(params.get("output_file_template"), "topographic_features.alignment.output_file_template")
     if params.get("resampling", "bilinear") not in {"nearest", "bilinear", "cubic"}:
         raise ValueError("topographic_features.alignment.resampling debe ser nearest, bilinear o cubic.")
+
+
+# Funcion para validar parametros de mapas topograficos.
+def _validate_map_plots(params: dict[str, Any]) -> None:
+    if not isinstance(params, dict):
+        raise ValueError("topographic_features.map_plots debe ser un diccionario.")
+    if "output_dir" in params:
+        _require_text(params["output_dir"], "topographic_features.map_plots.output_dir")
+    if "dpi" in params:
+        _require_positive_number(params["dpi"], "topographic_features.map_plots.dpi")
+    if "percentile_clip" in params:
+        clip = params["percentile_clip"]
+        if (
+            not isinstance(clip, list)
+            or len(clip) != 2
+            or not all(isinstance(value, int | float) and not isinstance(value, bool) for value in clip)
+            or not 0 <= clip[0] < clip[1] <= 100
+        ):
+            raise ValueError("topographic_features.map_plots.percentile_clip debe tener dos percentiles entre 0 y 100.")
+    if "layers" not in params:
+        return
+    if not isinstance(params["layers"], list) or not params["layers"]:
+        raise ValueError("topographic_features.map_plots.layers debe ser una lista no vacia.")
+    for index, layer in enumerate(params["layers"]):
+        if not isinstance(layer, dict):
+            raise ValueError(f"topographic_features.map_plots.layers[{index}] debe ser un diccionario.")
+        _require_text(layer.get("band"), f"topographic_features.map_plots.layers[{index}].band")
+        if "output_path" in layer:
+            _require_text(layer["output_path"], f"topographic_features.map_plots.layers[{index}].output_path")
 
 
 # Funcion para validar texto obligatorio.

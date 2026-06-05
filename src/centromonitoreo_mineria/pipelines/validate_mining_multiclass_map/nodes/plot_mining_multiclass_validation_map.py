@@ -12,6 +12,8 @@ from rasterio.enums import Resampling
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
+from centromonitoreo_mineria.pipelines.helper.class_colors import CLASS_COLORS
+
 
 # Funcion para graficar aciertos y errores sobre el mapa multiclase.
 def plot_mining_multiclass_validation_map(
@@ -28,7 +30,7 @@ def plot_mining_multiclass_validation_map(
 
     figure, axis = plt.subplots(figsize=tuple(plot_params.get("figure_size", [9, 9])))
     labels = list(params["class_values"].keys())
-    cmap = ListedColormap([params.get("class_colors", {}).get(label, "#999999") for label in labels])
+    cmap = ListedColormap([params.get("class_colors", {}).get(label, CLASS_COLORS.get(label, "#999999")) for label in labels])
     axis.imshow(_display_array(class_map, labels, params), cmap=cmap, extent=extent, vmin=-0.5, vmax=len(labels) - 0.5, interpolation="nearest")
     _plot_status_points(axis, points, plot_params)
     axis.set_title(plot_params.get("title", "Validacion espacial multiclase"))

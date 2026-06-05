@@ -9,6 +9,8 @@ from matplotlib.colors import ListedColormap
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
+from centromonitoreo_mineria.pipelines.helper.class_colors import CLASS_COLORS
+
 
 # Funcion para guardar el mapa multiclase postprocesado como PNG.
 def plot_mining_multiclass_postprocessed_map(
@@ -26,7 +28,7 @@ def plot_mining_multiclass_postprocessed_map(
 
     labels = list(params["class_values"].keys())
     display = _display_array(class_map, labels, params)
-    colors = [plot_params.get("colors", {}).get(label, "#999999") for label in labels]
+    colors = [plot_params.get("colors", {}).get(label, CLASS_COLORS.get(label, "#999999")) for label in labels]
     cmap = ListedColormap(colors)
     cmap.set_bad("#FFFFFF")
     figure, axis = plt.subplots(figsize=tuple(plot_params.get("figure_size", [9, 9])))

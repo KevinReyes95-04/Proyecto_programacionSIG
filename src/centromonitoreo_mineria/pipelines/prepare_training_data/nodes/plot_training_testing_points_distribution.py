@@ -12,7 +12,12 @@ def plot_training_testing_points_distribution(
     params: dict[str, Any],
 ) -> dict[str, Any]:
     label_column = params["label_column"]
-    plot_params = {**params.get("spatial_plot", {}), **params.get("split_spatial_plot", {})}
+    plot_params = {
+        "class_order": params.get("class_order"),
+        "class_colors": params.get("class_colors", {}),
+        **params.get("spatial_plot", {}),
+        **params.get("split_spatial_plot", {}),
+    }
     training_points = _to_geodataframe(training_labeled_points, params)
     testing_points = _to_geodataframe(testing_labeled_points, params)
     bounds = _combined_bounds(training_points, testing_points)

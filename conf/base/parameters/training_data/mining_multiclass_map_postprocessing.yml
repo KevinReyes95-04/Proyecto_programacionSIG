@@ -12,10 +12,10 @@ mining_multiclass_map_postprocessing:
     figure_size: [9, 9]
     dpi: 160
     colors:
-      Bosque Natural: "#0CB354"
-      Cuerpos de Agua: "#1379B9"
-      Mineria: "#E31A1C"
-      Nubes: "#18A8D8"
-      Suelo Desnudo: "#FFC107"
-      Vegetacion: "#8DD34F"
+      Bosque Natural: "#1B5E20"
+      Cuerpos de Agua: "#1565C0"
+      Mineria: "#D32F2F"
+      Nubes: "#616161"
+      Suelo Desnudo: "#F28E2B"
+      Vegetacion: "#43A047"
 

@@ -1,5 +1,5 @@
 ---
-title: "Identificacion reproducible de mineria de oro de aluvion con Sentinel-2 y Random Forest"
+title: "Identificación de minería de oro de aluvión mediante imágenes satelitales y aprendizaje automatizado en un flujo de trabajo reproducible con Kedro"
 subtitle: "Proyecto final - Programacion y SIG"
 author: "Kevin Orlando Reyes Mosquera"
 date: today
@@ -377,6 +377,13 @@ La idea metodologica es simple: cada pipeline debe hacer una parte pequena y
 verificable. Por eso el informe se organiza igual que el codigo: primero se
 presenta el comando de ejecucion, luego el diagrama, despues el fragmento de
 codigo central y finalmente el resultado generado.
+
+Para no duplicar todo el repositorio dentro del informe, en cada pipeline se
+incluye completo el archivo `pipeline.py`. Ese archivo muestra la arquitectura
+Kedro: imports, funcion `create_pipeline()`, orden de ejecucion, entradas,
+salidas y nombre de cada nodo. Si se quiere profundizar en la logica interna,
+cada seccion indica los nodos que deben revisarse en la carpeta `nodes/` del
+pipeline correspondiente.
 :::
 
 ## Estructura del proyecto
@@ -459,6 +466,76 @@ flowchart TD
 kedro run --pipeline download_sentinel2
 ```
 
+**Codigo completo de `pipeline.py`**
+
+```python
+from kedro.pipeline import Pipeline, node
+from centromonitoreo_mineria.pipelines.download_sentinel2.nodes import (
+    build_sentinel2_download_assets,
+    build_sentinel2_download_metadata,
+    build_sentinel2_download_visualizations,
+    download_sentinel2_drive_export_to_local,
+    export_sentinel2_download_to_drive,
+    validate_sentinel2_download_config,
+)
+
+
+def create_pipeline(**kwargs) -> Pipeline:
+    """Creates the Kedro pipeline for the Sentinel-2 download process."""
+    return Pipeline(
+        [
+            node(
+                func=validate_sentinel2_download_config,
+                inputs=["params:gee", "params:sentinel2_download"],
+                outputs="sentinel2_download_config",
+                name="validate_sentinel2_download_config_node",
+            ),
+            node(
+                func=build_sentinel2_download_assets,
+                inputs="sentinel2_download_config",
+                outputs="sentinel2_download_assets",
+                name="build_sentinel2_download_assets_node",
+            ),
+            node(
+                func=export_sentinel2_download_to_drive,
+                inputs=["sentinel2_download_assets", "sentinel2_download_config"],
+                outputs="sentinel2_drive_export_metadata",
+                name="export_sentinel2_download_to_drive_node",
+            ),
+            node(
+                func=build_sentinel2_download_metadata,
+                inputs=[
+                    "sentinel2_download_assets",
+                    "sentinel2_drive_export_metadata",
+                    "sentinel2_download_config",
+                ],
+                outputs="sentinel2_download_metadata",
+                name="build_sentinel2_download_metadata_node",
+            ),
+            node(
+                func=download_sentinel2_drive_export_to_local,
+                inputs=["sentinel2_drive_export_metadata", "sentinel2_download_config"],
+                outputs="sentinel2_local_download_metadata",
+                name="download_sentinel2_drive_export_to_local_node",
+            ),
+            node(
+                func=build_sentinel2_download_visualizations,
+                inputs=["sentinel2_local_download_metadata", "sentinel2_download_config"],
+                outputs="sentinel2_download_visualizations_metadata",
+                name="build_sentinel2_download_visualizations_node",
+            ),
+        ]
+    )
+```
+
+Para profundizar en la logica interna, revisar los nodos
+`validate_sentinel2_download_config_node`,
+`build_sentinel2_download_assets_node`,
+`export_sentinel2_download_to_drive_node`,
+`build_sentinel2_download_metadata_node`,
+`download_sentinel2_drive_export_to_local_node` y
+`build_sentinel2_download_visualizations_node`.
+
 ```{mermaid}
 flowchart LR
   p["params:gee + params:sentinel2_download"]:::data --> v("validar configuracion"):::node
@@ -494,6 +571,8 @@ def download_sentinel2_drive_export_to_local(drive_export_metadata, config):
 
 ![Composicion Sentinel-2 en color real.](../data/08_reporting/sentinel2_download_visualizations/sentinel2_true_color.png){#fig-true-color fig-align="center" width="90%"}
 
+![Composicion Sentinel-2 en color real usada como fondo cartografico.](../data/08_reporting/sentinel2_download_visualizations/sentinel2_true_color_background.png){#fig-true-color-background fig-align="center" width="90%"}
+
 ![Composicion Sentinel-2 en falso color.](../data/08_reporting/sentinel2_download_visualizations/sentinel2_false_color.png){#fig-false-color fig-align="center" width="90%"}
 
 ![Vista general de bandas Sentinel-2 descargadas.](../data/08_reporting/sentinel2_download_visualizations/sentinel2_bands_grid.png){#fig-bands-grid fig-align="center" width="95%"}
@@ -510,6 +589,52 @@ areas en metros.
 ```powershell
 kedro run --pipeline build_topographic_features
 ```
+
+**Codigo completo de `pipeline.py`**
+
+```python
+from kedro.pipeline import Pipeline, node
+
+from centromonitoreo_mineria.pipelines.build_topographic_features.nodes import (
+    build_topographic_features,
+    plot_topographic_feature_maps,
+    validate_topographic_features_config,
+)
+
+
+def create_pipeline(**kwargs) -> Pipeline:
+    """Creates the Kedro pipeline for topographic features."""
+    return Pipeline(
+        [
+            node(
+                func=validate_topographic_features_config,
+                inputs=[
+                    "params:gee",
+                    "params:sentinel2_download",
+                    "params:topographic_features",
+                ],
+                outputs="topographic_features_config",
+                name="validate_topographic_features_config_node",
+            ),
+            node(
+                func=build_topographic_features,
+                inputs="topographic_features_config",
+                outputs="topographic_features_metadata",
+                name="build_topographic_features_node",
+            ),
+            node(
+                func=plot_topographic_feature_maps,
+                inputs=["topographic_features_metadata", "topographic_features_config"],
+                outputs="topographic_feature_maps_metadata",
+                name="plot_topographic_feature_maps_node",
+            ),
+        ]
+    )
+```
+
+Para profundizar en la logica interna, revisar los nodos
+`validate_topographic_features_config_node`, `build_topographic_features_node`
+y `plot_topographic_feature_maps_node`.
 
 ```{mermaid}
 flowchart LR
@@ -542,6 +667,17 @@ Los GeoTIFF resultantes quedan en `data/04_feature/sentinel2_bands` para que
 las predicciones raster usen la misma grilla, el mismo CRS y la misma extension
 que las bandas Sentinel-2.
 
+**Resultados**
+
+![Modelo digital de elevacion alineado a la grilla Sentinel-2.](../data/08_reporting/topographic_features/topography_dem_map.png){#fig-topography-dem fig-align="center" width="90%"}
+
+![Mapa de pendiente derivado del DEM y alineado a Sentinel-2.](../data/08_reporting/topographic_features/topography_slope_map.png){#fig-topography-slope fig-align="center" width="90%"}
+
+Estos mapas en color permiten revisar el contexto fisico de la zona de estudio.
+El DEM resalta la transicion entre planicies aluviales y zonas de mayor
+elevacion, mientras que la pendiente ayuda a ubicar laderas, bordes de valle y
+superficies mas estables o mas abruptas.
+
 ## Pipeline 3: indices espectrales Sentinel-2
 
 **Comando**
@@ -549,6 +685,72 @@ que las bandas Sentinel-2.
 ```powershell
 kedro run --pipeline sentinel2_spectral_indices
 ```
+
+**Codigo completo de `pipeline.py`**
+
+```python
+from kedro.pipeline import Pipeline, node
+from centromonitoreo_mineria.pipelines.sentinel2_spectral_indices.nodes import (
+    build_sentinel2_spectral_indices_assets,
+    build_sentinel2_spectral_indices_metadata,
+    export_sentinel2_spectral_index_maps,
+    export_sentinel2_spectral_index_tifs,
+    validate_sentinel2_spectral_indices_config,
+)
+
+
+def create_pipeline(**kwargs) -> Pipeline:
+    """Creates the Kedro pipeline for Sentinel-2 spectral indices."""
+    return Pipeline(
+        [
+            node(
+                func=validate_sentinel2_spectral_indices_config,
+                inputs=["params:gee", "params:sentinel2_spectral_indices"],
+                outputs="sentinel2_spectral_indices_config",
+                name="validate_sentinel2_spectral_indices_config_node",
+            ),
+            node(
+                func=build_sentinel2_spectral_indices_assets,
+                inputs="sentinel2_spectral_indices_config",
+                outputs="sentinel2_spectral_indices_assets",
+                name="build_sentinel2_spectral_indices_assets_node",
+            ),
+            node(
+                func=export_sentinel2_spectral_index_maps,
+                inputs=[
+                    "sentinel2_spectral_indices_assets",
+                    "sentinel2_spectral_indices_config",
+                ],
+                outputs="sentinel2_spectral_indices_maps_metadata",
+                name="export_sentinel2_spectral_index_maps_node",
+            ),
+            node(
+                func=export_sentinel2_spectral_index_tifs,
+                inputs="sentinel2_spectral_indices_config",
+                outputs="sentinel2_spectral_indices_tifs_metadata",
+                name="export_sentinel2_spectral_index_tifs_node",
+            ),
+            node(
+                func=build_sentinel2_spectral_indices_metadata,
+                inputs=[
+                    "sentinel2_spectral_indices_assets",
+                    "sentinel2_spectral_indices_maps_metadata",
+                    "sentinel2_spectral_indices_tifs_metadata",
+                    "sentinel2_spectral_indices_config",
+                ],
+                outputs="sentinel2_spectral_indices_metadata",
+                name="build_sentinel2_spectral_indices_metadata_node",
+            ),
+        ]
+    )
+```
+
+Para profundizar en la logica interna, revisar los nodos
+`validate_sentinel2_spectral_indices_config_node`,
+`build_sentinel2_spectral_indices_assets_node`,
+`export_sentinel2_spectral_index_maps_node`,
+`export_sentinel2_spectral_index_tifs_node` y
+`build_sentinel2_spectral_indices_metadata_node`.
 
 ```{mermaid}
 flowchart LR
@@ -584,7 +786,17 @@ def add_sentinel2_spectral_indices(image):
 
 ![NDVI: respuesta de vegetacion.](../data/08_reporting/sentinel2_spectral_indices_maps/ndvi_map.png){#fig-ndvi fig-align="center" width="80%"}
 
+![MSAVI: vegetacion ajustada para superficies con suelo expuesto.](../data/08_reporting/sentinel2_spectral_indices_maps/msavi_map.png){#fig-msavi fig-align="center" width="80%"}
+
+![NDWI: respuesta asociada a humedad y cuerpos de agua.](../data/08_reporting/sentinel2_spectral_indices_maps/ndwi_map.png){#fig-ndwi fig-align="center" width="80%"}
+
 ![BSI: zonas de suelo desnudo o superficies expuestas.](../data/08_reporting/sentinel2_spectral_indices_maps/bsi_map.png){#fig-bsi fig-align="center" width="80%"}
+
+![MBSI: superficies expuestas e intervenidas.](../data/08_reporting/sentinel2_spectral_indices_maps/mbsi_map.png){#fig-mbsi fig-align="center" width="80%"}
+
+![NDSI: contraste espectral para superficies claras y suelo desnudo.](../data/08_reporting/sentinel2_spectral_indices_maps/ndsi_map.png){#fig-ndsi fig-align="center" width="80%"}
+
+![NDBI: respuesta de superficies construidas o alteradas.](../data/08_reporting/sentinel2_spectral_indices_maps/ndbi_map.png){#fig-ndbi fig-align="center" width="80%"}
 
 ## Pipeline 4: preparacion de puntos etiquetados
 
@@ -593,6 +805,74 @@ def add_sentinel2_spectral_indices(image):
 ```powershell
 kedro run --pipeline prepare_training_data
 ```
+
+**Codigo completo de `pipeline.py`**
+
+```python
+from kedro.pipeline import Pipeline, node
+from centromonitoreo_mineria.pipelines.prepare_training_data.nodes import (
+    build_training_data_metadata,
+    plot_labeled_points_reports,
+    plot_training_testing_points_distribution,
+    prepare_labeled_points,
+    split_training_testing_data,
+)
+
+
+def create_pipeline(**kwargs) -> Pipeline:
+    """Creates the Kedro pipeline for training data preparation."""
+    return Pipeline(
+        [
+            node(
+                func=prepare_labeled_points,
+                inputs="params:training_data",
+                outputs="validated_labeled_points",
+                name="prepare_labeled_points_node",
+            ),
+            node(
+                func=plot_labeled_points_reports,
+                inputs=["validated_labeled_points", "params:training_data"],
+                outputs="labeled_points_reports_metadata",
+                name="plot_labeled_points_reports_node",
+            ),
+            node(
+                func=split_training_testing_data,
+                inputs=["validated_labeled_points", "params:training_data"],
+                outputs=["training_labeled_points", "testing_labeled_points"],
+                name="split_training_testing_data_node",
+            ),
+            node(
+                func=plot_training_testing_points_distribution,
+                inputs=[
+                    "training_labeled_points",
+                    "testing_labeled_points",
+                    "params:training_data",
+                ],
+                outputs="training_testing_points_spatial_plot_metadata",
+                name="plot_training_testing_points_distribution_node",
+            ),
+            node(
+                func=build_training_data_metadata,
+                inputs=[
+                    "validated_labeled_points",
+                    "training_labeled_points",
+                    "testing_labeled_points",
+                    "labeled_points_reports_metadata",
+                    "training_testing_points_spatial_plot_metadata",
+                    "params:training_data",
+                ],
+                outputs="training_data_metadata",
+                name="build_training_data_metadata_node",
+            ),
+        ]
+    )
+```
+
+Para profundizar en la logica interna, revisar los nodos
+`prepare_labeled_points_node`, `plot_labeled_points_reports_node`,
+`split_training_testing_data_node`,
+`plot_training_testing_points_distribution_node` y
+`build_training_data_metadata_node`.
 
 ```{mermaid}
 flowchart LR
@@ -636,13 +916,79 @@ La division es estratificada para conservar la proporcion de clases.
 
 ![Puntos de prueba.](../data/08_reporting/prepare_training_data/testing_labeled_points_distribution.png){#fig-testing-points fig-align="center" width="90%"}
 
-## Pipeline 5: extraccion de variables por punto
+## Pipeline 5: extraccion de variables espectrales y topograficas por punto
 
 **Comando**
 
 ```powershell
 kedro run --pipeline extract_sentinel2_training_features
 ```
+
+**Codigo completo de `pipeline.py`**
+
+```python
+from kedro.pipeline import Pipeline, node
+
+from centromonitoreo_mineria.pipelines.extract_sentinel2_training_features.nodes import (
+    build_sentinel2_training_features_image,
+    build_sentinel2_training_features_metadata,
+    extract_sentinel2_features,
+    validate_sentinel2_training_features_config,
+)
+
+
+def create_pipeline(**kwargs) -> Pipeline:
+    """Creates the Kedro pipeline for Sentinel-2 training feature tables."""
+    return Pipeline(
+        [
+            node(
+                func=validate_sentinel2_training_features_config,
+                inputs=[
+                    "params:gee",
+                    "params:sentinel2_spectral_indices",
+                    "params:sentinel2_training_features",
+                ],
+                outputs="sentinel2_training_features_config",
+                name="validate_sentinel2_training_features_config_node",
+            ),
+            node(
+                func=build_sentinel2_training_features_image,
+                inputs="sentinel2_training_features_config",
+                outputs="sentinel2_training_features_image",
+                name="build_sentinel2_training_features_image_node",
+            ),
+            node(
+                func=extract_sentinel2_features,
+                inputs=[
+                    "training_labeled_points",
+                    "testing_labeled_points",
+                    "sentinel2_training_features_image",
+                    "sentinel2_training_features_config",
+                ],
+                outputs=["training_sentinel2_features", "testing_sentinel2_features"],
+                name="extract_sentinel2_features_node",
+            ),
+            node(
+                func=build_sentinel2_training_features_metadata,
+                inputs=[
+                    "training_labeled_points",
+                    "testing_labeled_points",
+                    "training_sentinel2_features",
+                    "testing_sentinel2_features",
+                    "sentinel2_training_features_config",
+                ],
+                outputs="sentinel2_training_features_metadata",
+                name="build_sentinel2_training_features_metadata_node",
+            ),
+        ]
+    )
+```
+
+Para profundizar en la logica interna, revisar los nodos
+`validate_sentinel2_training_features_config_node`,
+`build_sentinel2_training_features_image_node`,
+`extract_sentinel2_features_node` y
+`build_sentinel2_training_features_metadata_node`.
 
 ```{mermaid}
 flowchart LR
@@ -655,6 +1001,12 @@ flowchart LR
   classDef data fill:#ffffff,stroke:#333,stroke-dasharray:5 5;
   classDef node fill:#b7dce8,stroke:#111;
 ```
+
+Este pipeline no solo extrae las bandas Sentinel-2 y los indices espectrales.
+Tambien incorpora las variables topograficas generadas en el Pipeline 2
+(`DEM` y `SLOPE`) y las muestrea sobre los mismos puntos de entrenamiento y
+prueba. Asi, cada punto queda descrito por 18 variables predictoras: 9 bandas
+Sentinel-2, 7 indices espectrales y 2 variables topograficas.
 
 ```python
 # Funcion para extraer valores espectrales en coordenadas de puntos.
@@ -679,6 +1031,129 @@ con la particion original.
 ```powershell
 kedro run --pipeline train_mining_binary_rf
 ```
+
+**Codigo completo de `pipeline.py`**
+
+```python
+from kedro.pipeline import Pipeline, node
+
+from centromonitoreo_mineria.pipelines.train_mining_binary_rf.nodes import (
+    build_mining_binary_datasets,
+    build_mining_binary_feature_importance,
+    build_mining_binary_random_forest_metadata,
+    evaluate_mining_binary_random_forest,
+    plot_mining_binary_confusion_matrix,
+    plot_mining_binary_feature_importance,
+    predict_mining_binary_random_forest,
+    train_mining_binary_random_forest,
+    validate_mining_binary_random_forest_config,
+)
+
+
+def create_pipeline(**kwargs) -> Pipeline:
+    """Creates the Kedro pipeline for binary mining Random Forest."""
+    return Pipeline(
+        [
+            node(
+                func=validate_mining_binary_random_forest_config,
+                inputs="params:mining_binary_random_forest",
+                outputs="mining_binary_random_forest_config",
+                name="validate_mining_binary_random_forest_config_node",
+            ),
+            node(
+                func=build_mining_binary_datasets,
+                inputs=[
+                    "training_sentinel2_features",
+                    "testing_sentinel2_features",
+                    "mining_binary_random_forest_config",
+                ],
+                outputs=[
+                    "mining_binary_training_dataset",
+                    "mining_binary_testing_dataset",
+                ],
+                name="build_mining_binary_datasets_node",
+            ),
+            node(
+                func=train_mining_binary_random_forest,
+                inputs=[
+                    "mining_binary_training_dataset",
+                    "mining_binary_random_forest_config",
+                ],
+                outputs="mining_binary_random_forest_model",
+                name="train_mining_binary_random_forest_node",
+            ),
+            node(
+                func=predict_mining_binary_random_forest,
+                inputs=[
+                    "mining_binary_random_forest_model",
+                    "mining_binary_testing_dataset",
+                    "mining_binary_random_forest_config",
+                ],
+                outputs="mining_binary_predictions",
+                name="predict_mining_binary_random_forest_node",
+            ),
+            node(
+                func=evaluate_mining_binary_random_forest,
+                inputs=[
+                    "mining_binary_predictions",
+                    "mining_binary_random_forest_config",
+                ],
+                outputs="mining_binary_metrics",
+                name="evaluate_mining_binary_random_forest_node",
+            ),
+            node(
+                func=build_mining_binary_feature_importance,
+                inputs=[
+                    "mining_binary_random_forest_model",
+                    "mining_binary_random_forest_config",
+                ],
+                outputs="mining_binary_feature_importance",
+                name="build_mining_binary_feature_importance_node",
+            ),
+            node(
+                func=plot_mining_binary_confusion_matrix,
+                inputs=[
+                    "mining_binary_metrics",
+                    "mining_binary_random_forest_config",
+                ],
+                outputs="mining_binary_confusion_matrix_plot_metadata",
+                name="plot_mining_binary_confusion_matrix_node",
+            ),
+            node(
+                func=plot_mining_binary_feature_importance,
+                inputs=[
+                    "mining_binary_feature_importance",
+                    "mining_binary_random_forest_config",
+                ],
+                outputs="mining_binary_feature_importance_plot_metadata",
+                name="plot_mining_binary_feature_importance_node",
+            ),
+            node(
+                func=build_mining_binary_random_forest_metadata,
+                inputs=[
+                    "mining_binary_training_dataset",
+                    "mining_binary_testing_dataset",
+                    "mining_binary_metrics",
+                    "mining_binary_confusion_matrix_plot_metadata",
+                    "mining_binary_feature_importance_plot_metadata",
+                    "mining_binary_random_forest_config",
+                ],
+                outputs="mining_binary_random_forest_metadata",
+                name="build_mining_binary_random_forest_metadata_node",
+            ),
+        ]
+    )
+```
+
+Para profundizar en la logica interna, revisar los nodos
+`validate_mining_binary_random_forest_config_node`,
+`build_mining_binary_datasets_node`, `train_mining_binary_random_forest_node`,
+`predict_mining_binary_random_forest_node`,
+`evaluate_mining_binary_random_forest_node`,
+`build_mining_binary_feature_importance_node`,
+`plot_mining_binary_confusion_matrix_node`,
+`plot_mining_binary_feature_importance_node` y
+`build_mining_binary_random_forest_metadata_node`.
 
 ```{mermaid}
 flowchart LR
@@ -728,6 +1203,66 @@ omitir algunos puntos mineros.
 kedro run --pipeline predict_mining_binary_map
 ```
 
+**Codigo completo de `pipeline.py`**
+
+```python
+from kedro.pipeline import Pipeline, node
+
+from centromonitoreo_mineria.pipelines.predict_mining_binary_map.nodes import (
+    build_mining_binary_map_metadata,
+    plot_mining_binary_map,
+    predict_mining_binary_map_rasters,
+    validate_mining_binary_map_prediction_config,
+)
+
+
+def create_pipeline(**kwargs) -> Pipeline:
+    """Creates the Kedro pipeline for binary mining map prediction."""
+    return Pipeline(
+        [
+            node(
+                func=validate_mining_binary_map_prediction_config,
+                inputs="params:mining_binary_map_prediction",
+                outputs="mining_binary_map_prediction_config",
+                name="validate_mining_binary_map_prediction_config_node",
+            ),
+            node(
+                func=predict_mining_binary_map_rasters,
+                inputs=[
+                    "mining_binary_random_forest_model",
+                    "mining_binary_map_prediction_config",
+                ],
+                outputs="mining_binary_map_prediction_metadata",
+                name="predict_mining_binary_map_rasters_node",
+            ),
+            node(
+                func=plot_mining_binary_map,
+                inputs=[
+                    "mining_binary_map_prediction_metadata",
+                    "mining_binary_map_prediction_config",
+                ],
+                outputs="mining_binary_map_plot_metadata",
+                name="plot_mining_binary_map_node",
+            ),
+            node(
+                func=build_mining_binary_map_metadata,
+                inputs=[
+                    "mining_binary_map_prediction_metadata",
+                    "mining_binary_map_plot_metadata",
+                    "mining_binary_map_prediction_config",
+                ],
+                outputs="mining_binary_map_metadata",
+                name="build_mining_binary_map_metadata_node",
+            ),
+        ]
+    )
+```
+
+Para profundizar en la logica interna, revisar los nodos
+`validate_mining_binary_map_prediction_config_node`,
+`predict_mining_binary_map_rasters_node`, `plot_mining_binary_map_node` y
+`build_mining_binary_map_metadata_node`.
+
 ```{mermaid}
 flowchart LR
   model["modelo RF binario"]:::data --> win("leer raster por ventanas"):::node
@@ -763,6 +1298,83 @@ for window in windows(reference.width, reference.height, window_size):
 kedro run --pipeline validate_mining_binary_map
 ```
 
+**Codigo completo de `pipeline.py`**
+
+```python
+from kedro.pipeline import Pipeline, node
+from centromonitoreo_mineria.pipelines.validate_mining_binary_map.nodes import (
+    build_mining_binary_map_validation_metadata,
+    plot_classification_points_overlay,
+    plot_probability_points_overlay,
+    plot_testing_errors_overlay,
+    validate_mining_binary_map_validation_config,
+)
+
+
+def create_pipeline(**kwargs) -> Pipeline:
+    """Creates the Kedro pipeline for visual validation of mining map."""
+    return Pipeline(
+        [
+            node(
+                func=validate_mining_binary_map_validation_config,
+                inputs="params:mining_binary_map_validation",
+                outputs="mining_binary_map_validation_config",
+                name="validate_mining_binary_map_validation_config_node",
+            ),
+            node(
+                func=plot_classification_points_overlay,
+                inputs=[
+                    "training_sentinel2_features",
+                    "mining_binary_predictions",
+                    "mining_binary_map_metadata",
+                    "mining_binary_map_validation_config",
+                ],
+                outputs="mining_binary_classification_points_plot_metadata",
+                name="plot_mining_binary_classification_points_overlay_node",
+            ),
+            node(
+                func=plot_probability_points_overlay,
+                inputs=[
+                    "mining_binary_predictions",
+                    "mining_binary_map_metadata",
+                    "mining_binary_map_validation_config",
+                ],
+                outputs="mining_binary_probability_points_plot_metadata",
+                name="plot_mining_binary_probability_points_overlay_node",
+            ),
+            node(
+                func=plot_testing_errors_overlay,
+                inputs=[
+                    "mining_binary_predictions",
+                    "mining_binary_map_metadata",
+                    "mining_binary_map_validation_config",
+                ],
+                outputs="mining_binary_testing_errors_plot_metadata",
+                name="plot_mining_binary_testing_errors_overlay_node",
+            ),
+            node(
+                func=build_mining_binary_map_validation_metadata,
+                inputs=[
+                    "mining_binary_predictions",
+                    "mining_binary_classification_points_plot_metadata",
+                    "mining_binary_probability_points_plot_metadata",
+                    "mining_binary_testing_errors_plot_metadata",
+                    "mining_binary_map_validation_config",
+                ],
+                outputs="mining_binary_map_validation_metadata",
+                name="build_mining_binary_map_validation_metadata_node",
+            ),
+        ]
+    )
+```
+
+Para profundizar en la logica interna, revisar los nodos
+`validate_mining_binary_map_validation_config_node`,
+`plot_mining_binary_classification_points_overlay_node`,
+`plot_mining_binary_probability_points_overlay_node`,
+`plot_mining_binary_testing_errors_overlay_node` y
+`build_mining_binary_map_validation_metadata_node`.
+
 ```{mermaid}
 flowchart LR
   points["puntos de prueba"]:::data --> sample("extraer clase raster"):::node
@@ -772,6 +1384,8 @@ flowchart LR
   classDef data fill:#ffffff,stroke:#333,stroke-dasharray:5 5;
   classDef node fill:#b7dce8,stroke:#111;
 ```
+
+![Puntos de prueba sobre mapa de clasificacion binaria.](../data/08_reporting/validate_mining_binary_map/mining_binary_classification_points_overlay.png){#fig-binary-class-points fig-align="center" width="90%"}
 
 ![Puntos de prueba sobre mapa de probabilidad.](../data/08_reporting/validate_mining_binary_map/mining_binary_probability_points_overlay.png){#fig-binary-prob-points fig-align="center" width="90%"}
 
@@ -788,6 +1402,64 @@ coberturas parecidas a mineria, como suelo desnudo y sedimentos.
 ```powershell
 kedro run --pipeline postprocess_mining_binary_map
 ```
+
+**Codigo completo de `pipeline.py`**
+
+```python
+from kedro.pipeline import Pipeline, node
+
+from centromonitoreo_mineria.pipelines.postprocess_mining_binary_map.nodes import (
+    build_mining_binary_postprocessing_metadata,
+    plot_mining_binary_postprocessed_map,
+    postprocess_mining_binary_map,
+    validate_mining_binary_postprocessing_config,
+)
+
+
+def create_pipeline(**kwargs) -> Pipeline:
+    """Creates the Kedro pipeline for mining binary map postprocessing."""
+    return Pipeline(
+        [
+            node(
+                func=validate_mining_binary_postprocessing_config,
+                inputs="params:mining_binary_map_postprocessing",
+                outputs="mining_binary_map_postprocessing_config",
+                name="validate_mining_binary_postprocessing_config_node",
+            ),
+            node(
+                func=postprocess_mining_binary_map,
+                inputs="mining_binary_map_postprocessing_config",
+                outputs="mining_binary_map_postprocessing_output_metadata",
+                name="postprocess_mining_binary_map_node",
+            ),
+            node(
+                func=plot_mining_binary_postprocessed_map,
+                inputs=[
+                    "mining_binary_map_postprocessing_output_metadata",
+                    "mining_binary_map_postprocessing_config",
+                ],
+                outputs="mining_binary_postprocessed_map_plot_metadata",
+                name="plot_mining_binary_postprocessed_map_node",
+            ),
+            node(
+                func=build_mining_binary_postprocessing_metadata,
+                inputs=[
+                    "mining_binary_map_postprocessing_output_metadata",
+                    "mining_binary_postprocessed_map_plot_metadata",
+                    "mining_binary_map_postprocessing_config",
+                ],
+                outputs="mining_binary_map_postprocessing_metadata",
+                name="build_mining_binary_postprocessing_metadata_node",
+            ),
+        ]
+    )
+```
+
+Para profundizar en la logica interna, revisar los nodos
+`validate_mining_binary_postprocessing_config_node`,
+`postprocess_mining_binary_map_node`,
+`plot_mining_binary_postprocessed_map_node` y
+`build_mining_binary_postprocessing_metadata_node`.
 
 ```{mermaid}
 flowchart LR
@@ -809,12 +1481,12 @@ postprocessed = rasterize_polygons(filtered, class_map, transform, params)
 
 | Indicador | Valor |
 |---|---:|
-| Parches originales | 403 |
-| Parches conservados | 10 |
-| Parches removidos | 393 |
-| Pixeles mineros originales | 10070 |
-| Pixeles mineros conservados | 7228 |
-| Area conservada | 72.29 ha |
+| Parches originales | 20385 |
+| Parches conservados | 566 |
+| Parches removidos | 19819 |
+| Pixeles mineros originales | 947476 |
+| Pixeles mineros conservados | 810004 |
+| Area conservada | 8101.32 ha |
 
 ![Mapa binario postprocesado por area minima.](../data/08_reporting/postprocess_mining_binary_map/mining_binary_postprocessed_map.png){#fig-binary-postprocessed fig-align="center" width="90%"}
 
@@ -825,6 +1497,83 @@ postprocessed = rasterize_polygons(filtered, class_map, transform, params)
 ```powershell
 kedro run --pipeline validate_postprocessed_mining_map
 ```
+
+**Codigo completo de `pipeline.py`**
+
+```python
+from kedro.pipeline import Pipeline, node
+
+from centromonitoreo_mineria.pipelines.validate_postprocessed_mining_map.nodes import (
+    build_postprocessed_class_summary,
+    build_postprocessed_point_validation_table,
+    build_postprocessed_validation_metadata,
+    plot_postprocessed_validation_map,
+    validate_postprocessed_mining_map_validation_config,
+)
+
+
+def create_pipeline(**kwargs) -> Pipeline:
+    """Creates the Kedro pipeline for validating the postprocessed mining map."""
+    return Pipeline(
+        [
+            node(
+                func=validate_postprocessed_mining_map_validation_config,
+                inputs="params:postprocessed_mining_map_validation",
+                outputs="postprocessed_mining_map_validation_config",
+                name="validate_postprocessed_mining_map_validation_config_node",
+            ),
+            node(
+                func=build_postprocessed_point_validation_table,
+                inputs=[
+                    "training_sentinel2_features",
+                    "testing_sentinel2_features",
+                    "mining_binary_map_postprocessing_metadata",
+                    "postprocessed_mining_map_validation_config",
+                ],
+                outputs="postprocessed_mining_point_validation",
+                name="build_postprocessed_mining_point_validation_table_node",
+            ),
+            node(
+                func=build_postprocessed_class_summary,
+                inputs=[
+                    "postprocessed_mining_point_validation",
+                    "postprocessed_mining_map_validation_config",
+                ],
+                outputs="postprocessed_mining_class_summary",
+                name="build_postprocessed_mining_class_summary_node",
+            ),
+            node(
+                func=plot_postprocessed_validation_map,
+                inputs=[
+                    "postprocessed_mining_point_validation",
+                    "mining_binary_map_postprocessing_metadata",
+                    "postprocessed_mining_map_validation_config",
+                ],
+                outputs="postprocessed_mining_validation_plot_metadata",
+                name="plot_postprocessed_mining_validation_map_node",
+            ),
+            node(
+                func=build_postprocessed_validation_metadata,
+                inputs=[
+                    "postprocessed_mining_point_validation",
+                    "postprocessed_mining_class_summary",
+                    "postprocessed_mining_validation_plot_metadata",
+                    "mining_binary_map_postprocessing_metadata",
+                    "postprocessed_mining_map_validation_config",
+                ],
+                outputs="postprocessed_mining_map_validation_metadata",
+                name="build_postprocessed_mining_map_validation_metadata_node",
+            ),
+        ]
+    )
+```
+
+Para profundizar en la logica interna, revisar los nodos
+`validate_postprocessed_mining_map_validation_config_node`,
+`build_postprocessed_mining_point_validation_table_node`,
+`build_postprocessed_mining_class_summary_node`,
+`plot_postprocessed_mining_validation_map_node` y
+`build_postprocessed_mining_map_validation_metadata_node`.
 
 ```{mermaid}
 flowchart LR
@@ -850,6 +1599,130 @@ pero puede eliminar frentes mineros pequenos.
 ```powershell
 kedro run --pipeline train_mining_multiclass_rf
 ```
+
+**Codigo completo de `pipeline.py`**
+
+```python
+from kedro.pipeline import Pipeline, node
+
+from centromonitoreo_mineria.pipelines.train_mining_multiclass_rf.nodes import (
+    build_mining_multiclass_datasets,
+    build_mining_multiclass_feature_importance,
+    build_mining_multiclass_random_forest_metadata,
+    evaluate_mining_multiclass_random_forest,
+    plot_mining_multiclass_confusion_matrix,
+    plot_mining_multiclass_feature_importance,
+    predict_mining_multiclass_random_forest,
+    train_mining_multiclass_random_forest,
+    validate_mining_multiclass_random_forest_config,
+)
+
+
+def create_pipeline(**kwargs) -> Pipeline:
+    """Creates the Kedro pipeline for multiclass Random Forest."""
+    return Pipeline(
+        [
+            node(
+                func=validate_mining_multiclass_random_forest_config,
+                inputs="params:mining_multiclass_random_forest",
+                outputs="mining_multiclass_random_forest_config",
+                name="validate_mining_multiclass_random_forest_config_node",
+            ),
+            node(
+                func=build_mining_multiclass_datasets,
+                inputs=[
+                    "training_sentinel2_features",
+                    "testing_sentinel2_features",
+                    "mining_multiclass_random_forest_config",
+                ],
+                outputs=[
+                    "mining_multiclass_training_dataset",
+                    "mining_multiclass_testing_dataset",
+                ],
+                name="build_mining_multiclass_datasets_node",
+            ),
+            node(
+                func=train_mining_multiclass_random_forest,
+                inputs=[
+                    "mining_multiclass_training_dataset",
+                    "mining_multiclass_random_forest_config",
+                ],
+                outputs="mining_multiclass_random_forest_model",
+                name="train_mining_multiclass_random_forest_node",
+            ),
+            node(
+                func=predict_mining_multiclass_random_forest,
+                inputs=[
+                    "mining_multiclass_random_forest_model",
+                    "mining_multiclass_testing_dataset",
+                    "mining_multiclass_random_forest_config",
+                ],
+                outputs="mining_multiclass_predictions",
+                name="predict_mining_multiclass_random_forest_node",
+            ),
+            node(
+                func=evaluate_mining_multiclass_random_forest,
+                inputs=[
+                    "mining_multiclass_predictions",
+                    "mining_multiclass_random_forest_config",
+                ],
+                outputs="mining_multiclass_metrics",
+                name="evaluate_mining_multiclass_random_forest_node",
+            ),
+            node(
+                func=build_mining_multiclass_feature_importance,
+                inputs=[
+                    "mining_multiclass_random_forest_model",
+                    "mining_multiclass_random_forest_config",
+                ],
+                outputs="mining_multiclass_feature_importance",
+                name="build_mining_multiclass_feature_importance_node",
+            ),
+            node(
+                func=plot_mining_multiclass_confusion_matrix,
+                inputs=[
+                    "mining_multiclass_metrics",
+                    "mining_multiclass_random_forest_config",
+                ],
+                outputs="mining_multiclass_confusion_matrix_plot_metadata",
+                name="plot_mining_multiclass_confusion_matrix_node",
+            ),
+            node(
+                func=plot_mining_multiclass_feature_importance,
+                inputs=[
+                    "mining_multiclass_feature_importance",
+                    "mining_multiclass_random_forest_config",
+                ],
+                outputs="mining_multiclass_feature_importance_plot_metadata",
+                name="plot_mining_multiclass_feature_importance_node",
+            ),
+            node(
+                func=build_mining_multiclass_random_forest_metadata,
+                inputs=[
+                    "mining_multiclass_training_dataset",
+                    "mining_multiclass_testing_dataset",
+                    "mining_multiclass_metrics",
+                    "mining_multiclass_confusion_matrix_plot_metadata",
+                    "mining_multiclass_feature_importance_plot_metadata",
+                    "mining_multiclass_random_forest_config",
+                ],
+                outputs="mining_multiclass_random_forest_metadata",
+                name="build_mining_multiclass_random_forest_metadata_node",
+            ),
+        ]
+    )
+```
+
+Para profundizar en la logica interna, revisar los nodos
+`validate_mining_multiclass_random_forest_config_node`,
+`build_mining_multiclass_datasets_node`,
+`train_mining_multiclass_random_forest_node`,
+`predict_mining_multiclass_random_forest_node`,
+`evaluate_mining_multiclass_random_forest_node`,
+`build_mining_multiclass_feature_importance_node`,
+`plot_mining_multiclass_confusion_matrix_node`,
+`plot_mining_multiclass_feature_importance_node` y
+`build_mining_multiclass_random_forest_metadata_node`.
 
 ```{mermaid}
 flowchart LR
@@ -898,6 +1771,67 @@ suelo expuesto y frentes mineros.
 kedro run --pipeline predict_mining_multiclass_map
 ```
 
+**Codigo completo de `pipeline.py`**
+
+```python
+from kedro.pipeline import Pipeline, node
+
+from centromonitoreo_mineria.pipelines.predict_mining_multiclass_map.nodes import (
+    build_mining_multiclass_map_metadata,
+    plot_mining_multiclass_map,
+    predict_mining_multiclass_map_rasters,
+    validate_mining_multiclass_map_prediction_config,
+)
+
+
+def create_pipeline(**kwargs) -> Pipeline:
+    """Creates the Kedro pipeline for multiclass mining map prediction."""
+    return Pipeline(
+        [
+            node(
+                func=validate_mining_multiclass_map_prediction_config,
+                inputs="params:mining_multiclass_map_prediction",
+                outputs="mining_multiclass_map_prediction_config",
+                name="validate_mining_multiclass_map_prediction_config_node",
+            ),
+            node(
+                func=predict_mining_multiclass_map_rasters,
+                inputs=[
+                    "mining_multiclass_random_forest_model",
+                    "mining_multiclass_map_prediction_config",
+                ],
+                outputs="mining_multiclass_map_prediction_metadata",
+                name="predict_mining_multiclass_map_rasters_node",
+            ),
+            node(
+                func=plot_mining_multiclass_map,
+                inputs=[
+                    "mining_multiclass_map_prediction_metadata",
+                    "mining_multiclass_map_prediction_config",
+                ],
+                outputs="mining_multiclass_map_plot_metadata",
+                name="plot_mining_multiclass_map_node",
+            ),
+            node(
+                func=build_mining_multiclass_map_metadata,
+                inputs=[
+                    "mining_multiclass_map_prediction_metadata",
+                    "mining_multiclass_map_plot_metadata",
+                    "mining_multiclass_map_prediction_config",
+                ],
+                outputs="mining_multiclass_map_metadata",
+                name="build_mining_multiclass_map_metadata_node",
+            ),
+        ]
+    )
+```
+
+Para profundizar en la logica interna, revisar los nodos
+`validate_mining_multiclass_map_prediction_config_node`,
+`predict_mining_multiclass_map_rasters_node`,
+`plot_mining_multiclass_map_node` y
+`build_mining_multiclass_map_metadata_node`.
+
 ```{mermaid}
 flowchart LR
   model["modelo RF multiclase"]:::data --> win("procesar raster por ventanas"):::node
@@ -929,6 +1863,96 @@ class_array[valid_mask] = np.array(
 ```powershell
 kedro run --pipeline validate_mining_multiclass_map
 ```
+
+**Codigo completo de `pipeline.py`**
+
+```python
+from kedro.pipeline import Pipeline, node
+
+from centromonitoreo_mineria.pipelines.validate_mining_multiclass_map.nodes import (
+    build_mining_multiclass_map_validation_metadata,
+    build_mining_multiclass_point_validation,
+    evaluate_mining_multiclass_map_validation,
+    plot_mining_multiclass_validation_confusion_matrix,
+    plot_mining_multiclass_validation_map,
+    validate_mining_multiclass_map_validation_config,
+)
+
+
+def create_pipeline(**kwargs) -> Pipeline:
+    """Creates the Kedro pipeline for multiclass map validation."""
+    return Pipeline(
+        [
+            node(
+                func=validate_mining_multiclass_map_validation_config,
+                inputs="params:mining_multiclass_map_validation",
+                outputs="mining_multiclass_map_validation_config",
+                name="validate_mining_multiclass_map_validation_config_node",
+            ),
+            node(
+                func=build_mining_multiclass_point_validation,
+                inputs=[
+                    "testing_sentinel2_features",
+                    "mining_multiclass_map_metadata",
+                    "mining_multiclass_map_validation_config",
+                ],
+                outputs="mining_multiclass_point_validation",
+                name="build_mining_multiclass_point_validation_node",
+            ),
+            node(
+                func=evaluate_mining_multiclass_map_validation,
+                inputs=[
+                    "mining_multiclass_point_validation",
+                    "mining_multiclass_map_validation_config",
+                ],
+                outputs=[
+                    "mining_multiclass_map_validation_metrics",
+                    "mining_multiclass_map_validation_class_summary",
+                ],
+                name="evaluate_mining_multiclass_map_validation_node",
+            ),
+            node(
+                func=plot_mining_multiclass_validation_confusion_matrix,
+                inputs=[
+                    "mining_multiclass_map_validation_metrics",
+                    "mining_multiclass_map_validation_config",
+                ],
+                outputs="mining_multiclass_validation_confusion_matrix_plot_metadata",
+                name="plot_mining_multiclass_validation_confusion_matrix_node",
+            ),
+            node(
+                func=plot_mining_multiclass_validation_map,
+                inputs=[
+                    "mining_multiclass_point_validation",
+                    "mining_multiclass_map_metadata",
+                    "mining_multiclass_map_validation_config",
+                ],
+                outputs="mining_multiclass_validation_map_metadata",
+                name="plot_mining_multiclass_validation_map_node",
+            ),
+            node(
+                func=build_mining_multiclass_map_validation_metadata,
+                inputs=[
+                    "mining_multiclass_point_validation",
+                    "mining_multiclass_map_validation_metrics",
+                    "mining_multiclass_validation_confusion_matrix_plot_metadata",
+                    "mining_multiclass_validation_map_metadata",
+                    "mining_multiclass_map_validation_config",
+                ],
+                outputs="mining_multiclass_map_validation_metadata",
+                name="build_mining_multiclass_map_validation_metadata_node",
+            ),
+        ]
+    )
+```
+
+Para profundizar en la logica interna, revisar los nodos
+`validate_mining_multiclass_map_validation_config_node`,
+`build_mining_multiclass_point_validation_node`,
+`evaluate_mining_multiclass_map_validation_node`,
+`plot_mining_multiclass_validation_confusion_matrix_node`,
+`plot_mining_multiclass_validation_map_node` y
+`build_mining_multiclass_map_validation_metadata_node`.
 
 ```{mermaid}
 flowchart LR
@@ -962,6 +1986,68 @@ flowchart LR
 kedro run --pipeline postprocess_mining_multiclass_map
 ```
 
+**Codigo completo de `pipeline.py`**
+
+```python
+from kedro.pipeline import Pipeline, node
+
+from centromonitoreo_mineria.pipelines.postprocess_mining_multiclass_map.nodes import (
+    build_mining_multiclass_postprocessing_metadata,
+    plot_mining_multiclass_postprocessed_map,
+    postprocess_mining_multiclass_map,
+    validate_mining_multiclass_postprocessing_config,
+)
+
+
+def create_pipeline(**kwargs) -> Pipeline:
+    """Creates the Kedro pipeline for multiclass map postprocessing."""
+    return Pipeline(
+        [
+            node(
+                func=validate_mining_multiclass_postprocessing_config,
+                inputs="params:mining_multiclass_map_postprocessing",
+                outputs="mining_multiclass_map_postprocessing_config",
+                name="validate_mining_multiclass_postprocessing_config_node",
+            ),
+            node(
+                func=postprocess_mining_multiclass_map,
+                inputs="mining_multiclass_map_postprocessing_config",
+                outputs=[
+                    "mining_multiclass_map_postprocessing_output_metadata",
+                    "mining_multiclass_postprocessed_class_summary",
+                ],
+                name="postprocess_mining_multiclass_map_node",
+            ),
+            node(
+                func=plot_mining_multiclass_postprocessed_map,
+                inputs=[
+                    "mining_multiclass_map_postprocessing_output_metadata",
+                    "mining_multiclass_map_postprocessing_config",
+                ],
+                outputs="mining_multiclass_postprocessed_map_plot_metadata",
+                name="plot_mining_multiclass_postprocessed_map_node",
+            ),
+            node(
+                func=build_mining_multiclass_postprocessing_metadata,
+                inputs=[
+                    "mining_multiclass_map_postprocessing_output_metadata",
+                    "mining_multiclass_postprocessed_class_summary",
+                    "mining_multiclass_postprocessed_map_plot_metadata",
+                    "mining_multiclass_map_postprocessing_config",
+                ],
+                outputs="mining_multiclass_map_postprocessing_metadata",
+                name="build_mining_multiclass_postprocessing_metadata_node",
+            ),
+        ]
+    )
+```
+
+Para profundizar en la logica interna, revisar los nodos
+`validate_mining_multiclass_postprocessing_config_node`,
+`postprocess_mining_multiclass_map_node`,
+`plot_mining_multiclass_postprocessed_map_node` y
+`build_mining_multiclass_postprocessing_metadata_node`.
+
 ```{mermaid}
 flowchart LR
   m["mapa multiclase"]:::data --> f("filtro de mayoria 3x3"):::node
@@ -986,7 +2072,7 @@ for _ in range(iterations):
     result = smoothed
 ```
 
-El postprocesamiento multiclase modifico 1,008,764 pixeles mediante un filtro
+El postprocesamiento multiclase modifico 754,988 pixeles mediante un filtro
 de mayoria `3x3`. No inventa valores en zonas NoData, lo cual conserva la
 honestidad espacial del producto.
 
@@ -999,6 +2085,98 @@ honestidad espacial del producto.
 ```powershell
 kedro run --pipeline validate_postprocessed_mining_multiclass_map
 ```
+
+**Codigo completo de `pipeline.py`**
+
+```python
+from kedro.pipeline import Pipeline, node
+
+from centromonitoreo_mineria.pipelines.validate_mining_multiclass_map.nodes import (
+    evaluate_mining_multiclass_map_validation,
+    plot_mining_multiclass_validation_confusion_matrix,
+)
+from centromonitoreo_mineria.pipelines.validate_postprocessed_mining_multiclass_map.nodes import (
+    build_postprocessed_mining_multiclass_point_validation,
+    build_postprocessed_mining_multiclass_validation_metadata,
+    plot_postprocessed_mining_multiclass_validation_map,
+    validate_postprocessed_mining_multiclass_map_validation_config,
+)
+
+
+def create_pipeline(**kwargs) -> Pipeline:
+    """Creates the Kedro pipeline for validating the postprocessed multiclass map."""
+    return Pipeline(
+        [
+            node(
+                func=validate_postprocessed_mining_multiclass_map_validation_config,
+                inputs="params:postprocessed_mining_multiclass_map_validation",
+                outputs="postprocessed_mining_multiclass_map_validation_config",
+                name="validate_postprocessed_mining_multiclass_map_validation_config_node",
+            ),
+            node(
+                func=build_postprocessed_mining_multiclass_point_validation,
+                inputs=[
+                    "testing_sentinel2_features",
+                    "mining_multiclass_map_postprocessing_metadata",
+                    "postprocessed_mining_multiclass_map_validation_config",
+                ],
+                outputs="postprocessed_mining_multiclass_point_validation",
+                name="build_postprocessed_mining_multiclass_point_validation_node",
+            ),
+            node(
+                func=evaluate_mining_multiclass_map_validation,
+                inputs=[
+                    "postprocessed_mining_multiclass_point_validation",
+                    "postprocessed_mining_multiclass_map_validation_config",
+                ],
+                outputs=[
+                    "postprocessed_mining_multiclass_map_validation_metrics",
+                    "postprocessed_mining_multiclass_map_validation_class_summary",
+                ],
+                name="evaluate_postprocessed_mining_multiclass_map_validation_node",
+            ),
+            node(
+                func=plot_mining_multiclass_validation_confusion_matrix,
+                inputs=[
+                    "postprocessed_mining_multiclass_map_validation_metrics",
+                    "postprocessed_mining_multiclass_map_validation_config",
+                ],
+                outputs="postprocessed_mining_multiclass_validation_confusion_matrix_plot_metadata",
+                name="plot_postprocessed_mining_multiclass_validation_confusion_matrix_node",
+            ),
+            node(
+                func=plot_postprocessed_mining_multiclass_validation_map,
+                inputs=[
+                    "postprocessed_mining_multiclass_point_validation",
+                    "mining_multiclass_map_postprocessing_metadata",
+                    "postprocessed_mining_multiclass_map_validation_config",
+                ],
+                outputs="postprocessed_mining_multiclass_validation_map_metadata",
+                name="plot_postprocessed_mining_multiclass_validation_map_node",
+            ),
+            node(
+                func=build_postprocessed_mining_multiclass_validation_metadata,
+                inputs=[
+                    "postprocessed_mining_multiclass_point_validation",
+                    "postprocessed_mining_multiclass_map_validation_metrics",
+                    "postprocessed_mining_multiclass_validation_confusion_matrix_plot_metadata",
+                    "postprocessed_mining_multiclass_validation_map_metadata",
+                    "postprocessed_mining_multiclass_map_validation_config",
+                ],
+                outputs="postprocessed_mining_multiclass_map_validation_metadata",
+                name="build_postprocessed_mining_multiclass_validation_metadata_node",
+            ),
+        ]
+    )
+```
+
+Para profundizar en la logica interna, revisar los nodos
+`validate_postprocessed_mining_multiclass_map_validation_config_node`,
+`build_postprocessed_mining_multiclass_point_validation_node`,
+`evaluate_postprocessed_mining_multiclass_map_validation_node`,
+`plot_postprocessed_mining_multiclass_validation_confusion_matrix_node`,
+`plot_postprocessed_mining_multiclass_validation_map_node` y
+`build_postprocessed_mining_multiclass_validation_metadata_node`.
 
 ```{mermaid}
 flowchart LR
@@ -1039,6 +2217,24 @@ ofrece una respuesta clara para presencia/ausencia de mineria y alcanza
 seis coberturas; por eso su exactitud es menor, pero aporta una lectura mas
 rica del paisaje y de las confusiones espectrales.
 
+El resultado mas fuerte es la coherencia entre productos. La descarga
+Sentinel-2 genero una escena de trabajo georreferenciada, las variables
+topograficas quedaron alineadas a la misma grilla, los indices espectrales
+aportaron senales biofisicas complementarias y los modelos usaron un conjunto
+unico de 18 variables. Esta continuidad es importante en SIG porque evita que
+la clasificacion sea solo un ejercicio estadistico: cada prediccion conserva
+relacion con una extension espacial, un sistema de referencia, una resolucion
+de trabajo y un conjunto de supuestos cartograficos.
+
+En terminos de interpretacion, el binario funciona como una primera alerta de
+intervencion minera. Con `precision_mineria = 1.0`, los puntos mineros
+identificados por el modelo en prueba tienen alta confianza, aunque el
+`recall_mineria = 0.85` muestra que todavia existen omisiones. El multiclase,
+en cambio, sirve para leer el contexto territorial: agua, bosque, vegetacion,
+nubes, suelo desnudo y mineria. Aunque su `accuracy` es menor, permite saber
+si los errores se concentran en clases fisicamente parecidas, lo cual es mas
+util para diagnosticar el modelo que mirar solo una metrica global.
+
 | Producto | Resultado clave |
 |---|---|
 | Descarga Sentinel-2 | Bandas locales en `EPSG:9377` y visualizaciones RGB/falso color |
@@ -1046,7 +2242,7 @@ rica del paisaje y de las confusiones espectrales.
 | Indices espectrales | NDVI, MSAVI, NDWI, BSI, MBSI, NDSI y NDBI |
 | Datos de entrenamiento | 600 puntos, 480 entrenamiento y 120 prueba |
 | Modelo binario | Accuracy 0.975, F1 Mineria 0.919 |
-| Mapa binario postprocesado | 10 parches mineros conservados, 72.29 ha |
+| Mapa binario postprocesado | 566 parches mineros conservados, 8101.32 ha |
 | Modelo multiclase | Accuracy 0.717, F1 macro 0.759 |
 | Validacion multiclase espacial | Accuracy 0.725, F1 macro 0.767 |
 | Multiclase postprocesado | Accuracy 0.733, F1 macro 0.776 |
@@ -1073,6 +2269,133 @@ multiclase, el filtro de mayoria reduce ruido local y mejora levemente las
 metricas. En ambos casos, el postprocesamiento debe interpretarse como una
 decision cartografica de escala, no como una correccion absoluta.
 
+Desde la programacion, Kedro fue una pieza central del resultado. Su aporte no
+esta solo en ejecutar funciones, sino en obligar a separar responsabilidades:
+un nodo descarga, otro valida configuracion, otro genera indices, otro entrena,
+otro predice y otro produce reportes. Esa separacion hace mas facil depurar un
+flujo SIG, porque los errores dejan de estar escondidos en un unico script
+largo y pasan a tener entradas, salidas y parametros declarados. El Data
+Catalog tambien ayuda a que los GeoTIFF, CSV, JSON y PNG tengan una ubicacion
+estable, lo que reduce ambiguedades cuando se vuelve a renderizar el informe.
+
+El uso de Kedro tambien mejora la trazabilidad cartografica. En un flujo SIG
+es comun que una transformacion pequena cambie el CRS, el tamano de celda o la
+alineacion de pixeles. Al mantener parametros y productos por pipeline, el
+proyecto deja visible que la imagen Sentinel-2, el DEM, la pendiente, los
+indices y los mapas de prediccion trabajan sobre una misma grilla en
+`EPSG:9377`. Esa condicion es tan importante como la metrica del modelo,
+porque una clasificacion con buen desempeno estadistico puede perder valor si
+no es espacialmente consistente.
+
+La ejecucion muestra tres tipos de costo. El primero es externo: la descarga
+de Sentinel-2 depende de Google Earth Engine y Google Drive, por lo que es el
+pipeline mas demorado. En el metadato de exportacion, la tarea remota registra
+aproximadamente 24 minutos entre creacion y finalizacion, con 343.49 segundos
+de uso EECU reportado por Earth Engine. El segundo costo es raster-local: las
+predicciones binaria y multiclase clasifican una grilla de 3731 x 3788
+pixeles, es decir, 13992168 celdas con 18 variables por celda. El tercer costo
+es tabular o cartografico ligero: entrenamiento, validacion con puntos,
+matrices de confusion y graficas se ejecutan mucho mas rapido porque trabajan
+con 600 puntos o con resumenes ya calculados.
+
+| Pipeline | Costo relativo observado | Lectura SIG y de programacion |
+|---|---|---|
+| `download_sentinel2` | Muy alto | Consulta, composicion y exportacion remota; cuello de botella por Earth Engine y Drive |
+| `build_topographic_features` | Medio | Reproyecta/alinea DEM y pendiente a la grilla Sentinel-2 |
+| `sentinel2_spectral_indices` | Medio | Calcula indices por pixel y escribe rasters derivados |
+| `prepare_training_data` | Bajo | Organiza 600 puntos y genera graficas de control |
+| `extract_sentinel2_training_features` | Bajo a medio | Muestrea 18 variables sobre puntos de entrenamiento y prueba |
+| `train_mining_binary_rf` | Bajo | Entrena con 480 muestras y produce metricas e importancia |
+| `predict_mining_binary_map` | Alto | Aplica el modelo a toda la grilla raster |
+| `validate_mining_binary_map` | Bajo | Cruza puntos de prueba con mapa y probabilidades |
+| `postprocess_mining_binary_map` | Medio | Extrae componentes conectados, filtra por area y rasteriza |
+| `validate_postprocessed_mining_map` | Bajo | Evalua el mapa filtrado sobre puntos conocidos |
+| `train_mining_multiclass_rf` | Bajo | Entrena el modelo de seis clases con el mismo conjunto de variables |
+| `predict_mining_multiclass_map` | Alto | Clasifica todos los pixeles y calcula probabilidad maxima |
+| `validate_mining_multiclass_map` | Bajo | Resume aciertos y errores por clase |
+| `postprocess_mining_multiclass_map` | Medio | Aplica filtro de mayoria 3 x 3 y resume areas por clase |
+| `validate_postprocessed_mining_multiclass_map` | Bajo | Compara el mapa final con los puntos de validacion |
+
+Esta lectura de tiempos no debe entenderse como un benchmark formal, porque
+el proyecto no registra un cronometro homogeneo por nodo. Aun asi, permite una
+decision practica: si se quiere optimizar el flujo, primero conviene atacar la
+descarga/exportacion y despues las predicciones raster. En cambio, optimizar
+las matrices, graficas o validaciones tendria menor impacto en el tiempo total
+del proyecto.
+
+## Mejoras futuras del repositorio
+
+Una mejora importante para el repositorio seria agregar un pipeline de analisis
+de multicolinealidad y reduccion de dimensionalidad. En este proyecto se usan
+18 variables predictoras: bandas Sentinel-2, indices espectrales y variables
+topograficas. Varias de ellas pueden estar correlacionadas, por ejemplo bandas
+vecinas del sensor, indices derivados de las mismas bandas o variables
+relacionadas con suelo expuesto. En aplicaciones recientes de teledeteccion se
+ha mostrado que la seleccion y reduccion de variables sigue siendo relevante
+incluso con Random Forest: en un ejercicio con Sentinel-1 y Sentinel-2, una
+reduccion fuerte del conjunto de variables mantuvo desempenos comparables y
+ayudo a identificar variables realmente informativas [@mahmood2025selecting].
+Por eso no basta con mirar el `feature importance`; tambien conviene
+diagnosticar redundancia entre variables y documentar que variables aportan
+informacion nueva.
+
+El analisis PCA seria util como una rama experimental del flujo, no como un
+reemplazo automatico del modelo actual. PCA permite reducir dimensionalidad y
+conservar la mayor parte de la varianza en componentes no correlacionados. En
+teledeteccion reciente, los enfoques de PCA segmentado o estratificado se han
+usado sobre datos remotos multifuente para agrupar variables correlacionadas,
+reducir ruido y mejorar la clasificacion de coberturas [@chen2024strategy].
+En terminos de programacion, esto podria implementarse como un pipeline nuevo,
+por ejemplo
+`analyze_feature_collinearity`, que genere una matriz de correlacion, una
+grafica de varianza explicada, una tabla de cargas factoriales y un conjunto
+de componentes principales. Luego se podria crear una version comparativa de
+entrenamiento, por ejemplo `train_mining_binary_rf_pca` y
+`train_mining_multiclass_rf_pca`, usando `StandardScaler`, `PCA` y
+`RandomForestClassifier` dentro de un mismo flujo reproducible. La regla clave
+seria ajustar el PCA solo con datos de entrenamiento y aplicar esa misma
+transformacion a prueba y rasters, para evitar fuga de informacion.
+
+Tambien se debe fortalecer el levantamiento de puntos de entrenamiento en
+campo. El conjunto actual permite construir un prototipo, pero la calidad del
+mapa depende directamente de la calidad de las etiquetas. Para una version mas
+robusta, los puntos deberian levantarse con GPS, fotografias, fecha de visita,
+responsable, nivel de confianza, descripcion de cobertura y protocolo de
+clasificacion. Las revisiones recientes sobre clasificacion Sentinel-2
+subrayan que la calidad, diversidad geografica y representatividad de los
+datos de entrenamiento pesan mas que el simple aumento del numero de muestras
+[@jocea2025sentinel]. Ademas, la evaluacion de mapas LULC sigue requiriendo
+datos de referencia obtenidos con un diseno probabilistico o, al menos, con un
+protocolo claro que permita estimar errores e incertidumbre espacial
+[@dibiase2025design]. Esto es especialmente importante si el producto quiere
+pasar de ejercicio academico a insumo de monitoreo.
+
+Otra mejora relevante es la validacion espacial bloqueada. La division actual
+usa entrenamiento y prueba estratificados, pero los datos espaciales pueden
+tener autocorrelacion: puntos cercanos tienden a parecerse entre si. Si puntos
+muy vecinos quedan repartidos entre entrenamiento y prueba, la exactitud puede
+verse optimista. Para una version mas exigente del repositorio, se podria
+agregar una particion por bloques espaciales, por tramos de rio o por zonas
+geograficas. Estudios recientes de aprendizaje automatico geoespacial muestran
+que la validacion aleatoria puede sobreestimar el desempeno cuando las muestras
+estan agrupadas, mientras que las estrategias espaciales o adaptativas reducen
+ese sesgo al considerar distancia geografica y similitud en el espacio de
+variables [@wang2025dissimilarity]. Esto permitiria saber si el modelo
+generaliza a zonas no vistas, no solo a puntos cercanos a los usados para
+entrenar.
+
+Finalmente, el repositorio podria crecer hacia cuatro lineas tecnicas: (1)
+comparacion multitemporal para evaluar estabilidad entre fechas; (2) fusion
+con Sentinel-1 SAR para reducir dependencia de nubosidad y mejorar lectura de
+humedad/superficie, como se ha explorado en estudios de mineria con datos
+radar y multifuente [@nursamsi2024feasibility; @vanrensburg2022sar]; (3)
+registro formal de tiempo, memoria y tamano de salidas por nodo mediante hooks
+de Kedro; y (4) seguimiento de experimentos para comparar modelo base, modelo
+con PCA, modelo multitemporal y modelos alternativos bajo las mismas metricas.
+Con estas mejoras, el flujo no solo produciria mapas, sino que tambien
+permitiria auditar la calidad estadistica, espacial y computacional del
+sistema.
+
 # Limitaciones
 
 La primera limitacion es la resolucion espacial. Sentinel-2 es adecuado para
@@ -1080,6 +2403,15 @@ analisis regional, pero puede no detectar frentes mineros pequenos, estrechos o
 mezclados con vegetacion, agua y sedimentos. La segunda limitacion es la
 representatividad de los puntos etiquetados: el modelo aprende lo que aparece
 en las muestras y puede fallar en patrones que no esten bien representados.
+
+Tambien existe una limitacion espectral. La mineria aluvial no siempre aparece
+como una clase pura: puede mezclarse con agua turbia, bancos de sedimento,
+suelo desnudo, vegetacion degradada, caminos, patios de trabajo y sombras. Por
+eso la separacion entre `Mineria`, `Suelo Desnudo` y `Vegetacion` no depende
+solo del algoritmo, sino de la calidad de las muestras, la fecha de la imagen,
+la humedad del terreno y la resolucion de las bandas disponibles. La presencia
+de nubes y bordes de nubes agrega otro ruido porque puede ocultar pixeles o
+generar respuestas brillantes similares a superficies expuestas.
 
 La tercera limitacion es temporal. El proyecto trabaja con una ventana de
 imagen concreta; cambios de humedad, nubosidad, fenologia o actividad minera
@@ -1090,6 +2422,21 @@ Finalmente, el uso de Google Earth Engine y Drive requiere autenticacion del
 usuario. Esto no impide la reproducibilidad, pero si obliga a documentar el
 entorno y los pasos de configuracion.
 
+Desde la perspectiva de ingenieria de software, otra limitacion es que los
+tiempos de ejecucion no se capturan todavia de manera estandar dentro del
+repositorio. Los metadatos registran productos, parametros y algunas marcas de
+exportacion remota, pero no existe una tabla unica con duracion por pipeline o
+por nodo. Para una version mas madura del sistema seria conveniente agregar
+hooks de Kedro o registros JSON de inicio, cierre, memoria y tamano de salida.
+Eso permitiria comparar ejecuciones, detectar cuellos de botella y justificar
+decisiones de optimizacion con datos.
+
+Por ultimo, los mapas generados son productos de investigacion y no sustituyen
+validacion institucional ni trabajo de campo. La cartografia puede orientar
+zonas de revision, priorizar inspecciones y documentar una metodologia
+reproducible, pero la delimitacion oficial de mineria requeriria contraste con
+fuentes externas, series temporales, conocimiento local y criterios normativos.
+
 # Conclusiones
 
 El proyecto logro construir un flujo completo, ordenado y reproducible para
@@ -1097,16 +2444,47 @@ clasificar mineria de oro de aluvion con Sentinel-2 y Random Forest. Kedro
 facilito separar responsabilidades, mantener parametros explicitos y generar
 salidas trazables por pipeline.
 
+El aporte principal no es solo el mapa final, sino la cadena completa. El
+proyecto inicia con una imagen satelital, incorpora variables topograficas,
+calcula indices espectrales, organiza puntos de entrenamiento, entrena modelos,
+predice mapas, aplica postprocesamiento y valida resultados. Cada etapa queda
+conectada a una salida grafica o a un metadato, lo que convierte el informe en
+un producto verificable y no en una secuencia de resultados aislados.
+
 El enfoque binario obtuvo resultados altos para una practica academica:
 `accuracy = 0.975`, `precision_mineria = 1.0`, `recall_mineria = 0.85` y
 `F1_mineria = 0.919`. El enfoque multiclase fue mas dificil, pero permitio
 analizar confusiones entre coberturas y alcanzo `accuracy = 0.733` despues del
 postprocesamiento espacial.
 
+La experiencia con Kedro muestra que una arquitectura de pipelines es
+especialmente util para SIG. Permite repetir el flujo sin recordar manualmente
+el orden de scripts, cambiar parametros desde YAML, mantener productos en el
+catalogo y aislar fallas por nodo. En este proyecto, esa estructura ayudo a
+integrar procesos remotos de Earth Engine con procesamiento local de rasters,
+modelos de aprendizaje automatico y salidas de reporte en Quarto.
+
+El analisis de ejecucion tambien deja una conclusion practica: los mayores
+costos no estan en entrenar el Random Forest, sino en mover y procesar datos
+espaciales. La descarga/exportacion Sentinel-2 es el paso mas lento por su
+dependencia externa, y las predicciones raster son costosas porque aplican el
+modelo a casi 14 millones de pixeles. Este comportamiento es esperable en
+sistemas de informacion geografica y debe considerarse al escalar el flujo a
+otras fechas, areas mas grandes o resoluciones mas finas.
+
 Los resultados deben leerse como un producto metodologico reproducible y no
 como una delimitacion oficial de mineria. El principal aporte es demostrar una
 cadena automatizada desde la imagen satelital hasta la validacion espacial,
 incluyendo codigo, parametros, mapas, metricas y pruebas.
+
+Como trabajo futuro, el flujo podria fortalecerse con mas puntos de campo,
+comparacion multitemporal, registro formal de tiempos por nodo, evaluacion con
+otros clasificadores, validacion espacial bloqueada y una validacion
+independiente de poligonos mineros. Tambien seria conveniente incorporar un
+pipeline de diagnostico de multicolinealidad y PCA para comparar el modelo
+actual con una version de variables transformadas. Con esas mejoras, la
+arquitectura actual podria pasar de prototipo academico a una base mas robusta
+para monitoreo operacional.
 
 # Referencias
 
@@ -1208,7 +2586,7 @@ pytest
 La ultima verificacion local del repositorio reporto:
 
 ```text
-47 passed, 1 warning
+48 passed, 1 warning
 ```
 
 ## Anexo D. Renderizado del informe
@@ -1235,7 +2613,7 @@ Las salidas se organizan por pipeline dentro de `data/08_reporting`:
 | Carpeta | Contenido |
 |---|---|
 | `sentinel2_download_visualizations` | RGB, falso color y grilla de bandas |
-| `topographic_features` | Metadatos de DEM y pendiente alineados a Sentinel-2 |
+| `topographic_features` | Mapas y metadatos de DEM y pendiente alineados a Sentinel-2 |
 | `sentinel2_spectral_indices_maps` | Mapas de indices espectrales |
 | `prepare_training_data` | Distribucion espacial y por clase de puntos |
 | `extract_sentinel2_training_features` | Metadatos de extraccion de variables |

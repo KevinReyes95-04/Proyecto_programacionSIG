@@ -8,13 +8,19 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
+from centromonitoreo_mineria.pipelines.helper.class_colors import CLASS_COLORS
+
 
 # Funcion para graficar cuantas muestras hay por clase.
 def plot_labeled_points_class_distribution(
     labeled_points: gpd.GeoDataFrame, params: dict[str, Any]
 ) -> dict[str, Any]:
     label_column = params["label_column"]
-    plot_params = params.get("class_distribution_plot", {})
+    plot_params = {
+        "class_order": params.get("class_order"),
+        "class_colors": params.get("class_colors", {}),
+        **params.get("class_distribution_plot", {}),
+    }
     output_path = Path(
         plot_params.get(
             "output_path",
@@ -24,11 +30,17 @@ def plot_labeled_points_class_distribution(
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
     counts = _ordered_class_counts(labeled_points, label_column, plot_params)
-    colors = _colors(plot_params.get("colors", []), len(counts))
+    colors = _colors(counts.index, params, plot_params)
     labels = [fill(label, width=plot_params.get("label_wrap_width", 16)) for label in counts.index]
 
     figure, axis = plt.subplots(figsize=tuple(plot_params.get("figure_size", [10, 6])))
-    bars = axis.bar(labels, counts.to_numpy(), color=colors)
+    bars = axis.bar(
+        labels,
+        counts.to_numpy(),
+        color=colors,
+        edgecolor=plot_params.get("bar_edgecolor", "black"),
+        linewidth=plot_params.get("bar_linewidth", 0.8),
+    )
     axis.bar_label(bars, padding=3, fontsize=plot_params.get("value_font_size", 9))
     axis.set_title(plot_params.get("title", "Conjunto de datos"))
     axis.set_xlabel(plot_params.get("x_label", "Cobertura"))
@@ -59,7 +71,8 @@ def _ordered_class_counts(
     return counts.sort_index().sort_values(ascending=False, kind="stable")
 
 
-# Funcion para repetir colores cuando hay mas clases que colores configurados.
-def _colors(colors: list[str], count: int) -> list[str]:
-    default_colors = ["#8DD34F", "#0CB354", "#1379B9", "#FFC107", "#F5F500", "#18A8D8"]
-    return [color for _, color in zip(range(count), cycle(colors or default_colors))]
+# Funcion para asignar colores semanticamente consistentes por clase.
+def _colors(classes: Any, params: dict[str, Any], plot_params: dict[str, Any]) -> list[str]:
+    class_colors = CLASS_COLORS | params.get("class_colors", {}) | plot_params.get("class_colors", {})
+    fallback_colors = cycle(plot_params.get("colors", []) or list(CLASS_COLORS.values()))
+    return [class_colors.get(class_name, next(fallback_colors)) for class_name in classes]

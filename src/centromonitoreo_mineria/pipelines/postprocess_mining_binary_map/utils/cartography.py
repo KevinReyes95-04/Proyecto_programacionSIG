@@ -4,6 +4,11 @@ import numpy as np
 from matplotlib.colors import BoundaryNorm, ListedColormap
 from matplotlib.patches import Patch
 
+from centromonitoreo_mineria.pipelines.helper.class_colors import (
+    CLASS_COLORS,
+    NO_MINING_COLOR,
+)
+
 
 def draw_class_map(
     axis: Any,
@@ -13,8 +18,8 @@ def draw_class_map(
 ) -> None:
     """Dibuja el raster binario postprocesado."""
     map_params = params.get("map", {})
-    no_mining = map_params.get("no_mining_color", "#1A9850")
-    mining = map_params.get("mining_color", "#E31A1C")
+    no_mining = map_params.get("no_mining_color", NO_MINING_COLOR)
+    mining = map_params.get("mining_color", CLASS_COLORS["Mineria"])
     nodata = int(params["class_nodata"])
     plot_data = np.ma.masked_where(class_map == nodata, class_map)
     cmap = ListedColormap([no_mining, mining])

@@ -19,7 +19,7 @@ def plot_mining_binary_feature_importance(
     top_n = int(plot_params.get("top_n", 20))
     data = mining_binary_feature_importance.head(top_n).sort_values("importance")
     figure, axis = plt.subplots(figsize=tuple(plot_params.get("figure_size", [8, 7])))
-    axis.barh(data["feature"], data["importance"], color=plot_params.get("color", "#1379B9"))
+    axis.barh(data["feature"], data["importance"], color=plot_params.get("color", "#616161"))
     axis.set_xlabel(plot_params.get("x_label", "Importancia"))
     axis.set_title(plot_params.get("title", "Importancia de variables"))
     axis.grid(axis="x", alpha=0.3)

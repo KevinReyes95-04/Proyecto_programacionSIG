@@ -24,7 +24,7 @@ mining_binary_map_prediction:
     title: Mapa binario de mineria
     figure_size: [8, 8]
     dpi: 160
-    mining_color: "#E31A1C"
+    mining_color: "#D32F2F"
     mining_alpha: 0.55
     background:
       enabled: true
@@ -33,5 +33,5 @@ mining_binary_map_prediction:
     title: Mapa categorico - Mineria vs No Mineria
     figure_size: [8, 8]
     dpi: 160
-    negative_color: "#1A9850"
-    positive_color: "#E31A1C"
+    negative_color: "#1B5E20"
+    positive_color: "#D32F2F"
