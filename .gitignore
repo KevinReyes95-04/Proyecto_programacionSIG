@@ -14,6 +14,8 @@ conf/local/
 
 # Rendered reports
 /docs/proyecto_final.html
+/docs/proyecto_final.tex
+/docs/proyecto_final.log
 /docs/proyecto_final_files/
 
 # Data outputs

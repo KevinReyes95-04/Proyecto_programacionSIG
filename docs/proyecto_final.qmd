@@ -1181,19 +1181,20 @@ def train_mining_binary_random_forest(train_dataset, config):
 
 | Metrica | Valor |
 |---|---:|
-| Accuracy | 0.975 |
-| Precision Mineria | 1.000 |
-| Recall Mineria | 0.850 |
-| F1 Mineria | 0.919 |
+| Accuracy | 0.942 |
+| Precision Mineria | 0.882 |
+| Recall Mineria | 0.750 |
+| F1 Mineria | 0.811 |
 
 ![Matriz de confusion del Random Forest binario.](../data/08_reporting/train_mining_binary_rf/mining_binary_confusion_matrix.png){#fig-binary-confusion fig-align="center" width="72%"}
 
 ![Importancia de variables del modelo binario.](../data/08_reporting/train_mining_binary_rf/mining_binary_feature_importance.png){#fig-binary-importance fig-align="center" width="82%"}
 
-El resultado binario es fuerte para un ejercicio academico: no hubo falsos
-positivos en el conjunto de prueba, pero si tres falsos negativos. Esto indica
-que el modelo es conservador: cuando marca mineria suele acertar, aunque puede
-omitir algunos puntos mineros.
+El resultado binario es solido para un ejercicio academico, aunque no perfecto:
+en el conjunto de prueba aparecen 2 falsos positivos y 5 falsos negativos. Esto
+indica que el modelo logra separar la mayor parte de los puntos mineros, pero
+todavia puede confundir algunas superficies expuestas con mineria y omitir
+intervenciones reales.
 
 ## Pipeline 7: prediccion raster binaria
 
@@ -1749,10 +1750,10 @@ def train_mining_multiclass_random_forest(training_dataset, config):
 
 | Metrica | Valor |
 |---|---:|
-| Accuracy | 0.717 |
-| Precision macro | 0.782 |
-| Recall macro | 0.747 |
-| F1 macro | 0.759 |
+| Accuracy | 0.767 |
+| Precision macro | 0.819 |
+| Recall macro | 0.792 |
+| F1 macro | 0.800 |
 
 ![Matriz de confusion del Random Forest multiclase.](../data/08_reporting/train_mining_multiclass_rf/mining_multiclass_confusion_matrix.png){#fig-multiclass-confusion fig-align="center" width="82%"}
 
@@ -1968,10 +1969,10 @@ flowchart LR
 
 | Metrica espacial | Valor |
 |---|---:|
-| Accuracy | 0.725 |
-| Precision macro | 0.796 |
-| Recall macro | 0.753 |
-| F1 macro | 0.767 |
+| Accuracy | 0.792 |
+| Precision macro | 0.841 |
+| Recall macro | 0.814 |
+| F1 macro | 0.822 |
 | Puntos validos | 120 |
 
 ![Matriz de confusion espacial del mapa multiclase.](../data/08_reporting/validate_mining_multiclass_map/mining_multiclass_validation_confusion_matrix.png){#fig-multiclass-val-cm fig-align="center" width="82%"}
@@ -2192,10 +2193,10 @@ flowchart LR
 
 | Metrica | Mapa original | Mapa postprocesado |
 |---|---:|---:|
-| Accuracy | 0.725 | 0.733 |
-| Precision macro | 0.796 | 0.806 |
-| Recall macro | 0.753 | 0.761 |
-| F1 macro | 0.767 | 0.776 |
+| Accuracy | 0.792 | 0.808 |
+| Precision macro | 0.841 | 0.848 |
+| Recall macro | 0.814 | 0.831 |
+| F1 macro | 0.822 | 0.834 |
 
 ![Matriz de confusion del mapa multiclase postprocesado.](../data/08_reporting/validate_postprocessed_mining_multiclass_map/postprocessed_mining_multiclass_validation_confusion_matrix.png){#fig-multiclass-post-cm fig-align="center" width="82%"}
 
@@ -2213,7 +2214,7 @@ agresiva la estructura del mapa.
 El flujo confirma que Sentinel-2 y Random Forest permiten construir un sistema
 funcional para mapeo exploratorio de mineria de aluvion. El modelo binario
 ofrece una respuesta clara para presencia/ausencia de mineria y alcanza
-`accuracy = 0.975`. El modelo multiclase es mas exigente porque debe separar
+`accuracy = 0.942`. El modelo multiclase es mas exigente porque debe separar
 seis coberturas; por eso su exactitud es menor, pero aporta una lectura mas
 rica del paisaje y de las confusiones espectrales.
 
@@ -2227,9 +2228,9 @@ relacion con una extension espacial, un sistema de referencia, una resolucion
 de trabajo y un conjunto de supuestos cartograficos.
 
 En terminos de interpretacion, el binario funciona como una primera alerta de
-intervencion minera. Con `precision_mineria = 1.0`, los puntos mineros
-identificados por el modelo en prueba tienen alta confianza, aunque el
-`recall_mineria = 0.85` muestra que todavia existen omisiones. El multiclase,
+intervencion minera. Con `precision_mineria = 0.882`, los puntos mineros
+identificados por el modelo en prueba tienen una confianza razonable, aunque el
+`recall_mineria = 0.750` muestra que todavia existen omisiones. El multiclase,
 en cambio, sirve para leer el contexto territorial: agua, bosque, vegetacion,
 nubes, suelo desnudo y mineria. Aunque su `accuracy` es menor, permite saber
 si los errores se concentran en clases fisicamente parecidas, lo cual es mas
@@ -2241,20 +2242,20 @@ util para diagnosticar el modelo que mirar solo una metrica global.
 | Variables topograficas | DEM y pendiente alineados a la grilla Sentinel-2 |
 | Indices espectrales | NDVI, MSAVI, NDWI, BSI, MBSI, NDSI y NDBI |
 | Datos de entrenamiento | 600 puntos, 480 entrenamiento y 120 prueba |
-| Modelo binario | Accuracy 0.975, F1 Mineria 0.919 |
+| Modelo binario | Accuracy 0.942, F1 Mineria 0.811 |
 | Mapa binario postprocesado | 566 parches mineros conservados, 8101.32 ha |
-| Modelo multiclase | Accuracy 0.717, F1 macro 0.759 |
-| Validacion multiclase espacial | Accuracy 0.725, F1 macro 0.767 |
-| Multiclase postprocesado | Accuracy 0.733, F1 macro 0.776 |
+| Modelo multiclase | Accuracy 0.767, F1 macro 0.800 |
+| Validacion multiclase espacial | Accuracy 0.792, F1 macro 0.822 |
+| Multiclase postprocesado | Accuracy 0.808, F1 macro 0.834 |
 
 ## Discusion critica
 
-El modelo binario tiene un comportamiento conservador: evita falsos positivos
-en los puntos de prueba, pero omite algunos puntos mineros. Para monitoreo
-ambiental, esto tiene implicaciones distintas. Un falso positivo puede generar
-alertas innecesarias, mientras que un falso negativo puede ocultar zonas de
-intervencion real. Por eso el mapa de probabilidad es tan importante como el
-mapa de clase.
+El modelo binario tiene un comportamiento util para alerta temprana, pero no
+esta libre de error: en los puntos de prueba mantiene falsos positivos y falsos
+negativos. Para monitoreo ambiental, esto tiene implicaciones distintas. Un
+falso positivo puede generar alertas innecesarias, mientras que un falso
+negativo puede ocultar zonas de intervencion real. Por eso el mapa de
+probabilidad es tan importante como el mapa de clase.
 
 El modelo multiclase muestra una dificultad esperada: separar `Suelo Desnudo`
 y `Vegetacion` en un contexto de transicion. En imagenes Sentinel-2, las zonas
@@ -2452,9 +2453,9 @@ conectada a una salida grafica o a un metadato, lo que convierte el informe en
 un producto verificable y no en una secuencia de resultados aislados.
 
 El enfoque binario obtuvo resultados altos para una practica academica:
-`accuracy = 0.975`, `precision_mineria = 1.0`, `recall_mineria = 0.85` y
-`F1_mineria = 0.919`. El enfoque multiclase fue mas dificil, pero permitio
-analizar confusiones entre coberturas y alcanzo `accuracy = 0.733` despues del
+`accuracy = 0.942`, `precision_mineria = 0.882`, `recall_mineria = 0.750` y
+`F1_mineria = 0.811`. El enfoque multiclase fue mas dificil, pero permitio
+analizar confusiones entre coberturas y alcanzo `accuracy = 0.808` despues del
 postprocesamiento espacial.
 
 La experiencia con Kedro muestra que una arquitectura de pipelines es
